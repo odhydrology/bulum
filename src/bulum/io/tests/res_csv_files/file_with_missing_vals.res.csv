@@ -1,0 +1,25 @@
+File version,2
+Missing data value,-9999
+EOM
+Project name,Unsaved Project
+Source version,5.12.0.12088
+Latest result run time,2023-08-01 05:16:15
+Simulation time,1889-01-01 - 2023-08-01
+Field,Units,RunName,ScenarioName,ScenarioInputSetName,Name,Site,ElementName,WaterFeatureType,ElementType,Structure,Custom
+EOC
+2
+1,ML.day^-1,Latest Run,Scenario 1,Default Input Set,Gauge: Gauge 2: Downstream Flow,Gauge 2,Downstream Flow,Gauge,Node,Downstream Flow,4b2bb6ea-c1a0-4bce-b4cf-4f2a7cbdc5ce,
+2,ML.day^-1,Latest Run,Scenario 1,Default Input Set,Inflow: Inflow 1: Downstream Flow,Inflow 1,Downstream Flow,Inflow,Node,Downstream Flow,4b2bb6ea-c1a0-4bce-b4cf-4f2a7cbdc5ce,
+Date,1>Gauge 2>Downstream Flow,2>Inflow 1>Downstream Flow
+EOH
+1889-01-01,-9999,100.00000000000001
+1889-01-02,100.00000000000001,100.00000000000001
+1889-01-03,100.00000000000001,100.00000000000001
+1889-01-04,100.00000000000001,100.00000000000001
+1889-01-05,100.00000000000001,-9999
+1889-01-06,100.00000000000001,-9999
+1889-01-07,100.00000000000001,100.00000000000001
+1889-01-08,100.00000000000001,100.00000000000001
+1889-01-09,100.00000000000001,100.00000000000001
+1889-01-10,-9999,100.00000000000001
+1889-01-11,-9999,100.00000000000001

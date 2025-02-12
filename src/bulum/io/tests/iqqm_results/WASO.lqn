@@ -1,0 +1,44 @@
+Data Information # Wet Tropics WRP: Full Utilisation of Existing Entitlements Case.
+01 01 1890 31 12 2008	/ Start date, End date
+'O02l'			/ Quan Files (eg 'M058.IQN')
+13 0			/ No. output files, No. of equations
+'O02l#007.82d' 00 00 00 00 T   / [1]  Irrigation
+1 0 0           /
+007 2           /
+'O02l#008.82d' 00 00 00 00 T   / [2]  Irrigation
+1 0 0           /
+008 2           /
+'O02l#012.31d' 00 00 00 00 T   / [3]  Urban
+1 0 0           /
+012 2           /
+'O02l#035.31d' 00 00 00 00 T   / [4]  Industrial
+1 0 0           /
+035 2           /
+'O02l#036.82d' 00 00 00 00 T   / [5]  Irrigation
+1 0 0           /
+036 2           /
+'O02l#038.82d' 00 00 00 00 T   / [6]  Irrigation
+1 0 0           /
+038 2           /
+'O02l#039.82d' 00 00 00 00 T   / [7]  Irrigation
+1 0 0           /
+039 2           /
+'O02l#029.82d' 00 00 00 00 T   / [8]  Irrigation
+1 0 0           /
+029 2           /
+'O02l#020.31d' 00 00 00 00 T   / [9]  Urban
+1 0 0           /
+020 2           /
+'O02l#055.82d' 00 00 00 00 T   / [10]  Irrigation
+1 0 0           /
+055 2           /
+'O02l#053.82d' 00 00 00 00 T   / [11]  Irrigation
+1 0 0           /
+053 2           /
+'O02l#047.31d' 00 00 00 00 T   / [12]  Industrial
+1 0 0           /
+047 2           /
+'O02l#048.82d' 00 00 00 00 T   / [13]  Irrigation
+1 0 0           /
+048 2           /
+

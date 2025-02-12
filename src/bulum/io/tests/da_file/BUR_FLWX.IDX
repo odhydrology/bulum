@@ -1,0 +1,55 @@
+6.36.1 06/11/2006 10:48:30.64
+01/01/1890 30/06/2004  0
+121comp.EXT  Lake Lucy _Exteded                       Modified Flow   ML/d           
+111infco.EXT Subcatch between LLucy & Lucky_Extended  Modified Flow   ML/d           
+107infco.EXT Subcatch L Downs to Blue Range_Extended  Modified Flow   ML/d           
+113comp.EXT  Clarke R Wandovale-Extended              Modified Flow   ML/d           
+110infco.EXT Reach 3 Subcatch to Mt Fullstop_Extended Modified Flow   ML/d           
+120comp.EXT  Running R @ Mt Brad Sacramento-Extended  Modified Flow   ML/d           
+112comp.EXT  Star R@ Laroo Sacra-Extended             Modified Flow   ML/d           
+106comp.EXT  Basalt R @ BluffD Sacra_Extended         Modified Flow   ML/d           
+keelbott.EXT Keelbottom Ck at GS120102a_Extended      Modified Flow   ML/d           
+119comp.EXT  Fanning R@ Fanning Sacra _Extended       Modified Flow   ML/d           
+002ainf.EXT  Subcatch Mt Fullstop - Mt Foxton_Extende Modified Flow   ML/d           
+002binf.EXT  Subcatch Mt Foxton - AMTD 383_Extended   Modified Flow   ML/d           
+002cinf.EXT  Subcatch AMTD 383 - CT Weir_Extended     Modified Flow   ML/d           
+002dinf.EXT  Subcatch CTWeir to Sellhei_Extended      Modified Flow   ML/d           
+014comp.EXT  Broughton R@ Oak Meadows Sacra _Extended Modified Flow   ML/d           
+n133.EXT      GS120302 InHwys (Extended with rec. flo Gauged Flow     ML/d           
+n140.EXT      GS120303 StAnns (Extended with rec. dat Gauged Flow     ML/d           
+004cinf.EXT  Subcatch Sell to Burd Falls ex Cape_Exte Modified Flow   ML/d           
+004ainf.EXT  Sub Cape Inland Hway to Suttor conf_Exte Modified Flow   ML/d           
+004binf.EXT  Sub Suttor St Anns to Burd ex Cape_Exten Modified Flow   ML/d           
+Dummy0.EXT   dummy                                    Flow            ML/d           
+N175Infl.EXT Native Comp Ck @ Violet Grove_Extended   Modified Flow   ML/d           
+N173Infl.EXT Belyando-Suttor R _Extended              Modified Flow   ML/d           
+N176Infl.EXT Belyando-Suttor R_Extended               Modified Flow   ML/d           
+N169Infl.EXT Mistake C @ Charl(120306a)_Extended      Modified Flow   ML/d           
+N163Infl.EXT Mistake Creek at Twin Hills_Extended     Modified Flow   ML/d           
+N157Infl.EXT Belyando-Suttor R_Extended               Modified Flow   ML/d           
+N151Infl.EXT Suttor R @ Eaglefield (120304a)_Extended Modified Flow   ML/d           
+N149Infl.EXT Belyando-Suttor R_Extended               Modified Flow   ML/d           
+N142Infl.EXT Belyando-Suttor R_Extended               Modified Flow   ML/d           
+N139Infl.EXT Cape River at Pentland_Extended          Modified Flow   ML/d           
+N135Infl.EXT Dummy extension data_Extended            Flow            ML/d           
+daminf.EXT   Burdekin Falls (dummy)                   Flow            ML/d           
+myu2dbeg.EXT Myuna-Dalbeg (extended to 6/2004)        Modified Flow   ML/d           
+pelican.EXT  Pelican Ck Mt Jimmy Composite			         Flow            ML/d           
+crediton.EXT Crediton Estimated flows (adj. for use)  Flow            ML/d           
+cred2ed.EXT  Inflows Crediton to Eungella (Adjusted)  Flow            ML/d           
+edam2u.EXT   Eungella to Urannah Inflows (extended)   Flow            ML/d           
+u2cw.EXT     U2CW Subcatchment Inflows Corrected      Flow            ML/d           
+exmoor.EXT   Bowen River at Exmoor		 /Site Name       Modified Flow   ML/d           
+jc2myuna.EXT Myuna Subcatch Inflows (Negs = 0)        Gauged Flow     ML/d           
+120005s.EXT  Dummy extension data                     Flow            ML/d           
+120018s.EXT  Dummy extension data                     Flow            ML/d           
+Dal2clai.EXT Dalbeg to Clare Residual Inflows Extende Modified Flow   ML/d           
+Dummy0.EXT   dummy                                    Flow            ML/d           
+119005S.EXT  Dummy extension data                     Flow            ML/d           
+MAJORCK.EXT  Dummy extension data                     Flow            ML/d           
+PIC2POW.EXT  Dummy extension data                     Flow            ML/d           
+HAUG_REL.EXT Haughton Releases (dummy)                Flow            ML/d           
+sacresid.EXT Clare to Home Hill (dummy)               Flow            ML/d           
+Cla_hh.EXT   Clare to Home Hill Residual Inflows Exte Flow            ML/d           
+URANNAH.PPT  Urannah GS Rainfall (Silo)               Precipitation   mm             
+Uran150.ppt  Urannah Rain - 150-day running total     Precipitation   mm             

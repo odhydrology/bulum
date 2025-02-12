@@ -1,0 +1,42 @@
+6.75.34 07/12/2022 10:20:54.28
+/\WT_MO02l.sys
+          13          30
+ 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+01/01/1890 31/12/2008  0
+  1 Mossman River R  1.1
+  5 Dummy Node       0.0
+  7 Unallocated Irr  8.3
+  8 Unallocated Irr  8.3
+ 15 Infow to Rex Cr  1.0
+ 20 MO1b Cains Regi  3.1
+ 25 Dummy Node       0.0
+ 10 Confluence of M 11.0
+ 12 Unallocated Urb  3.1
+ 35 Mossman River I  3.1
+ 36 Mossman River I  8.3
+ 38 Unallocated Irr  8.3
+ 39 Unallocated Irr  8.3
+ 29 029 Unallocated  8.3
+ 30 Mossman River a  0.0
+ 40 Dummy Node       0.0
+ 50 Inflow to South  1.1
+ 55 MO2 Irrigation   8.3
+ 53 Unallocated Irr  8.3
+ 60 South Mossman R  0.0
+ 45 Confluence of M 11.0
+ 46 Residual Inflow  1.0
+ 47 Unsuppl. Commer  3.1
+ 48 Unsuppl.Irrig:   8.3
+ 65 Dummy Node       0.0

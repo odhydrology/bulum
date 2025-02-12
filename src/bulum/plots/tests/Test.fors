@@ -1,0 +1,124 @@
+[input]
+file = 422306.csv
+name = 422306_full
+
+[input]
+file = 422310_common.csv
+name = 422310_common
+
+[input]
+file = 422313.csv
+name = 422313_full
+
+[input]
+file = 422394.csv
+name = 422394_full
+
+[input]
+file = zeros.csv
+name = zeros
+
+[input]
+file = 41013_pp_rain.csv
+name = rain
+
+[input]
+file = 41013_pp_mpot_rolled.csv
+name = evap
+
+//////////////////////////////////////// reach 1
+
+[inflow]
+name = 422306a_inflow
+inflow = zeros
+dsnode = 422306a_gauge
+
+[gauge] //83
+name = 422306a_gauge
+observedflow = 422306_full
+applyobserved = true
+dsnode = confluence
+
+//////////////////////////////////////// reach 2
+
+[inflow]
+name = 422313ab_inflow
+inflow = zeros
+dsnode = 422313ab_gauge
+
+[gauge] //at b 147
+name = 422313ab_gauge
+observedflow = 422313_full
+applyobserved = true
+dsnode = confluence
+
+//////////////////////////////////////// reach 3
+
+[inflow]
+name = 422394a_inflow
+inflow = zeros
+dsnode = 422394a_gauge
+
+[gauge] //327
+name = 422394a_gauge
+observedflow = 422394_full
+applyobserved = true
+dsnode = confluence
+
+//////////////////////////////////////// reach 4
+
+[node]
+name = confluence
+dsnode = my_routing
+
+[nonlinear reach]
+name = my_routing
+parameters = 100000, 0.75
+dsnode = residual_gauge
+
+[gauge]
+name = residual_gauge
+observedflow = 422310_common
+dsnode = mysac
+
+[sacramento]
+name = mysac
+area = 913
+model = mysacmodel
+dsnode = 422310abc_gauge
+
+[gauge]
+name = 422310abc_gauge
+observedflow = 422310_common
+
+//////////////////////////////////////// ALL DONE
+
+[sacramento model]
+name = mysacmodel
+rainfall = rain
+evaporation = evap
+parameters = 0, 45, 60, 0.01, +
+    0.01, 150, 0, 0.11, +
+    1.5, 0, 0.2, 0.01, +
+    25, 0.2, 47, 15  
+uh = 0.95, 0.05
+
+[recorder]
+node = 422310abc_gauge
+outno = 0
+filename = 422310abc_modelled.csv
+
+[recorder]
+node = mysac
+outno = 1
+filename = 422310abc_residual_sac.csv
+
+[recorder]
+node = residual_gauge
+outno = 2
+filename = 422310abc_calculated_residual.csv
+
+[recorder]
+node = residual_gauge
+outno = 0
+filename = 422310abc_routed_upstream.csv

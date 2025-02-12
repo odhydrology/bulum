@@ -1,0 +1,5 @@
+,Column name,Start date,End date,Number water years with at least 1 day at or below level,Percentage water years with at least 1 day at or below level,Number of events at or below trigger (>=1day),Number of events at or below trigger (>=7days),Number of events at or below trigger (>=30days),Number of events at or below trigger (>=91days),Number of events at or below trigger (>=183days),Number of events at or below trigger (>=365days),Longest period at or below trigger (days)
+400,Storage\0013 Storm King Dam\Storage Volume (ML),1889-07-01,2019-06-30,5,0.038461538,6,5,4,2,1,0,289
+655,Storage\0013 Storm King Dam\Storage Volume (ML),1889-07-01,2019-06-30,8,0.061538462,7,7,6,5,3,1,411
+1090,Storage\0013 Storm King Dam\Storage Volume (ML),1889-07-01,2019-06-30,30,0.230769231,32,25,19,10,6,2,809
+1530,Storage\0013 Storm King Dam\Storage Volume (ML),1889-07-01,2019-06-30,61,0.469230769,49,41,36,31,16,7,1167

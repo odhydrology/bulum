@@ -1,0 +1,10 @@
+Data Information - Mossman Full Use
+01 01 1890 31 12 2008		/ start date, end date
+'O02l'			        / Name of IQN File
+2 0					/ No. output files, No. of equations
+'O02l#030.01d' 00 00 00 00 T    / [1]
+1 0 0								/ 
+030 1							        / 
+'O02l#065.01d' 00 00 00 00 T    / [2]
+1 0 0								/ 
+065 1							        / 
