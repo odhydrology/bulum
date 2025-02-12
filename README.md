@@ -79,4 +79,4 @@ nose2 src.bulum.stats.tests
 
 ## License
 
-None.
+Refer to LICENCE.md
