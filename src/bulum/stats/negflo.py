@@ -49,7 +49,7 @@ from collections.abc import MutableSequence
 import numpy as np
 import pandas as pd
 
-import bulum.io as oio
+import bulum.io as bio
 import bulum.utils as utils
 from bulum.utils import TimeseriesDataframe
 

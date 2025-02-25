@@ -1,6 +1,6 @@
 import unittest
 from bulum import utils
-import bulum.io as oio
+import bulum.io as bio
 import re
 
 
@@ -11,7 +11,7 @@ class Tests(unittest.TestCase):
         for filename in ["./src/bulum/io/tests/test_data.csv",
                          "./src/bulum/io/tests/test_data.csv",
                          "./src/bulum/io/tests/test_data2.csv"]:
-            ensemble.add_dataframe(oio.read(filename))
+            ensemble.add_dataframe(bio.read(filename))
             #ensemble.add_dataframe_from_file(filename) //TODO: I have replaced this with above until we can unpick the cicrular import issue
         self.assertEqual(min(ensemble.ensemble.keys()), 0)
         self.assertEqual(max(ensemble.ensemble.keys()), 2)
@@ -21,10 +21,10 @@ class Tests(unittest.TestCase):
         ensemble = utils.DataframeEnsemble()
         for filename in ["./src/bulum/io/tests/test_data.csv",
                          "./src/bulum/io/tests/test_data2.csv"]:
-            ensemble.add_dataframe(oio.read(filename), key=filename.split('/')[-1], tag="hist_clim")
+            ensemble.add_dataframe(bio.read(filename), key=filename.split('/')[-1], tag="hist_clim")
             #ensemble.add_dataframe_from_file(filename, key=filename.split('/')[-1], tag="hist_clim") //TODO: I have replaced this with above until we can unpick the cicrular import issue
         # The below dataframe should not be the same shape.
-        other_df = oio.read("./src/bulum/io/tests/modelled_flow.csv")
+        other_df = bio.read("./src/bulum/io/tests/modelled_flow.csv")
         self.assertFalse(ensemble.df_shape_matches_ensemble(other_df))
         # Assert raise exception
         # ensemble.add_dataframe("whatever", other_df)

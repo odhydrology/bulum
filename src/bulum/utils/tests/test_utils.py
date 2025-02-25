@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 from bulum import utils
-import bulum.io as oio
+import bulum.io as bio
 from datetime import datetime
 
 
@@ -136,14 +136,14 @@ class Tests(unittest.TestCase):
         self.assertFalse(utils.check_data_equivalence(df, df2 * 1.00001))
 
     def test_wy_start_date(self):
-        df = oio.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv",r"%Y-%m-%d")
+        df = bio.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv",r"%Y-%m-%d")
         start_jul=utils.get_wy_start_date(df)
         start_jan=utils.get_wy_start_date(df,1)
         self.assertEqual(start_jul,datetime(1889,7,1))
         self.assertEqual(start_jan,datetime(1890,1,1))
 
     def test_wy_end_date(self):
-        df = oio.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv",r"%Y-%m-%d")
+        df = bio.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv",r"%Y-%m-%d")
         start_jul=utils.get_wy_end_date(df)
         start_mar=utils.get_wy_end_date(df,3)
         self.assertEqual(start_jul,datetime(1919,6,30))
