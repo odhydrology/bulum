@@ -5,7 +5,13 @@ import bulum.clim as ocl
 import bulum.utils as out
 import pandas as pd
 
+
 class Tests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        os.makedirs("./trash", exist_ok=True)
+        return super().setUpClass()
 
     def test_load_data_into_df(self):
         """
@@ -21,8 +27,8 @@ class Tests(unittest.TestCase):
         # print(df3.head())
         # print(df3.tail())
         self.assertTrue(len(df3) == len(df1))
-        self.assertAlmostEqual(df3.x.values[-1], 136) #these values should line up despite different starting dates for each file
-        self.assertAlmostEqual(df3.y.values[-1], 62) #these values should line up despite different starting dates for each file
+        self.assertAlmostEqual(df3.x.values[-1], 136)  # these values should line up despite different starting dates for each file
+        self.assertAlmostEqual(df3.y.values[-1], 62)  # these values should line up despite different starting dates for each file
         # And now doe the same again with files loaded in the opposite order
         df1 = oio.read_ts_csv("./src/bulum/clim/tests/Flow.out.RCP85_P2050_GCM8.csv", date_format=r"%Y-%m-%d")["FRex_FR.qqm"]
         df2 = oio.read_ts_csv("./src/bulum/clim/tests/Flow.out.withmissing.csv", date_format=r"%Y-%m-%d")["FRex_FR.qqm"]
@@ -32,8 +38,8 @@ class Tests(unittest.TestCase):
         # print(df3.head())
         # print(df3.tail())
         self.assertTrue(len(df3) == len(df1))
-        self.assertAlmostEqual(df3.x.values[-1], 62) #these values should line up despite different starting dates for each file
-        self.assertAlmostEqual(df3.y.values[-1], 136) #these values should line up despite different starting dates for each file
+        self.assertAlmostEqual(df3.x.values[-1], 62)  # these values should line up despite different starting dates for each file
+        self.assertAlmostEqual(df3.y.values[-1], 136)  # these values should line up despite different starting dates for each file
 
     def test_get_exc_transform(self):
         """
@@ -44,7 +50,7 @@ class Tests(unittest.TestCase):
         current_climate = oio.read_ts_csv("./src/bulum/clim/tests/Flow.out.withmissing.csv", date_format=r"%Y-%m-%d")
         future_climate = oio.read_ts_csv("./src/bulum/clim/tests/Flow.out.RCP85_P2050_GCM8.csv", date_format=r"%Y-%m-%d")
         answer1 = ocl.derive_transformation_curves(current_climate["FRex_FR.qqm"], future_climate["FRex_FR.qqm"])
-        answer2 = ocl.derive_transformation_curves(current_climate["FRex_FR.qqm"], future_climate["FRex_FR.qqm"], season_start_months=[3,7,9])
+        answer2 = ocl.derive_transformation_curves(current_climate["FRex_FR.qqm"], future_climate["FRex_FR.qqm"], season_start_months=[3, 7, 9])
         total_len_1 = sum([len(a[1]) for a in answer1.values()])
         total_len_2 = sum([len(a[1]) for a in answer2.values()])
         self.assertEqual(total_len_1, total_len_2)
@@ -61,8 +67,5 @@ class Tests(unittest.TestCase):
         # print(answer["Current"].sum())
         # print(answer["Future"].sum())
         # print(answer["Transf"].sum())
-        self.assertAlmostEqual(answer["Transf"].sum(), 4845710.795475168) # Actually haven't checked that this is the correct answer but looks plausible.
+        self.assertAlmostEqual(answer["Transf"].sum(), 4845710.795475168)  # Actually haven't checked that this is the correct answer but looks plausible.
         answer.to_csv("./trash/transformed.csv")
-        
-
-

@@ -6,8 +6,14 @@ import bulum.utils as out
 import pandas as pd
 from timeit import default_timer as timer
 
+
 class Tests(unittest.TestCase):
-    
+
+    @classmethod
+    def setUpClass(cls):
+        os.makedirs("./src/bulum/io/tests/test_outputs", exist_ok=True)
+        return super().setUpClass()
+
     def test_read_ts_csv(self):
         df = oio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
         self.assertEqual(len(df), 10)
@@ -15,7 +21,7 @@ class Tests(unittest.TestCase):
         df_max_df = max(df.index)
         self.assertEqual(df_min_df[:4], "1889")
         self.assertEqual(df_max_df, "1889-01-10")
-    
+
     def test_read_ts_csv2(self):
         df = oio.read_ts_csv("./src/bulum/io/tests/test_data2.csv")
         self.assertEqual(len(df), 10)
@@ -23,20 +29,20 @@ class Tests(unittest.TestCase):
         df_max_df = max(df.index)
         self.assertEqual(df_min_df[:4], "1889")
         self.assertEqual(df_max_df, "1889-01-10")
-    
+
     def test_read_res_csv(self):
         df = oio.read_res_csv("./src/bulum/io/tests/res_csv_files/simple_model.res.csv")
         df_min_df = min(df.index)
         df_max_df = max(df.index)
-        self.assertListEqual(df.columns.to_list(),['1>Gauge 2>Downstream Flow', '2>Inflow 1>Downstream Flow'])
+        self.assertListEqual(df.columns.to_list(), ['1>Gauge 2>Downstream Flow', '2>Inflow 1>Downstream Flow'])
         self.assertEqual(len(df), 49155)
         self.assertEqual(df_min_df[:4], "1889")
-        self.assertEqual(df_max_df, "2023-08-01") #2023-08-01
+        self.assertEqual(df_max_df, "2023-08-01")  # 2023-08-01
 
     def test_read_res_csv_with_missing_values(self):
         df = oio.read_res_csv("./src/bulum/io/tests/res_csv_files/file_with_missing_vals.res.csv")
         self.assertEqual(df.isnull().sum().sum(), 5)
-                
+
     def test_read_res_csv_with_missing_values2(self):
         df = oio.read_res_csv("./src/bulum/io/tests/res_csv_files/file_with_missing_vals.res.csv", custom_na_values=['100.00000000000001'])
         self.assertEqual(df.isnull().sum().sum(), 17)
@@ -50,7 +56,7 @@ class Tests(unittest.TestCase):
         oio.write_res_csv(df, test_output_filename)
         self.assertTrue(os.path.isfile(test_output_filename))
         self.assertGreater(os.path.getsize(test_output_filename), 0)
-                    
+
     def test_write_area_ts_csv(self):
         # delete test output if it already exists
         test_output_filename = "./src/bulum/io/tests/test_outputs/test_data.area.csv"
@@ -61,8 +67,8 @@ class Tests(unittest.TestCase):
         oio.write_area_ts_csv(df, test_output_filename)
         self.assertTrue(os.path.isfile(test_output_filename))
         self.assertGreater(os.path.getsize(test_output_filename), 0)
-    
-    def test_read_idx(self):        
+
+    def test_read_idx(self):
         # start = timer()
         test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
         df = oio.read_idx(test_idx_filename)
@@ -70,7 +76,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(df.columns), 53)
         # end = timer()
         # print(f"read time = {(end - start)}") # Time in seconds, e.g. 5.38091952400282
-    
+
     def test_write_idx(self):
         # start = timer()
         # delete test output if it already exists
@@ -110,7 +116,7 @@ class Tests(unittest.TestCase):
 
     # def test_iqqm_out_reader(self):
     #     reader = oio.iqqm_out_reader("./src/bulum/io/tests/iqqm_results/O02l.IQN") #O02l.IQN
-    #     reader.require(node="030", output="01") #node_number, rec_number. 
+    #     reader.require(node="030", output="01") #node_number, rec_number.
     #     reader.require(node="065", output="01") #node_number, rec_number.
     #     df = reader.read()
     #     self.assertAlmostEqual(len(df.columns), 2)
@@ -134,7 +140,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(df), 43464)
         self.assertAlmostEqual(df["020_02.d"].sum(), 561119.5652, delta=5)
         self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495, delta=30)
-        
-        
+
+
 if __name__ == "__main__":
     unittest.main()
