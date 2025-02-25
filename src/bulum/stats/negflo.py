@@ -140,7 +140,7 @@ class Negflo:
     def __init__(self,
                  # TODO: should these be tsdfs or should we just pass in one series? need to see functionality of negflo program.
                  df_residual: pd.DataFrame,
-                 flow_limit: float,
+                 flow_limit: float = 0.0,
                  #  num_segments: int,
                  #  segment_start_date: pd.DatetimeIndex, segment_end_date: pd.DatetimeIndex
                  ):
@@ -288,9 +288,9 @@ class Negflo:
             residual[i] = res[i]
         return residual
 
-    def decorator_report_neg_leftover(self, func):
-        def wrapper(*args, **kwargs):
-            x = func(*args, **kwargs)
+    def decorator_report_neg_leftover(func):
+        def wrapper(self, *args, **kwargs):
+            x = func(self, *args, **kwargs)
             if self.neg_residual < 0:
                 logger.error(f"Smoothing function has negative flow left over: {self.neg_residual}.")
             return x
@@ -364,7 +364,6 @@ class Negflo:
                distributed at every negative flow event."""
         left_tracker = ContiguousTracker()
         right_tracker = ContiguousTracker()
-        neg_tracker = ContiguousTracker()
         neg_acc = 0
 
         def _greater_tracker(left, right):
@@ -377,16 +376,16 @@ class Negflo:
             is_final_value = residual_idx == (len(residual) - 1)
             # if we've hit the end or if we've dropped out of RHS tracker and
             # need to distribute negative flow
+
+            if is_final_value:
+                if residual_val >= self.flow_limit:
+                    right_tracker.add(residual_idx, residual_val)
+                elif residual_val < 0:
+                    neg_acc += residual_val
             if ((is_final_value or (residual_val < self.flow_limit
                                     and right_tracker.is_member_of_block(residual_idx)))
-                    and self._has_neg_flow_to_redistribute(neg_acc, neg_tracker)
+                    and self._has_neg_flow_to_redistribute(neg_acc)
                     and (left_tracker.is_tracking() or right_tracker.is_tracking())):
-                if is_final_value:
-                    if residual_val >= self.flow_limit:
-                        right_tracker.add(residual_idx, residual_val)
-                    elif residual_val < 0:
-                        neg_tracker.add(residual_idx, residual_val)
-                neg_acc += neg_tracker.sum_and_reset()
                 larger_pos_tracker = _greater_tracker(left_tracker, right_tracker)
 
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, larger_pos_tracker.get())
@@ -402,7 +401,7 @@ class Negflo:
                 right_tracker = ContiguousTracker()
 
             if residual_val < 0:
-                neg_tracker.add(residual_idx, residual_val)
+                neg_acc += residual_val
                 residual[residual_idx] = 0
 
         return residual

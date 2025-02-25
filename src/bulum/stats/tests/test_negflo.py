@@ -130,6 +130,27 @@ class Tests(unittest.TestCase):
 
     # TODO write tests for sm7, see 4 (or more!) cases
 
+    def test_sm7(self):
+        """Chooses the larger flow period?"""
+        df = pd.DataFrame({
+            "a": [2, -1, 1],
+        })
+        expect = pd.Series([1, 0, 1])
+        negflo = Negflo(df)
+        negflo.sm7()
+        self.assertTrue(all(expect == negflo.df_residual["a"]))
+
+    def test_sm7_unidir(self):
+        """Works on the boundaries?"""
+        df = pd.DataFrame({
+            "a": [2, -1],
+            "b": [-1, 2],
+        })
+        negflo = Negflo(df)
+        negflo.sm7()
+        self.assertEqual(1, negflo.df_residual["a"][0])
+        self.assertEqual(1, negflo.df_residual["b"][1])
+
 
 if __name__ == '__main__':
     unittest.main()
