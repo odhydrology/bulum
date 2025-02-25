@@ -79,6 +79,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(3, np.count_nonzero(s1))
         self.assertEqual(3, np.count_nonzero(s1 == 0))
         self.assertEqual(3, s1[len(s1) - 2])
+        self.assertEqual(sum(s1), sum(negflo.df_residual["a"]))
 
         s2 = negflo.df_residual["b"]
         self.assertTrue(all(pd.Series([0.0, 5.0, 4.0, 2.0, 3.0, 6.0]) == s2))

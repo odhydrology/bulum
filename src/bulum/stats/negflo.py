@@ -96,7 +96,7 @@ class _AnalysisType(Enum):
             case _AnalysisType.SMOOTHED_NEG_LIM:
                 return ".sm7"
             case default:
-                raise ValueError(f"Invalid enum supplied, {t}")
+                raise ValueError(f"Unhandled/invalid enum, {t}")
 
 
 class Negflo:
@@ -145,6 +145,7 @@ class Negflo:
         # used to reset the residual df to speed up processes where we need to reset constantly
         self._df_residual_const = df_residual.copy()  # TODO is this req? might cause storage issues for sufficiently large DFs
         self.df_residual = df_residual
+        self.neg_residual = 0
 
         self.flow_limit = flow_limit
 
@@ -216,6 +217,7 @@ class Negflo:
 
     def _reset_residual(self):
         """Resets the residual to the initial state."""
+        self.neg_residual = 0
         self.df_residual = self._df_residual_const.copy()
 
     def rw1(self) -> None:
@@ -250,7 +252,7 @@ class Negflo:
         if sum_pos_flow_above_lim > abs(neg_flow_acc):
             rf = self._rescaling_factor(neg_flow_acc, sum_pos_flow_above_lim)
             for i in range(len(pos_flow_period_l)):
-                pos_flow_period_l[i] = self.flow_limit + pos_flow_period_l[i] * rf
+                pos_flow_period_l[i] = self.flow_limit + pos_flow_above_lim_l[i] * rf
             neg_flow_acc = 0
         else:
             for i in range(len(pos_flow_period_l)):
@@ -295,6 +297,7 @@ class Negflo:
                 residual[residual_idx] = 0
 
         if neg_flow_acc < 0:
+            self.neg_residual = neg_flow_acc
             logger.error(f"Smoothing function was unable to fully factor out negative flows, remainder {neg_flow_acc}.")
         return residual
 
@@ -326,6 +329,7 @@ class Negflo:
                 pos_flow_tracker.add(residual_idx, residual_val)
 
         if sum(neg_flow_tracker) < 0:
+            self.neg_residual = neg_flow_acc
             logger.error(f"Smoothing function was unable to fully factor out negative flows, remainder {sum(neg_flow_tracker)}.")
         return residual
 
@@ -399,6 +403,7 @@ class Negflo:
 
         raise NotImplementedError()
         if sum(neg_tracker) < 0:
+            self.neg_residual = neg_flow_acc
             logger.error(f"Smoothing function was unable to fully factor out negative flows, remainder {sum(neg_tracker)}.")
         return residual
 
