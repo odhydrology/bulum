@@ -288,17 +288,17 @@ class Negflo:
             residual[i] = res[i]
         return residual
 
-    def decorator_report_neg_leftover(func):
+    def log_neg_leftover(func):
         def wrapper(self, *args, **kwargs):
             x = func(self, *args, **kwargs)
             if self.neg_residual < 0:
-                logger.error(f"Smoothing function has negative flow left over: {self.neg_residual}.")
+                logger.warning(f"Negative flow remaining after execution: {self.neg_residual}")
             return x
         return wrapper
 
     # TODO is there a way to refactor the following three helpers into one method with additional options? Look at the order of execution and boundary conditionals.
 
-    @decorator_report_neg_leftover
+    @log_neg_leftover
     def _sm_forward_helper(self, residual: pd.Series, *, carry_negative=True) -> pd.Series:
         """SM2 & SM3 helper, which operates on pd.Series aka columns of the dataframe."""
         pos_tracker = ContiguousTracker()
@@ -326,7 +326,7 @@ class Negflo:
 
         return residual
 
-    @decorator_report_neg_leftover
+    @log_neg_leftover
     def _sm_backward_helper(self, residual: pd.Series, *, carry_negative=True) -> pd.Series:
         """SM4 & SM5 helper, which operates on pd.Series aka columns of the dataframe."""
         pos_tracker = ContiguousTracker()
@@ -353,7 +353,7 @@ class Negflo:
 
         return residual
 
-    @decorator_report_neg_leftover
+    @log_neg_leftover
     def _sm_bidirectional_helper(self, residual: pd.Series, *, carry_negative=True) -> pd.Series:
         """SM7 helper.
 
