@@ -1,5 +1,5 @@
 import pandas as pd
-#import bulum.io as oio
+# import bulum.io as oio
 import re
 from typing import Any, Iterable, Optional
 import enum
@@ -82,17 +82,17 @@ class TimeseriesDataframe(pd.DataFrame):
         """
         match regex:
             case None:
-                pattern: str
+                assert isinstance(pattern, str)
                 if exact:
                     split_tags = self.tags.split(self.TAG_DELIMITER)
                     return pattern in split_tags
                 else:
                     return pattern in self.tags
             case RegexArg.PATTERN:
-                pattern: str
+                assert isinstance(pattern, str)
                 return bool(re.search(pattern, self.tags))
             case RegexArg.OBJECT:
-                pattern: re.Pattern
+                assert isinstance(pattern, re.Pattern)
                 return bool(pattern.search(self.tags))
             case _:
                 raise ValueError("Invalid argument supplied to regex, " +
@@ -134,7 +134,7 @@ class DataframeEnsemble:
     Each timeseries dataframe is stored in an internal object, with a little attached metadata.
     All timeseries in the ensemble are expected to have the same index, and the same columns."""
 
-    def __init__(self, dfs: Iterable[TimeseriesDataframe] = None) -> None:
+    def __init__(self, dfs: Optional[Iterable[TimeseriesDataframe]] = None) -> None:
         """
         A DataframeEnsemble is an collection of bulum-style timeseries dataframes, which might represent collected results from a set of model runs.
         Each timeseries dataframe is stored in an internal object, with a little attached metadata.
@@ -144,7 +144,7 @@ class DataframeEnsemble:
             dfs: A collection of dataframes to add to the ensemble.
         """
         self.ensemble: dict[Any, TimeseriesDataframe] = {}
-        if dfs:
+        if dfs is not None:
             for df in dfs:
                 self.add_dataframe(df)
 
