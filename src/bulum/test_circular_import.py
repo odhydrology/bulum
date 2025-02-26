@@ -1,3 +1,5 @@
+"""Tests for circular imports."""
+
 import unittest
 import traceback
 
@@ -15,10 +17,9 @@ class Tests(unittest.TestCase):
             from . import utils
         except ModuleNotFoundError as e:
             self.fail(e.msg)
-        except AttributeError as e:
-            if "circular import" in e.msg:
-                self.fail(f"Circular import: {traceback.format_exc()}")
-        self.assertTrue(True)
+        except AttributeError as _:
+            # if "circular import" in e.msg:
+            self.fail(f"Circular import: {traceback.format_exc()}")
 
 
 if __name__ == "__main__":
