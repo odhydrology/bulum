@@ -12,9 +12,7 @@ logging.getLogger().setLevel(logging.CRITICAL)  # ignores warnings for carried n
 
 
 class Tests(unittest.TestCase):
-    # TODO these tests will be somewhat ad-hoc and require modification as the API (especially constructor) of the Negflo class is solidified.
     # TODO write tests with larger dataframes/series/data sets
-    # TODO test data loading from file
 
     def test_cl1(self):
         df = pd.DataFrame({
@@ -42,7 +40,7 @@ class Tests(unittest.TestCase):
 
     def test__sm2_3_helper(self):
         negflo = Negflo(pd.DataFrame(), 0)
-        self.assertTrue(all(0 == negflo._sm_forward_helper(pd.Series([-1, 1]))))
+        self.assertTrue(all(0 == negflo.sm_forward_series(pd.Series([-1, 1]))))
 
     def test_sm2(self):
         """Tests to make sure ordering is correct i.e. smooths forward not backward."""
@@ -98,12 +96,15 @@ class Tests(unittest.TestCase):
     def test_sm4(self):
         """Tests to make sure ordering is correct i.e. smooths backward and not forward."""
         df = pd.DataFrame({
-            "a": [1.0, -1.0],
-            "b": [-1.0, 1.0]
+            "a": [1, -1],
+            "b": [-1, 1]
         })
         negflo = Negflo(df, 0)
         negflo.sm4()
+        self.assertEqual(0, negflo.neg_overflow["a"])
         self.assertEqual(0, np.count_nonzero(negflo.df_residual["a"]))
+
+        self.assertEqual(-1, negflo.neg_overflow["b"])
         self.assertEqual(1, np.count_nonzero(negflo.df_residual["b"]))
 
     def test_sm4_carry(self):
@@ -124,6 +125,7 @@ class Tests(unittest.TestCase):
         expect = pd.Series([0.0, 0.0, 2.0, 0.0, 3.0, 0.0])
         negflo = Negflo(df, 2)
         negflo.sm5()
+        self.assertEqual(0, negflo.neg_overflow["a"])
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     # TODO implement and write tests for sm6
@@ -149,7 +151,23 @@ class Tests(unittest.TestCase):
         negflo = Negflo(df)
         negflo.sm7()
         self.assertEqual(1, negflo.df_residual["a"][0])
+        self.assertEqual(0, negflo.df_residual["a"][1])
+
         self.assertEqual(1, negflo.df_residual["b"][1])
+        self.assertEqual(0, negflo.df_residual["b"][0])
+
+    def test_sm7_flow_lim(self):
+        """Respects flow limits?"""
+        df = pd.DataFrame({
+            "a": [4, -2, 2, 2],
+        })
+        expect = pd.DataFrame({
+            "a": [2, 0, 2, 2]
+        })
+        negflo = Negflo(df, 2)
+        negflo.sm7()
+        self.assertEqual(0, negflo.neg_overflow["a"])
+        self.assertTrue(all(expect["a"] == negflo.df_residual["a"]))
 
 
 if __name__ == '__main__':
