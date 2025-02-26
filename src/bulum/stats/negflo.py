@@ -380,9 +380,14 @@ class Negflo:
         Current implementation only distributes flows at the conclusion of the
         RHS tracker (or at the end of all flow). 
 
-        # TODO Check whether this is the expected behaviour or if it should be
-               distributed at every negative flow event.
         """
+        # TODO Check whether this is the expected behaviour or if it should be
+        #      distributed at every negative flow event.
+        # TODO Distribute over other positive flow event if it flattens the
+        #      larger? Or if it would flatten one, then flatten both
+        #      simultaneously?
+        # TODO This might be easier if I changed the algorithm - identify
+        #      periods first and then do the smoothing.
         left_tracker = ContiguousTracker()
         right_tracker = ContiguousTracker()
         neg_acc = 0

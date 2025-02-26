@@ -130,8 +130,6 @@ class Tests(unittest.TestCase):
 
     # TODO implement and write tests for sm6
 
-    # TODO write tests for sm7, see 4 (or more!) cases
-
     def test_sm7(self):
         """Chooses the larger flow period?"""
         df = pd.DataFrame({
