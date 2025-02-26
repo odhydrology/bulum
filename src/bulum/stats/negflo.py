@@ -1,4 +1,7 @@
-# confer https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
+"""Bulum implementation of negflo and supporting classes.
+
+C.f. https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
+"""
 
 import itertools
 import logging
@@ -33,9 +36,9 @@ class NegfloAnalysisType(Enum):
     SMOOTHED_SPECIFIED = 6  # sm6
     SMOOTHED_NEG_LIM = 7  # sm7
 
-    @staticmethod
-    def to_file_extension(t) -> str:
-        match t:
+    def to_file_extension(self) -> str:
+        """Gives the corresponding file extension for """
+        match self:
             case NegfloAnalysisType.RAW:
                 return ".rw1"
             case NegfloAnalysisType.CLIPPED:
@@ -54,8 +57,8 @@ class NegfloAnalysisType(Enum):
                 return ".sm6"
             case NegfloAnalysisType.SMOOTHED_NEG_LIM:
                 return ".sm7"
-            case default:
-                raise ValueError(f"Unhandled/invalid enum, {t}")
+            case _:
+                raise ValueError(f"Unhandled/invalid enum, {self}")
 
 
 class ContiguousTracker:
@@ -67,7 +70,7 @@ class ContiguousTracker:
         self.start_idx = None
         # tracks most recent position of positive period
         self.last_idx = None
-        self.acc: list[Any] = []
+        self.acc = []
 
     def __len__(self):
         return len(self.acc)
@@ -136,6 +139,18 @@ class ContiguousTracker:
         self.acc = val
 
 
+def _dec_sm_helpers_log_neg_rem(func):
+    """Decorator to standardise treatment of remaining negative flow after execution."""
+    @functools.wraps(func)
+    def _impl(self, residual: pd.Series, *args, **kwargs):
+        series, neg_overflow = func(self, residual, *args, **kwargs)
+        self.neg_overflow[residual.name] = neg_overflow
+        if neg_overflow < 0:
+            logger.warning(f"Negative flow remaining after execution: {neg_overflow}")
+        return series
+    return _impl
+
+
 class Negflo:
     """Bulum implementation of NEGFLO, **NOT FINISHED**.
 
@@ -168,6 +183,7 @@ class Negflo:
         # TODO is this ^^^ req? might cause storage issues for sufficiently large DFs
         self.df_residual = df_residual
         self.neg_overflow: dict[Any, float] = {}
+        self.df_name: Optional[str]
         if isinstance(df_residual, TimeseriesDataframe):
             self.df_name = df_residual.name
         else:
@@ -190,15 +206,17 @@ class Negflo:
         # self.segment_dates = [(segment_start_date, segment_end_date)]
 
     @classmethod
-    def from_config_file(cls, input_filename):  # TODO unfinished
+    def from_config_file(cls, input_filename):
+        # TODO unfinished
         with open(input_filename, 'r') as file:
             # date line
             line = file.readline().strip()
             try:
                 start_date, end_date = itertools.batched(line.split(), n=3)
-            except ValueError:
+            except ValueError as exc:
                 raise ValueError(
-                    f"Unexpected format for dates (expected dd mm YYYY dd mm YYYY). Got {line}")
+                    "Unexpected format for dates (expected dd mm YYYY dd mm YYYY). " +
+                    f"Got {line}") from exc
             start_date = pd.to_datetime(start_date, dayfirst=True)
             end_date = pd.to_datetime(end_date, dayfirst=True)
             if end_date < start_date:
@@ -234,11 +252,11 @@ class Negflo:
             segment_start_date = pd.to_datetime(segment_start_date)
             segment_end_date = pd.to_datetime(segment_end_date)
 
-        return cls.__init__(
+        return cls(
             df_residual=df_residual,
-            num_segments=num_segments,
-            segment_start_date=segment_start_date,
-            segment_end_date=segment_end_date
+            # num_segments=num_segments,
+            # segment_start_date=segment_start_date,
+            # segment_end_date=segment_end_date
         )
 
     def _reset_residual(self):
@@ -259,17 +277,19 @@ class Negflo:
         self.df_residual[self.df_residual < 0] = 0
 
     @staticmethod
-    def _has_neg_flow_to_redistribute(neg_acc: float, neg_tracker: Optional[ContiguousTracker] = None) -> bool:
+    def _has_neg_flow_to_redistribute(neg_acc: float,
+                                      neg_tracker: Optional[ContiguousTracker] = None) -> bool:
         if neg_tracker is None:
             return neg_acc != 0
         else:
             return neg_tracker.is_tracking() or neg_acc != 0
 
     @staticmethod
-    def _rescaling_factor(sum_negative: float, sum_positive: float) -> float:
+    def _rescaling_factor(sum_negative, sum_positive):
         return 1 - abs(sum_negative) / sum_positive
 
-    def _smooth_flows(self, neg_acc: float, pos_flow_period_l: MutableSequence[float]) -> tuple[float, MutableSequence[float]]:
+    def _smooth_flows(self, neg_acc,
+                      pos_flow_period_l: MutableSequence[Any]) -> tuple[Any, MutableSequence[Any]]:
         """Smooths the accumulated positive flows.
 
         This will mutate the provided input sequence.
@@ -284,27 +304,16 @@ class Negflo:
 
         if sum_pos_flow_above_lim > abs(neg_acc):
             rf = self._rescaling_factor(neg_acc, sum_pos_flow_above_lim)
-            for i in range(len(pos_flow_period_l)):
+            for i, _ in enumerate(pos_flow_period_l):
                 pos_flow_period_l[i] = self.flow_limit + pos_flow_above_lim_l[i] * rf
             neg_acc = 0
         else:
-            for i in range(len(pos_flow_period_l)):
+            for i, _ in enumerate(pos_flow_period_l):
                 delta = pos_flow_period_l[i] - self.flow_limit
                 # INVARIANT: delta > 0
                 pos_flow_period_l[i] = self.flow_limit
                 neg_acc += delta  # reduces the absolute val
         return neg_acc, pos_flow_period_l
-
-    def _dec_sm_helpers_log_neg_rem(func):
-        """Decorator to standardise treatment of remaining negative flow after execution."""
-        @functools.wraps(func)
-        def _impl(self, residual: pd.Series, *args, **kwargs):
-            series, neg_overflow = func(self, residual, *args, **kwargs)
-            self.neg_overflow[residual.name] = neg_overflow
-            if neg_overflow < 0:
-                logger.warning(f"Negative flow remaining after execution: {neg_overflow}")
-            return series
-        return _impl
 
     @_dec_sm_helpers_log_neg_rem
     def _sm_global_series(self, residual: pd.Series) -> pd.Series:
@@ -312,11 +321,13 @@ class Negflo:
         residual[residual < 0] = 0
         neg_sum, res = self._smooth_flows(neg_sum, residual)
         assert len(residual) == len(res)
-        for i in range(len(res)):
+        for i, _ in enumerate(res):
             residual[i] = res[i]
         return residual, neg_sum
 
-    # TODO is there a way to refactor the following three helpers into one method with additional options? Look at the order of execution and boundary conditionals.
+    # TODO is there a way to refactor the following three helpers into one
+    #      method with additional options? Look at the order of execution and
+    #      boundary conditionals.
 
     @_dec_sm_helpers_log_neg_rem
     def sm_forward_series(self, residual: pd.Series, *, carry_negative=True) -> pd.Series:
@@ -327,7 +338,7 @@ class Negflo:
             if residual_val >= self.flow_limit:
                 pos_tracker.add(residual_idx, residual_val)
 
-            is_below_flow_limit = (residual_val < self.flow_limit)
+            is_below_flow_limit = residual_val < self.flow_limit
             is_final_value = residual_idx == (len(residual) - 1)
             if ((is_below_flow_limit or is_final_value)
                     and self._has_neg_flow_to_redistribute(neg_acc)
@@ -361,7 +372,8 @@ class Negflo:
             if ((is_nonneg or is_final_value)
                     and self._has_neg_flow_to_redistribute(neg_acc)
                     and pos_tracker.is_tracking()):
-                # Reached the end of the negative flow period AND there was previously a positive flow period.
+                # Reached the end of the negative flow period AND there was
+                # previously a positive flow period.
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, pos_tracker.get())
                 for list_idx, df_idx in enumerate(pos_tracker.indices()):
                     residual[df_idx] = smoothed_pos_flows[list_idx]
@@ -392,7 +404,7 @@ class Negflo:
         right_tracker = ContiguousTracker()
         neg_acc = 0
 
-        def _greater_tracker(left: ContiguousTracker, right: ContiguousTracker) -> ContiguousTracker:
+        def greater_tracker(left: ContiguousTracker, right: ContiguousTracker) -> ContiguousTracker:
             """Returns the tracker that has the greater total flow above the
             flow limit."""
             left_sum = sum(left.offset(-self.flow_limit))
@@ -413,7 +425,7 @@ class Negflo:
                                     and right_tracker.is_member_of_block(residual_idx)))
                     and self._has_neg_flow_to_redistribute(neg_acc)
                     and (left_tracker.is_tracking() or right_tracker.is_tracking())):
-                larger_pos_tracker = _greater_tracker(left_tracker, right_tracker)
+                larger_pos_tracker = greater_tracker(left_tracker, right_tracker)
 
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, larger_pos_tracker.get())
                 for list_idx, df_idx in enumerate(larger_pos_tracker.indices()):
@@ -530,18 +542,17 @@ class Negflo:
 
         # prototype
         # TODO periods var should be passed in or a class variable
-        periods: list[tuple[pd.DatetimeIndex, pd.DatetimeIndex]]
-
-        for start_date, end_date in periods:
-            pass
-            df: pd.DataFrame
-            df = df.loc[start_date:end_date]
-            # filter between these dates
-            # apply global smoothing helper fn to all columns
-            df.apply(self._sm_global_series)
-            update_df: pd.DataFrame
-            self.df_residual.update(update_df)
-        raise NotImplementedError()
+        # periods: list[tuple[pd.DatetimeIndex, pd.DatetimeIndex]]
+        # for start_date, end_date in periods:
+        #     pass
+        #     df: pd.DataFrame
+        #     df = df.loc[start_date:end_date]
+        #     # filter between these dates
+        #     # apply global smoothing helper fn to all columns
+        #     df.apply(self._sm_global_series)
+        #     update_df: pd.DataFrame
+        #     self.df_residual.update(update_df)
+        # raise NotImplementedError()
 
     def sm7(self) -> None:
         """
@@ -609,8 +620,8 @@ class Negflo:
         if out_filename is None:  # Automatically determine file name.
             out_filename = (
                 ("result" if self.df_name is None else self.df_name)
-                + NegfloAnalysisType.to_file_extension(self._analysis_type))
+                + self._analysis_type.to_file_extension())
         # if extension is not already specified
         elif not re.match(r"\.\w+$", out_filename):
-            out_filename += NegfloAnalysisType.to_file_extension(self._analysis_type)
+            out_filename += self._analysis_type.to_file_extension()
         self.df_residual.to_csv(out_filename)

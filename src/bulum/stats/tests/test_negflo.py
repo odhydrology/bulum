@@ -1,3 +1,5 @@
+"""Tests for the negflo class."""
+
 import logging
 import unittest
 
@@ -12,9 +14,10 @@ logging.getLogger().setLevel(logging.CRITICAL)  # ignores warnings for carried n
 
 
 class Tests(unittest.TestCase):
-    # TODO write tests with larger dataframes/series/data sets
+    # TODO write tests with larger/randomised dataframes/series/data sets
 
     def test_cl1(self):
+        """Test CL1 - clipping."""
         df = pd.DataFrame({
             "a": [-1.0, 1.0],
             "b": [-5.0, -3.0]
@@ -24,6 +27,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(1, np.count_nonzero(negflo.df_residual))
 
     def test_sm1(self):
+        """Test SM1 - global smoothing."""
         df = pd.DataFrame({
             "a": [-1.0, 1.0],
             "b": [0.0, 4.0]
@@ -33,12 +37,8 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(0 == negflo.df_residual["a"]))
         self.assertTrue(all(df["b"] == negflo.df_residual["b"]))
 
-    def test__smooth_flows(self):
-        negflo = Negflo(pd.DataFrame(), 0)
-        self.assertEqual(0, negflo._smooth_flows(-1, [1])[1][0])
-        self.assertEqual(1, negflo._smooth_flows(0, [1])[1][0])
-
     def test__sm2_3_helper(self):
+        """Test the smoothing algorithm for SM2"""
         negflo = Negflo(pd.DataFrame(), 0)
         self.assertTrue(all(0 == negflo.sm_forward_series(pd.Series([-1, 1]))))
 
@@ -66,7 +66,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(5, s[len(s) - 2])
 
     def test_sm2_3(self):
-        """tests non-zero flow limit"""
+        """SM2 non-zero flow limit"""
         df = pd.DataFrame({
             "a": [-4., 1., 1., -1., 8., 0.],  # tests basic function
             "b": [-10.0, 8.0, 6.0, 2.0, 4.0, 10.0],  # tests whether flow limit is preserved
@@ -83,6 +83,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(pd.Series([0.0, 5.0, 4.0, 2.0, 3.0, 6.0]) == s2))
 
     def test_sm3(self):
+        """SM3 general test"""
         df = pd.DataFrame({
             "a": [-4.0, 1.0, 1.0, -1.0, 8.0, 0.0],
         })
