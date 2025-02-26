@@ -5,6 +5,7 @@ import logging
 from collections.abc import MutableSequence
 from enum import Enum
 from typing import Optional
+import re
 
 import pandas as pd
 
@@ -156,6 +157,10 @@ class Negflo:
         self._df_residual_const = df_residual.copy()  # TODO is this req? might cause storage issues for sufficiently large DFs
         self.df_residual = df_residual
         self.neg_residual = 0
+        if isinstance(df_residual, TimeseriesDataframe):
+            self.df_name = df_residual.name
+        else:
+            self.df_name = None
 
         self.flow_limit = flow_limit
 
@@ -573,10 +578,16 @@ class Negflo:
 
         self.log()
 
-    def to_file(self, *, out_filename=None):
-        """Saves the result dataframe to the output file."""
-        # TODO: better control over file location etc.?
-        if out_filename is None:
-            out_filename = "result"
-        out_filename += NegfloAnalysisType.to_file_extension(self._analysis_type)
+    def to_file(self, *, out_filename: Optional[str] = None):
+        """Saves the result dataframe to the output file.
+
+        This function will attempt to automatically 
+        """
+        if out_filename is None:  # Automatically determine file name.
+            out_filename = (
+                ("result" if self.df_name is None else self.df_name)
+                + NegfloAnalysisType.to_file_extension(self._analysis_type))
+        # if extension is not already specified
+        elif not re.match(r"\.\w+$", out_filename):
+            out_filename += NegfloAnalysisType.to_file_extension(self._analysis_type)
         self.df_residual.to_csv(out_filename)
