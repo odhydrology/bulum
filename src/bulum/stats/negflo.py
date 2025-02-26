@@ -13,7 +13,7 @@ import pandas as pd
 
 from bulum.utils import TimeseriesDataframe
 
-from .negflo_internals import (AnalysisType, ContiguousTracker, FileType,
+from .negflo_helpers import (AnalysisType, ContiguousTracker, FileType,
                                dec_sm_helpers_log_neg_rem)
 
 logger = logging.getLogger(__name__)

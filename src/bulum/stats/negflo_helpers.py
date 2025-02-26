@@ -1,4 +1,4 @@
-"""Bulum implementation of negflo and supporting classes.
+"""Bulum, negflo supporting classes.
 
 C.f. https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 """
@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class FileType(Enum):
+    """Negflo file types. For use in config file setup."""
     IQQM = 0
     IQQM_GUI = 1
     SOURCE_INPUT = 2
@@ -21,6 +22,7 @@ class FileType(Enum):
 
 
 class AnalysisType(Enum):
+    """Negflo class keeps track of most recent analysis performed."""
     RAW = -1
     CLIPPED = 0
     SMOOTHED_ALL = 1  # sm1
@@ -135,7 +137,8 @@ class ContiguousTracker:
 
 
 def dec_sm_helpers_log_neg_rem(func):
-    """Decorator to standardise treatment of remaining negative flow after execution."""
+    """Decorator to standardise treatment of remaining negative flow after
+    execution. Internal use only."""
     @functools.wraps(func)
     def _impl(self, residual: pd.Series, *args, **kwargs):
         series, neg_overflow = func(self, residual, *args, **kwargs)
