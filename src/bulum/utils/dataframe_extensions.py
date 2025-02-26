@@ -93,7 +93,8 @@ class TimeseriesDataframe(pd.DataFrame):
         print(f"Tags: {self.tags}")
         print(self.describe())
 
-    def has_tag(self, pattern: str | re.Pattern, *, regex: Optional[RegexArg] = None, exact=False) -> bool:
+    def has_tag(self, pattern: str | re.Pattern, *, regex: Optional[RegexArg] = None,
+                exact=False) -> bool:
         """Check if the provided tag matches any of the dataframe's tags.
 
         Args:
@@ -160,16 +161,14 @@ class TimeseriesDataframe(pd.DataFrame):
 
 
 class DataframeEnsemble:
-    """A DataframeEnsemble is an collection of bulum-style timeseries dataframes, which might represent collected results from a set of model runs.
-    Each timeseries dataframe is stored in an internal object, with a little attached metadata.
-    All timeseries in the ensemble are expected to have the same index, and the same columns."""
+    """A DataframeEnsemble is an collection of bulum-style timeseries
+    dataframes, which might represent collected results from a set of model
+    runs. Each timeseries dataframe is stored in an internal object, with a
+    little attached metadata. All timeseries in the ensemble are expected to
+    have the same index, and the same columns."""
 
     def __init__(self, dfs: Optional[Iterable[TimeseriesDataframe]] = None) -> None:
         """
-        A DataframeEnsemble is an collection of bulum-style timeseries dataframes, which might represent collected results from a set of model runs.
-        Each timeseries dataframe is stored in an internal object, with a little attached metadata.
-        All timeseries in the ensemble are expected to have the same index, and the same columns.
-
         Args:
             dfs: A collection of dataframes to add to the ensemble.
         """
@@ -222,6 +221,7 @@ class DataframeEnsemble:
             print(f"Key: {key}, Shape: {val.shape}, Tags: {val.tags}")
 
     def df_shape_matches_ensemble(self, new_df) -> bool:
+        """Internal function to verify new dfs."""
         if len(self.ensemble) > 0:
             first_shape = list(self.ensemble.values())[0].shape
             new_df_shape = new_df.shape
@@ -230,11 +230,12 @@ class DataframeEnsemble:
         return True
 
     def assert_df_shape_matches_ensemble(self, new_df):
+        """Internal function to verify new dfs."""
         if len(self.ensemble) > 0:
             first_shape = list(self.ensemble.values())[0].shape
             new_df_shape = new_df.shape
             if first_shape != new_df_shape:
-                raise Exception(
+                raise ValueError(
                     f"ERROR: New Dataframe has shape {new_df_shape}" +
                     f" but the ensemble members have shape {first_shape}!"
                 )
@@ -261,3 +262,8 @@ class DataframeEnsemble:
             if tsdf.has_tag(tag, **kwargs) != exclude:
                 subensemble.add_dataframe(tsdf, key)
         return subensemble
+
+    def add_tag(self, tag):
+        """Add a tag to all dataframes."""
+        for dataframe in self.ensemble.values():
+            dataframe.add_tag(tag)
