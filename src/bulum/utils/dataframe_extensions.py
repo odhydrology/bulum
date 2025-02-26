@@ -12,11 +12,13 @@ TODO ---API---
 
 """
 
-import pandas as pd
-# import bulum.io as oio
+import enum
 import re
 from typing import Any, Iterable, Optional
-import enum
+
+import pandas as pd
+
+# import bulum.io as oio
 
 
 class RegexArg(enum.Enum):
@@ -216,8 +218,8 @@ class DataframeEnsemble:
 #        self.add_dataframe(df, key, tag)
 
     def print_summary(self):
-        for key in self.ensemble:
-            print(f"Key: {key}, Shape: {self.ensemble[key].shape}")
+        for key, val in self.ensemble.items():
+            print(f"Key: {key}, Shape: {val.shape}, Tags: {val.tags}")
 
     def df_shape_matches_ensemble(self, new_df) -> bool:
         if len(self.ensemble) > 0:
