@@ -239,12 +239,25 @@ class DataframeEnsemble:
                     f" but the ensemble members have shape {first_shape}!"
                 )
 
-    def filter_tag(self, tag, **kwargs):
-        """Returns a sub-ensemble with all dataframes which match `tag`. Refer
-        to the TSDF.has_tag function for the arguments that can be passed
-        here."""
+    def filter_tag(self, tag, *, exclude: bool = False, **kwargs):
+        """Return a new ensemble containing dataframes filtered by tag.
+
+        By default, it will include all dataframes whose tags partially match
+        the provided tag. 
+
+        This function delegates to TSDF.has_tag(), refer to that function for
+        keyword arguments.
+
+        Args:
+            tag
+                The tag to match. String, regex pattern, or compiled regex pattern. 
+                (Regex requires regex argument to be set)
+            exclude
+                If True, it will filter *out* all dataframes which match the tag.
+        """
         subensemble = DataframeEnsemble()
         for key, tsdf in self.ensemble.items():
-            if tsdf.has_tag(tag, **kwargs):
+            # Take the logical XOR
+            if tsdf.has_tag(tag, **kwargs) != exclude:
                 subensemble.add_dataframe(tsdf, key)
         return subensemble
