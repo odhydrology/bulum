@@ -159,8 +159,16 @@ class DataframeEnsemble:
     def __len__(self):
         return len(self.ensemble)
 
-    def get(self, key):
-        return self.ensemble.get(key)
+    def get(self, key=None):
+        """Return the underlying dataframe if the ensemble is a singleton, or
+        the dataframe at the given key."""
+        if key is None:
+            if len(self.ensemble) == 1:
+                return next(iter(self.ensemble.values()))
+            else:
+                raise ValueError("DataframeEnsemble.get() was ")
+        else:
+            return self.ensemble.get(key)
 
     def add_dataframe(self, df, key=None, tag=None):
         if not isinstance(df, TimeseriesDataframe):
