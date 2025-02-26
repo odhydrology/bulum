@@ -1,3 +1,17 @@
+"""TimeseriesDataframes and DataframeEnsembles.
+
+TODO ---DESCRIBE--- 
+TimeseriesDataframes (TSDF) are a wrapper around pandas
+dataframes, with extra fields (tags, name, source, ...) and methods that
+facilitate working with these fields.
+
+DataframeEnsembles are a way to organise multiple TSDFs, with methods that work
+(at present) primarily with the tags associated with TSDFs.
+
+TODO ---API--- 
+
+"""
+
 import pandas as pd
 # import bulum.io as oio
 import re
@@ -6,6 +20,7 @@ import enum
 
 
 class RegexArg(enum.Enum):
+    """Specifies the type of argument supplied to filtering functions in TSDF and """
     PATTERN = 1
     OBJECT = 2
 
@@ -18,6 +33,18 @@ class TimeseriesDataframe(pd.DataFrame):
         - source (str)
         - description (str)
         - a string of tags (str)
+
+    ---API---
+    TODO 
+
+    init()
+
+    copy_from_dataframe(df)
+
+    ...
+
+    has_tag():
+
     """
     TAG_DELIMITER = ','
 
@@ -65,15 +92,15 @@ class TimeseriesDataframe(pd.DataFrame):
         print(self.describe())
 
     def has_tag(self, pattern: str | re.Pattern, *, regex: Optional[RegexArg] = None, exact=False) -> bool:
-        """
-        Checks for a (partial) match of `tag` in `self.tags`.
+        """Check if the provided tag matches any of the dataframe's tags.
 
         Args:
             pattern: string pattern, regex pattern, or compiled regex object
             regex: Optional[RegexArg (enum)]; keyword-only
-                None    Uses python `in` operation to check for membership
-                PATTERN regex pattern (requires compiling) OBJECT  compiled
-                regex object
+                None    Uses python `in` operation to check for membership; 
+                        expects a string to be supplied to pattern
+                PATTERN non-compiled regex pattern 
+                OBJECT  compiled regex pattern
             exact: bool
                 Whether we require an exact match of the tag to return True.
                 This argument is superceded by a non-None `regex` argument, and
@@ -99,7 +126,8 @@ class TimeseriesDataframe(pd.DataFrame):
                                  f"{regex=} but expected RegexArg")
 
     def add_tag(self, tag: str, check_membership=False):
-        """
+        """Add a tag to the TimeseriesDataframe.
+
         This is the canonical way to add tags to a TimeseriesDataframe. It can
         add multiple tags separated by the designated tag delimiter (by default,
         a comma ,).
