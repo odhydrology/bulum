@@ -1,7 +1,4 @@
-"""Bulum, negflo supporting classes.
-
-C.f. https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
-"""
+"""Bulum, negflo supporting classes."""
 
 import logging
 from enum import Enum
@@ -13,7 +10,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-class FileType(Enum):
+class NegfloFileType(Enum):
     """Negflo file types. For use in config file setup."""
     IQQM = 0
     IQQM_GUI = 1
@@ -21,7 +18,7 @@ class FileType(Enum):
     SOURCE_OUTPUT = 3
 
 
-class AnalysisType(Enum):
+class NegfloAnalysisType(Enum):
     """Negflo class keeps track of most recent analysis performed."""
     RAW = -1
     CLIPPED = 0
@@ -36,29 +33,29 @@ class AnalysisType(Enum):
     def to_file_extension(self) -> str:
         """Gives the corresponding file extension for """
         match self:
-            case AnalysisType.RAW:
+            case NegfloAnalysisType.RAW:
                 return ".rw1"
-            case AnalysisType.CLIPPED:
+            case NegfloAnalysisType.CLIPPED:
                 return ".cl1"
-            case AnalysisType.SMOOTHED_ALL:
+            case NegfloAnalysisType.SMOOTHED_ALL:
                 return ".sm1"
-            case AnalysisType.SMOOTHED_FORWARD:
+            case NegfloAnalysisType.SMOOTHED_FORWARD:
                 return ".sm2"
-            case AnalysisType.SMOOTHED_FORWARD_NO_CARRY:
+            case NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY:
                 return ".sm3"
-            case AnalysisType.SMOOTHED_BACKWARD:
+            case NegfloAnalysisType.SMOOTHED_BACKWARD:
                 return ".sm4"
-            case AnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
+            case NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
                 return ".sm5"
-            case AnalysisType.SMOOTHED_SPECIFIED:
+            case NegfloAnalysisType.SMOOTHED_SPECIFIED:
                 return ".sm6"
-            case AnalysisType.SMOOTHED_NEG_LIM:
+            case NegfloAnalysisType.SMOOTHED_NEG_LIM:
                 return ".sm7"
             case _:
                 raise ValueError(f"Unhandled/invalid enum, {self}")
 
 
-class ContiguousTracker:
+class ContiguousIndexTracker:
     """Convenience class to track contiguous blocks of data as determined by
     index. Essentially a wrapper over a list with convenience methods."""
 
@@ -138,12 +135,15 @@ class ContiguousTracker:
 
 def dec_sm_helpers_log_neg_rem(func):
     """Decorator to standardise treatment of remaining negative flow after
-    execution. Internal use only."""
+    execution. Internal use only.
+
+    Short for "decorate smoothing helpers log negative remainding flow"
+    """
     @functools.wraps(func)
     def _impl(self, residual: pd.Series, *args, **kwargs):
         series, neg_overflow = func(self, residual, *args, **kwargs)
         self.neg_overflow[residual.name] = neg_overflow
         if neg_overflow < 0:
-            logger.warning(f"Negative flow remaining after execution: {neg_overflow}")
+            logger.warning("Negative flow remaining after execution: %s", neg_overflow)
         return series
     return _impl

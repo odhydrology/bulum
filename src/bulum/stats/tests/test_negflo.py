@@ -102,10 +102,10 @@ class Tests(unittest.TestCase):
         })
         negflo = Negflo(df, 0)
         negflo.sm4()
-        self.assertEqual(0, negflo.neg_overflow["a"])
+        self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertEqual(0, np.count_nonzero(negflo.df_residual["a"]))
 
-        self.assertEqual(-1, negflo.neg_overflow["b"])
+        self.assertEqual(-1, negflo.neg_overflows["b"])
         self.assertEqual(1, np.count_nonzero(negflo.df_residual["b"]))
 
     def test_sm4_carry(self):
@@ -126,7 +126,7 @@ class Tests(unittest.TestCase):
         expect = pd.Series([0.0, 0.0, 2.0, 0.0, 3.0, 0.0])
         negflo = Negflo(df, 2)
         negflo.sm5()
-        self.assertEqual(0, negflo.neg_overflow["a"])
+        self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     # TODO implement and write tests for sm6
@@ -165,7 +165,7 @@ class Tests(unittest.TestCase):
         })
         negflo = Negflo(df, 2)
         negflo.sm7()
-        self.assertEqual(0, negflo.neg_overflow["a"])
+        self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect["a"] == negflo.df_residual["a"]))
 
 
