@@ -27,7 +27,7 @@ class NegfloAnalysisType(Enum):
     SMOOTHED_FORWARD_NO_CARRY = 3  # sm3
     SMOOTHED_BACKWARD = 4  # sm4
     SMOOTHED_BACKWARD_NO_CARRY = 5  # sm5
-    SMOOTHED_SPECIFIED = 6  # sm6
+    SMOOTHED_SEGMENTS = 6  # sm6
     SMOOTHED_NEG_LIM = 7  # sm7
 
     def to_file_extension(self) -> str:
@@ -47,7 +47,7 @@ class NegfloAnalysisType(Enum):
                 return ".sm4"
             case NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
                 return ".sm5"
-            case NegfloAnalysisType.SMOOTHED_SPECIFIED:
+            case NegfloAnalysisType.SMOOTHED_SEGMENTS:
                 return ".sm6"
             case NegfloAnalysisType.SMOOTHED_NEG_LIM:
                 return ".sm7"

@@ -6,7 +6,7 @@ C.f. https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 import itertools
 import logging
 import re
-from collections.abc import MutableSequence
+from collections.abc import MutableSequence, Sequence
 from typing import Any, Optional
 
 import pandas as pd
@@ -34,8 +34,8 @@ class Negflo:
                  # TODO: should these be tsdfs or should we just pass in one series? need to see functionality of negflo program.
                  df_residual: pd.DataFrame | TimeseriesDataframe,
                  flow_limit: float = 0.0,
-                 #  num_segments: int,
-                 #  segment_start_date: pd.DatetimeIndex, segment_end_date: pd.DatetimeIndex
+                 num_segments: int = 0,
+                 segments: Optional[Sequence[tuple[pd.Timestamp, pd.Timestamp]]] = None
                  ):
         super().__init__()
 
@@ -55,10 +55,28 @@ class Negflo:
 
         self._analysis_type = helpers.NegfloAnalysisType.RAW
 
+        self.sm6_num_segments = num_segments
+        self.sm6_segment_boundaries: Optional[Sequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
+        # validation
+        if self.sm6_segment_boundaries is not None:
+            last_segment = None
+            for segment in self.sm6_segment_boundaries:
+                if segment[1] < segment[0]:
+                    raise ValueError(f"Segment must be in chronological order: {segment}")
+
+                if last_segment is None:
+                    last_segment = segment
+                    continue
+                elif segment[0] < last_segment[1]:
+                    raise ValueError(f"Malordered segments, {last_segment} is not before {segment}")
+                    # TODO better error message
+
     @classmethod
-    def from_config_file(cls, input_filename):
+    def from_config_file(cls, input_filename, *, execute=False):
+        """Construct a Negflo analysis from a config file. INCOMPLETE"""
+        # TODO Optionally executes analyses automatically based on provided input.
         # TODO unfinished
-        with open(input_filename, 'r') as file:
+        with open(input_filename, 'r', encoding="ascii") as file:
             # date line
             line = file.readline().strip()
             try:
@@ -94,19 +112,17 @@ class Negflo:
 
             flow_limit = float(file.readline().strip())
 
-            # segment
-            num_segments = int(file.readline().strip())
-            line = file.readline().strip()
-            segment_start_date, segment_end_date = itertools.batched(
-                line.split(), n=3)
-            segment_start_date = pd.to_datetime(segment_start_date)
-            segment_end_date = pd.to_datetime(segment_end_date)
+            # segments
+            # TODO flexibility to only specify periods, or only specify num_segments
+            # num_segments = int(file.readline().strip())
+            # line = file.readline().strip()
+            # segment_start_date, segment_end_date = itertools.batched(
+            #     line.split(), n=3)
+            # segment_start_date = pd.to_datetime(segment_start_date)
+            # segment_end_date = pd.to_datetime(segment_end_date)
 
         return cls(
             df_residual=df_residual,
-            # num_segments=num_segments,
-            # segment_start_date=segment_start_date,
-            # segment_end_date=segment_end_date
         )
 
     def _reset_residual(self) -> None:
@@ -379,32 +395,63 @@ class Negflo:
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self.df_residual = self.df_residual.apply(self._sm_backward_series, carry_negative=False)
 
-    def sm6(self) -> None:
-        """
-        This is the output file for averaging over the specified segments. The
-        method in each specified segment is the same as described for
-        residual.SM1, where negatives are averaged over the positive flows only
-        within the specified segment.
+    def sm6(self, *, method="default",
+            sampling_frequency=None, sampling_start_date=None) -> None:
+        """Smooths over the specified segments.
 
-        IMPORTANT: Unlike the original implementation, this version of SM6 does
-        not set the flow limit to zero while averaging.
-        """
-        self._analysis_type = AnalysisType.SMOOTHED_SPECIFIED
-        raise NotImplementedError()  # TODO
+        Applies the SM1 smoothing algorithm (ie global smoothing) for flows
+        across the specified periods. If no segments are defined or `method` is
+        set to `sample`, then it will partition the full period on an annual
+        (default) basis.
 
-        # prototype
-        # TODO periods var should be passed in or a class variable
-        # periods: list[tuple[pd.DatetimeIndex, pd.DatetimeIndex]]
-        # for start_date, end_date in periods:
-        #     pass
-        #     df: pd.DataFrame
-        #     df = df.loc[start_date:end_date]
-        #     # filter between these dates
-        #     # apply global smoothing helper fn to all columns
-        #     df.apply(self._sm_global_series)
-        #     update_df: pd.DataFrame
-        #     self.df_residual.update(update_df)
-        # raise NotImplementedError()
+        Unlike the reference documentation, this function does not set the flow
+        limit to zero while smoothing.
+
+        Assumes the indices of the underlying dataframe are datetimes.
+
+        Parameters
+        ----------
+            method : `Literal["default", "sample"]`, default 'default'
+                `default` will detect whether segments have been previously
+                    defined, otherwise it will sample the full period.
+                `sample` will sample the full period at the given `frequency`
+                    (typically anually) with optional parameter `start_date`
+            sampling_frequency : pd.DateOffset, optional
+                Specifies the time interval for smoothing periods. Defaults to
+                one year.
+            sampling_start_date : pd.Timestamp, optional
+                Specifies the start of the first period for sampling. Defaults
+                to the start of the data period.
+
+        Returns
+        -------
+        Writes the result to `self.df_residual`.
+        """
+        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
+        # pre-processing to determine segments if non-existent
+        if method == "default" and self.sm6_segment_boundaries is not None:
+            pass
+        else:
+            if sampling_start_date is None:
+                sampling_start_date = self.df_residual.index[0]
+            end = self.df_residual.index[-1]
+            date = sampling_start_date
+
+            if sampling_frequency is None:
+                sampling_frequency = pd.DateOffset(years=1)
+            one_day = pd.DateOffset(days=1)
+
+            self.sm6_segment_boundaries = []
+            while date < end:
+                last_date = date
+                date = date + sampling_frequency
+                self.sm6_segment_boundaries.append((last_date, date-one_day))
+
+        # main logic
+        for start, end in self.sm6_segment_boundaries:
+            negflo = Negflo(self.df_residual[start <= self.df_residual.index <= end])
+            negflo.sm1()
+            self.df_residual.update(negflo.df_residual)
 
     def sm7(self) -> None:
         """
@@ -435,7 +482,7 @@ class Negflo:
         raise NotImplementedError()  # TODO
 
     def run_all(self, filename="./residual"):
-        """Runs all types of """
+        """Runs all analyses on the residual."""
         self.rw1()
         self.df_residual.to_csv(f"{filename}.cl1")
         self._reset_residual()
@@ -460,11 +507,9 @@ class Negflo:
         self.df_residual.to_csv(f"{filename}.sm5")
         self._reset_residual()
 
-        # TODO sm6 will not be runnable without periods specified
-        logger.error("SM6 not implemented.")
-        # self.sm6()
-        # self.df_residual.to_csv(f"{filename}.sm6")
-        # self._reset_residual()
+        self.sm6()
+        self.df_residual.to_csv(f"{filename}.sm6")
+        self._reset_residual()
 
         self.sm7()
         self.df_residual.to_csv(f"{filename}.sm7")
@@ -473,10 +518,7 @@ class Negflo:
         self.log()
 
     def to_file(self, *, out_filename: Optional[str] = None):
-        """Saves the result dataframe to the output file.
-
-        This function will attempt to automatically 
-        """
+        """Saves the result dataframe to the output file."""
         if out_filename is None:  # Automatically determine file name.
             out_filename = (
                 ("result" if self.df_name is None else self.df_name)
