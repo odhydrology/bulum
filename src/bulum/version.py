@@ -5,4 +5,4 @@ Store the version here so:
 3) we can import it into your module
 :meta private:
 """
-__version__ = '0.2.9'
+__version__ = '0.2.10'
