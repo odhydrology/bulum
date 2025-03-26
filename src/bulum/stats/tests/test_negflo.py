@@ -1,7 +1,9 @@
 """Tests for the negflo class."""
+# pylint: skip-file
 
 import logging
 import unittest
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -10,11 +12,10 @@ from bulum.stats import Negflo
 
 logging.getLogger().setLevel(logging.CRITICAL)  # ignores warnings for carried negative flow
 
-# TODO: I need some reference data to be able to test the smoothing functions properly
+# TODO write tests with larger/randomised dataframes/series/data sets
 
 
 class Tests(unittest.TestCase):
-    # TODO write tests with larger/randomised dataframes/series/data sets
 
     def test_cl1(self):
         """Test CL1 - clipping."""
@@ -40,7 +41,7 @@ class Tests(unittest.TestCase):
     def test__sm2_3_helper(self):
         """Test the smoothing algorithm for SM2"""
         negflo = Negflo(pd.DataFrame(), 0)
-        self.assertTrue(all(0 == negflo.sm_forward_series(pd.Series([-1, 1]))))
+        self.assertTrue(all(0 == negflo._sm_forward_series(pd.Series([-1, 1]))))
 
     def test_sm2(self):
         """Tests to make sure ordering is correct i.e. smooths forward not backward."""
@@ -129,7 +130,31 @@ class Tests(unittest.TestCase):
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
-    # TODO implement and write tests for sm6
+    def test_sm6(self):
+        """Tests if periods are working as expected."""
+        df = pd.DataFrame({"a":
+                           [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
+        expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
+
+        def read_date(s):
+            return datetime.strptime(s, r"%d %m %y")
+        start_date = read_date("1 1 00")
+        expected.index = df.index = pd.date_range(start_date, periods=11)
+        segments = [
+            (read_date("1 1 00"), read_date("3 1 00")),
+            (read_date("4 1 00"), read_date("6 1 00")),
+            (read_date("7 1 00"), read_date("9 1 00")),
+        ]
+        negflo = Negflo(df, segments=segments)
+        negflo.sm6()
+        self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
+        self.assertEqual(negflo.neg_overflows["a"], -4)
+
+    # def test_sm6_sampling(self):
+    #     """Tests if periods are working as expected."""
+    #     df = pd.DataFrame({"a":
+    #                        [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
+    #     expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
 
     def test_sm7(self):
         """Chooses the larger flow period?"""

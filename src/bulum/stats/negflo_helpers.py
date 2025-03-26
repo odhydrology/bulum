@@ -56,8 +56,7 @@ class NegfloAnalysisType(Enum):
 
 
 class ContiguousIndexTracker:
-    """Convenience class to track contiguous blocks of data as determined by
-    index. Essentially a wrapper over a list with convenience methods."""
+    """Convenience class to track contiguous blocks of indices."""
 
     def __init__(self):
         # tracks start pt of positive period
@@ -96,9 +95,10 @@ class ContiguousIndexTracker:
         else:                               # non-contiguous case
             self.reset(idx, [v])
 
-    def get(self):
+    def get(self) -> list[int]:
+        """Return the list of indices which are currently being tracked."""
         if not self.is_tracking():
-            raise RuntimeError("ContiguousTracker is not tracking anything but get() was called.")
+            raise RuntimeError("ContiguousTracker.get() was called but nothing is being tracked.")
         return self.acc
 
     def offset(self, offset_val: Any | Callable[[Any], Any]) -> list[Any]:
@@ -117,12 +117,14 @@ class ContiguousIndexTracker:
     def is_tracking(self):
         """Checks if the tracker is active.
 
+        Note
+        ----
         If start_idx is not null then it is required that last_idx is also not
         null."""
         return self.start_idx is not None
 
     def is_member_of_block(self, idx):
-        """Asks whether idx is adjacent to the currently tracked block of integers."""
+        """Check if idx is adjacent to the currently tracked block of indices."""
         return self.is_tracking() and (self.start_idx - 1 <= idx <= self.last_idx + 1)
 
     def reset(self, /, idx: Optional[int] = None, val: Optional[list] = None):
@@ -137,12 +139,12 @@ def dec_sm_helpers_log_neg_rem(func):
     """Decorator to standardise treatment of remaining negative flow after
     execution. Internal use only.
 
-    Short for "decorate smoothing helpers log negative remainding flow"
+    Short for "decorate smoothing helpers: log negative remaining flow"
     """
     @functools.wraps(func)
     def _impl(self, residual: pd.Series, *args, **kwargs):
         series, neg_overflow = func(self, residual, *args, **kwargs)
-        self.neg_overflow[residual.name] = neg_overflow
+        self.neg_overflows[residual.name] = neg_overflow
         if neg_overflow < 0:
             logger.warning("Negative flow remaining after execution: %s", neg_overflow)
         return series
