@@ -2,10 +2,10 @@
 
 ## Installation
 
-This package may be installed using pip from Bitbucket (requires authentication), or directly from PyPi (public), or from a .tar.gz. Examples are shown below.
+This package may be installed using pip from GitHub, directly from PyPi (public), or from a .tar.gz. Examples are shown below.
 
 ```bash
-pip install git+https://bitbucket.org/odhydrology/bulum.git
+pip install git+https://github.com/odhydrology/bulum
 ```
 
 ```bash
