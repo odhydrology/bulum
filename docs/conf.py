@@ -19,6 +19,7 @@ release = '0.2.9'
 extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.apidoc",
+    'sphinx.ext.napoleon',
     "myst_parser"
 ]
 
@@ -27,16 +28,14 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 apidoc_modules = [
-    {'path': '.',
-     'destination': './_build'},
     {
-        'path': '../src/bulum/',
+        'path': '../src/bulum',
         'destination': 'source/',
         'exclude_patterns': ['**/test*',
                              '*.gitignore.*'],
         'max_depth': 4,
         'follow_links': False,
-        'separate_modules': False,
+        'separate_modules': True,
         'include_private': False,
         'no_headings': False,
         'module_first': False,

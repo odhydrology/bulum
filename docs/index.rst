@@ -1,19 +1,10 @@
-.. Bulum documentation master file, created by
-   sphinx-quickstart on Wed Mar 26 09:23:36 2025.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Bulum documentation
 ===================
 
-Add your content using ``reStructuredText`` syntax. See the
-`reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
-documentation for details.
-
+Welcome to the Bulum documentation.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
 
-   helloworld.md
-   
+   source/bulum
