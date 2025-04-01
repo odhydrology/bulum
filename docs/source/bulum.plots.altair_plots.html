@@ -1,0 +1,354 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bulum.plots.altair_plots module &mdash; Bulum 0.2.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bulum.plots.ensemble_altair_plots module" href="bulum.plots.ensemble_altair_plots.html" />
+    <link rel="prev" title="bulum.plots package" href="bulum.plots.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Bulum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="bulum.html">bulum package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bulum.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.html">bulum.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bulum.plots.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.html#module-bulum.plots">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bulum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="bulum.html">bulum package</a></li>
+          <li class="breadcrumb-item"><a href="bulum.plots.html">bulum.plots package</a></li>
+      <li class="breadcrumb-item active">bulum.plots.altair_plots module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/bulum.plots.altair_plots.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-bulum.plots.altair_plots">
+<span id="bulum-plots-altair-plots-module"></span><h1>bulum.plots.altair_plots module<a class="headerlink" href="#module-bulum.plots.altair_plots" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.annual_demand_supply_plot">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">annual_demand_supply_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">demand</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">supply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_tooltip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Key'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'WY'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ML/a'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sup_opacity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.annual_demand_supply_plot" title="Link to this definition"></a></dt>
+<dd><p>Annual plot of demand and supply from daily timeseries input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>demand</strong> (<em>pd.DataFrame</em>) – pd.Dataframe of daily demand timeseries to plot.</p></li>
+<li><p><strong>supply</strong> (<em>pd.DataFrame</em>) – pd.Dataframe of daily supply timeseries to plot.</p></li>
+<li><p><strong>wy_month</strong> (<em>int</em><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
+<li><p><strong>colours</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional list of colours to apply to data. Defaults to selection from “muted rainbow” colour scheme.</p></li>
+<li><p><strong>plotWidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional overall width of figure. Defaults to 1400.</p></li>
+<li><p><strong>plotHeight</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional overall height of figure. Defaults to 500.</p></li>
+<li><p><strong>show_tooltip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Optionally show tooltip. Defaults to True.</p></li>
+<li><p><strong>label_freq</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional frequency to display year label. Defaults to 5 (years).</p></li>
+<li><p><strong>caption</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional figure caption. Defaults to None.</p></li>
+<li><p><strong>legend</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional legend label. Defaults to “Key”.</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional x axis label. Defaults to “WY”.</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional y axis label. Defaults to “ML/a”.</p></li>
+<li><p><strong>sup_opacity</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional opacity of supply series. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.annual_plot">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">annual_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yLabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Flow</span> <span class="pre">(ML/a)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data</span> <span class="pre">set'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wyStartMonth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.annual_plot" title="Link to this definition"></a></dt>
+<dd><p>Annual plot of timeseries data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Dataframe of daily timeseries data.</p></li>
+<li><p><strong>yLabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Y axis title. Defaults to ‘Flow (ML/a)’.</p></li>
+<li><p><strong>legendTitle</strong> (<em>str</em><em>, </em><em>optional</em>) – Legend title. Defaults to ‘Data set’.</p></li>
+<li><p><strong>wyStartMonth</strong> (<em>int</em><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
+<li><p><strong>plotWidth</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart width. Defaults to 500.</p></li>
+<li><p><strong>plotHeight</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart height. Defaults to 300.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.daily_plot">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">daily_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yLabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Flow</span> <span class="pre">(ML/d)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data</span> <span class="pre">set'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.daily_plot" title="Link to this definition"></a></dt>
+<dd><p>Daily plot of timeseries data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Dataframe of daily timeseries data.</p></li>
+<li><p><strong>yLabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Y axis title. Defaults to ‘Flow (ML/d)’.</p></li>
+<li><p><strong>legendTitle</strong> (<em>str</em><em>, </em><em>optional</em>) – Legend title. Defaults to ‘Data set’.</p></li>
+<li><p><strong>plotWidth</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart width. Defaults to 500.</p></li>
+<li><p><strong>plotHeight</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart height. Defaults to 300.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.exceedence_plot">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">exceedence_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yLabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Flow</span> <span class="pre">(ML/d)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xLog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yLog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data</span> <span class="pre">set'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plottingPosition</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cunnane'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.exceedence_plot" title="Link to this definition"></a></dt>
+<dd><p>Exceedance plot of timeseries data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe of daily timeseries data.</p></li>
+<li><p><strong>yLabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Y axis title. Defaults to ‘Flow (ML/d)’.</p></li>
+<li><p><strong>xLog</strong> (<em>bool</em><em>, </em><em>optional</em>) – X axis log flag. Defaults to False.</p></li>
+<li><p><strong>yLog</strong> (<em>bool</em><em>, </em><em>optional</em>) – Y axis log flag. Defaults to False.</p></li>
+<li><p><strong>legendTitle</strong> (<em>str</em><em>, </em><em>optional</em>) – Legend title. Defaults to ‘Data set’.</p></li>
+<li><p><strong>plotWidth</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart width. Defaults to 500.</p></li>
+<li><p><strong>plotHeight</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart height. Defaults to 300.</p></li>
+<li><p><strong>plottingPosition</strong> (<em>str</em><em>, </em><em>optional</em>) – Defaults to “cunnane”. Other supported values: “weibull”, “gringorten”. See <a class="reference external" href="https://glossary.ametsoc.org/wiki/Plotting_position">https://glossary.ametsoc.org/wiki/Plotting_position</a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.pyblo">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">pyblo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dflist</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sites</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">series_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Series'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">site_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_freq</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">35</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stroke_width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stroke_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">font_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lightgrey'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.pyblo" title="Link to this definition"></a></dt>
+<dd><p>Returns a chart depicting available data by Water Year. Data is arranged by site with colour assigned by series.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dflist</strong> (<em>list</em>) – List of pd.Series data.</p></li>
+<li><p><strong>sites</strong> (<em>list</em>) – List of strings by which corresponding data in dflist is grouped by chart row.</p></li>
+<li><p><strong>series</strong> (<em>list</em>) – List of strings by which corresponding data in dflist is grouped by colour.</p></li>
+<li><p><strong>wy_month</strong> (<em>int</em><em>, </em><em>optional</em>) – Water year start month. Defaults to 1.</p></li>
+<li><p><strong>site_order</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional order to arrange Sites by. Defaults to order in sites.</p></li>
+<li><p><strong>series_order</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional order to arrange Series by. Defaults to order in series.</p></li>
+<li><p><strong>colours</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional list of colours (arranged by series_order) to apply to Series. Defaults to selection from “muted rainbow” colour scheme.</p></li>
+<li><p><strong>start_date</strong> (<em>DateTime</em><em>, </em><em>optional</em>) – Optional minimum date (%d/%m/%Y) to display. Defaults to None.</p></li>
+<li><p><strong>end_date</strong> (<em>DateTime</em><em>, </em><em>optional</em>) – Optional maximum date (%d/%m/%Y) to display. Defaults to None.</p></li>
+<li><p><strong>series_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional Series label for legend. Defaults to “Series”.</p></li>
+<li><p><strong>site_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional Site y-axis title. Defaults to None.</p></li>
+<li><p><strong>label_freq</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional frequency to display year label. Defaults to 10 (years).</p></li>
+<li><p><strong>subtitle</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to show subtitle. Defaults to True.</p></li>
+<li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional chart width parameter. Defaults to function of total years.</p></li>
+<li><p><strong>height</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional chart height parameter. Represents height per facet/site. Defaults to 35.</p></li>
+<li><p><strong>stroke_width</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional width of bar outline. Defaults to 0.5.</p></li>
+<li><p><strong>stroke_colour</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional colour of bar outline. Defaults to ‘black’.</p></li>
+<li><p><strong>font_size</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional font size to apply to all text. Defaults to 12.</p></li>
+<li><p><strong>grid_colour</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional colour of gridlines. Defaults to ‘lightgrey’.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.residual_mass_curve">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">residual_mass_curve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">yLabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Flow</span> <span class="pre">residual</span> <span class="pre">mass</span> <span class="pre">(ML)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legendTitle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data</span> <span class="pre">set'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.residual_mass_curve" title="Link to this definition"></a></dt>
+<dd><p>Residual mass curve of timeseries data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – Dataframe of daily timeseries data.</p></li>
+<li><p><strong>yLabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Y axis title. Defaults to ‘Flow residual mass (ML)’.</p></li>
+<li><p><strong>legendTitle</strong> (<em>str</em><em>, </em><em>optional</em>) – Legend title. Defaults to ‘Data set’.</p></li>
+<li><p><strong>plotWidth</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart width. Defaults to 500.</p></li>
+<li><p><strong>plotHeight</strong> (<em>int</em><em>, </em><em>optional</em>) – Chart height. Defaults to 300.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.storage_plot">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">storage_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Volume</span> <span class="pre">(ML)'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Date'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">legend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Key'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">caption</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lineWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotHeight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">300</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot2Height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_tooltip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.storage_plot" title="Link to this definition"></a></dt>
+<dd><p>Daily storage plot of timeseries data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – pd.Dataframe of daily timeseries to plot.</p></li>
+<li><p><strong>triggers</strong> (<em>dict</em><em>, </em><em>optional</em>) – Optional horizontal lines to mark on chart e.g. DSV, FSV. Dictionary where {key: value} = {‘Trigger name’:  Y value}. Defaults to None.</p></li>
+<li><p><strong>data_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional string to assign to supplied timeseries. Defaults to df column names.</p></li>
+<li><p><strong>colours</strong> (<em>list</em><em>, </em><em>optional</em>) – Optional list of colours to apply to data. Defaults to Altair default.</p></li>
+<li><p><strong>ylabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional label for y axis. Defaults to “Volume (ML)”.</p></li>
+<li><p><strong>xlabel</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional label for x axis. Defaults to “Date”.</p></li>
+<li><p><strong>legend</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional label for legend. Defaults to “Key”.</p></li>
+<li><p><strong>caption</strong> (<em>str</em><em>, </em><em>optional</em>) – Optional caption for figure. Defaults to None.</p></li>
+<li><p><strong>lineWidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional width of figure lines. Defaults to 2.</p></li>
+<li><p><strong>plotWidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional overall width of figure. Defaults to 800.</p></li>
+<li><p><strong>plotHeight</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional overall height of main figure. Defaults to 300.</p></li>
+<li><p><strong>plot2Height</strong> (<em>float</em><em>, </em><em>optional</em>) – Optional height of secondary figure. Defaults to 10% of main figure height.</p></li>
+<li><p><strong>show_tooltip</strong> (<em>bool</em><em>, </em><em>optional</em>) – Optionally show tooltip. Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.plots.altair_plots.wy_event_heatmap">
+<span class="sig-prename descclassname"><span class="pre">bulum.plots.altair_plots.</span></span><span class="sig-name descname"><span class="pre">wy_event_heatmap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">typing.Union[pandas.core.frame.DataFrame,</span> <span class="pre">pandas.core.series.Series]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criteria</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Series'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Pass'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fail_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Fail'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pass_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'white'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fail_colour</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'red'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stroke</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'black'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strokeWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.altair_plots.wy_event_heatmap" title="Link to this definition"></a></dt>
+<dd><p>Returns an Altair heatmap chart from a timeseries input of event count by Water Year.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em><em> | </em><em>Series</em>) – Annual (WY) index timeseries of no. of ‘events’ in a year i.e. output of StorageLevelAssessment.AnnualDaysBelowSummary()</p></li>
+<li><p><strong>criteria</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum integer in df that triggers a ‘failure’. Defaults to 1.</p></li>
+<li><p><strong>y_title</strong> (<em>str</em><em>, </em><em>optional</em>) – Y axis title. Defaults to “Series”.</p></li>
+<li><p><strong>pass_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Label for years that don’t meet the criteria. Defaults to “Pass”.</p></li>
+<li><p><strong>fail_label</strong> (<em>str</em><em>, </em><em>optional</em>) – Label for years that meet the criteria. Defaults to “Fail”.</p></li>
+<li><p><strong>pass_colour</strong> (<em>str</em><em>, </em><em>optional</em>) – Colour for years that don’t meet the criteria. Defaults to “white”.</p></li>
+<li><p><strong>fail_colour</strong> (<em>str</em><em>, </em><em>optional</em>) – Colour for years that meet the criteria. Defaults to “red”.</p></li>
+<li><p><strong>width</strong> (<em>int</em><em>, </em><em>optional</em>) – Width of chart output. Defaults to None.</p></li>
+<li><p><strong>height</strong> (<em>int</em><em>, </em><em>optional</em>) – Height of chart output. Defaults to None.</p></li>
+<li><p><strong>stroke</strong> (<em>str</em><em>, </em><em>optional</em>) – Colour of rectangle outline. Defaults to black.</p></li>
+<li><p><strong>strokeWidth</strong> (<em>float</em><em>, </em><em>optional</em>) – Width of rectangle outline. Defaults to 0.3.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Returns an Altair chart object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>altair.Chart</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bulum.plots.html" class="btn btn-neutral float-left" title="bulum.plots package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.plots.ensemble_altair_plots.html" class="btn btn-neutral float-right" title="bulum.plots.ensemble_altair_plots module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, OD Hydrology.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

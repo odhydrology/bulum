@@ -1,0 +1,249 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bulum.stats package &mdash; Bulum 0.2.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bulum.stats.swflo2s package" href="bulum.stats.swflo2s.html" />
+    <link rel="prev" title="bulum.plots.plotly_helpers module" href="bulum.plots.plotly_helpers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Bulum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="bulum.html">bulum package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bulum.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.html">bulum.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">bulum.stats package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-bulum.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bulum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="bulum.html">bulum package</a></li>
+      <li class="breadcrumb-item active">bulum.stats package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/bulum.stats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bulum-stats-package">
+<h1>bulum.stats package<a class="headerlink" href="#bulum-stats-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.swflo2s.html">bulum.stats.swflo2s package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.swflo2s.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html">bulum.stats.swflo2s.swflo2s module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_ecological_low_flow_periods"><code class="docutils literal notranslate"><span class="pre">days_in_ecological_low_flow_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_no_flow_periods"><code class="docutils literal notranslate"><span class="pre">days_in_no_flow_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_riffle_drown_out_periods"><code class="docutils literal notranslate"><span class="pre">days_in_riffle_drown_out_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_riffle_periods"><code class="docutils literal notranslate"><span class="pre">days_in_riffle_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_riparian_low_flow_periods"><code class="docutils literal notranslate"><span class="pre">days_in_riparian_low_flow_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.days_in_river_forming_periods"><code class="docutils literal notranslate"><span class="pre">days_in_river_forming_periods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.swflo2s.html#bulum.stats.swflo2s.swflo2s.mean_annual_flow"><code class="docutils literal notranslate"><span class="pre">mean_annual_flow()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.swflo2s.html#module-bulum.stats.swflo2s">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.aggregate_stats.html">bulum.stats.aggregate_stats module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_max"><code class="docutils literal notranslate"><span class="pre">annual_max()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_mean"><code class="docutils literal notranslate"><span class="pre">annual_mean()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_median"><code class="docutils literal notranslate"><span class="pre">annual_median()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_min"><code class="docutils literal notranslate"><span class="pre">annual_min()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_percentile"><code class="docutils literal notranslate"><span class="pre">annual_percentile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.ensemble_stats.html">bulum.stats.ensemble_stats module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.annual_incremental_risk"><code class="docutils literal notranslate"><span class="pre">annual_incremental_risk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.cumulative_risk"><code class="docutils literal notranslate"><span class="pre">cumulative_risk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.incremental_risk"><code class="docutils literal notranslate"><span class="pre">incremental_risk()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.percentile_envelope"><code class="docutils literal notranslate"><span class="pre">percentile_envelope()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.negflo.html">bulum.stats.negflo module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.add"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.force_add"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.force_add()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.get"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.get()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.indices"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.indices()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.is_member_of_block"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.is_member_of_block()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.is_tracking"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.is_tracking()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.reset"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousTracker.sum_and_reset"><code class="docutils literal notranslate"><span class="pre">ContiguousTracker.sum_and_reset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.FileType"><code class="docutils literal notranslate"><span class="pre">FileType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.FileType.IQQM"><code class="docutils literal notranslate"><span class="pre">FileType.IQQM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.FileType.IQQM_GUI"><code class="docutils literal notranslate"><span class="pre">FileType.IQQM_GUI</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.FileType.SOURCE_INPUT"><code class="docutils literal notranslate"><span class="pre">FileType.SOURCE_INPUT</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.FileType.SOURCE_OUTPUT"><code class="docutils literal notranslate"><span class="pre">FileType.SOURCE_OUTPUT</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo"><code class="docutils literal notranslate"><span class="pre">Negflo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.cl1"><code class="docutils literal notranslate"><span class="pre">Negflo.cl1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.from_file"><code class="docutils literal notranslate"><span class="pre">Negflo.from_file()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.log"><code class="docutils literal notranslate"><span class="pre">Negflo.log()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.run_all"><code class="docutils literal notranslate"><span class="pre">Negflo.run_all()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.rw1"><code class="docutils literal notranslate"><span class="pre">Negflo.rw1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm1"><code class="docutils literal notranslate"><span class="pre">Negflo.sm1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm2"><code class="docutils literal notranslate"><span class="pre">Negflo.sm2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm3"><code class="docutils literal notranslate"><span class="pre">Negflo.sm3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm4"><code class="docutils literal notranslate"><span class="pre">Negflo.sm4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm5"><code class="docutils literal notranslate"><span class="pre">Negflo.sm5()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm6"><code class="docutils literal notranslate"><span class="pre">Negflo.sm6()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.sm7"><code class="docutils literal notranslate"><span class="pre">Negflo.sm7()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo.to_file"><code class="docutils literal notranslate"><span class="pre">Negflo.to_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.reliability_stats_class.html">bulum.stats.reliability_stats_class module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.reliability_stats_class.html#bulum.stats.reliability_stats_class.Reliability"><code class="docutils literal notranslate"><span class="pre">Reliability</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.reliability_stats_class.html#bulum.stats.reliability_stats_class.Reliability.AnnualReliability"><code class="docutils literal notranslate"><span class="pre">Reliability.AnnualReliability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.reliability_stats_class.html#bulum.stats.reliability_stats_class.Reliability.MonthlyReliability"><code class="docutils literal notranslate"><span class="pre">Reliability.MonthlyReliability()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.reliability_stats_class.html#bulum.stats.reliability_stats_class.Reliability.ReliabilityTS"><code class="docutils literal notranslate"><span class="pre">Reliability.ReliabilityTS()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.stochastic_data_check.html">bulum.stats.stochastic_data_check module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.stochastic_data_check.html#bulum.stats.stochastic_data_check.StochasticDataComparison"><code class="docutils literal notranslate"><span class="pre">StochasticDataComparison</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.stochastic_data_check.html#bulum.stats.stochastic_data_check.StochasticDataComparison.Correlations"><code class="docutils literal notranslate"><span class="pre">StochasticDataComparison.Correlations</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.stochastic_data_check.html#bulum.stats.stochastic_data_check.StochasticDataComparison.Distributions"><code class="docutils literal notranslate"><span class="pre">StochasticDataComparison.Distributions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.stochastic_data_check.html#bulum.stats.stochastic_data_check.StochasticDataComparison.Stats"><code class="docutils literal notranslate"><span class="pre">StochasticDataComparison.Stats</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.storage_level_assessment.html">bulum.stats.storage_level_assessment module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.AnnualDaysBelow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelowSummary"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.AnnualDaysBelowSummary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTrigger"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.EventsBelowTrigger()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.EventsBelowTriggerAlgorithm()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerCount"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.EventsBelowTriggerCount()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.EventsBelowTriggerMax()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.NumberWaterYearsBelow"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.NumberWaterYearsBelow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.PercentWaterYearsBelow"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.PercentWaterYearsBelow()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment.Summary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-bulum.stats">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bulum.stats" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bulum.plots.plotly_helpers.html" class="btn btn-neutral float-left" title="bulum.plots.plotly_helpers module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.stats.swflo2s.html" class="btn btn-neutral float-right" title="bulum.stats.swflo2s package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, OD Hydrology.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

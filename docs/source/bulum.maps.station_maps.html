@@ -1,0 +1,178 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bulum.maps.station_maps module &mdash; Bulum 0.2.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bulum.plots package" href="bulum.plots.html" />
+    <link rel="prev" title="bulum.maps package" href="bulum.maps.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Bulum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="bulum.html">bulum package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bulum.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.html">bulum.io package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="bulum.maps.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.maps.html#module-bulum.maps">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bulum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="bulum.html">bulum package</a></li>
+          <li class="breadcrumb-item"><a href="bulum.maps.html">bulum.maps package</a></li>
+      <li class="breadcrumb-item active">bulum.maps.station_maps module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/bulum.maps.station_maps.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-bulum.maps.station_maps">
+<span id="bulum-maps-station-maps-module"></span><h1>bulum.maps.station_maps module<a class="headerlink" href="#module-bulum.maps.station_maps" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.maps.station_maps.simple_station_map">
+<span class="sig-prename descclassname"><span class="pre">bulum.maps.station_maps.</span></span><span class="sig-name descname"><span class="pre">simple_station_map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centroid_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_geojson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_geojson1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra_geojson2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.maps.station_maps.simple_station_map" title="Link to this definition"></a></dt>
+<dd><p>Returns a map of stations with pop up of information provided for each station</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>centroid_coords</strong> (<em>array</em><em> of </em><em>doubles</em>) – centroid coordinates for your map</p></li>
+<li><p><strong>area_geojson</strong> (<em>geojson layer</em>) – outline layer for your map (i.e., catchment, reach, state)</p></li>
+<li><p><strong>station_df</strong> (<em>pd.DataFrame</em>) – dataframe with station details. Must include ‘Station name’, ‘Station number’, ‘Latitude’ and ‘Longitude’. Any other columns are fine and information will be included in map pop up.</p></li>
+<li><p><strong>zoom_level</strong> (<em>int</em><em>, </em><em>optional</em>) – zoom level for your map. Defaults to 10.</p></li>
+<li><p><strong>extra_geojson1</strong> (<em>geojson layer</em><em>, </em><em>optional</em>) – additional mapping layer. Defaults to None.</p></li>
+<li><p><strong>extra_geojson2</strong> (<em>geojson layer</em><em>, </em><em>optional</em>) – additional mapping layer. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>map of stations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>folium map</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.maps.station_maps.station_map_plots">
+<span class="sig-prename descclassname"><span class="pre">bulum.maps.station_maps.</span></span><span class="sig-name descname"><span class="pre">station_map_plots</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centroid_coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_geojson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">station_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zoom_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.maps.station_maps.station_map_plots" title="Link to this definition"></a></dt>
+<dd><p>Returns a map of markers with pop up of daily data plot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>centroid_coords</strong> (<em>array</em><em> of </em><em>doubles</em>) – centroid coordinates for your map</p></li>
+<li><p><strong>area_geojson</strong> (<em>geojson layer</em>) – outline layer for your map (i.e., catchment, reach, state)</p></li>
+<li><p><strong>station_df</strong> (<em>pd.DataFrame</em>) – dataframe with station details. Must include ‘Name’, ‘Latitude’ and ‘Longitude’. Any other columns ignored.</p></li>
+<li><p><strong>data_df</strong> (<em>array</em><em> of </em><em>pd.DataFrame</em>) – daily data to plot in pop up</p></li>
+<li><p><strong>data_label</strong> (<em>str</em><em>, </em><em>optional</em>) – description of data, used in plot title. Defaults to ‘data’.</p></li>
+<li><p><strong>zoom_level</strong> (<em>int</em><em>, </em><em>optional</em>) – zoom level for your map. Defaults to 10.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>map of stations with daily data plots</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>_type_</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bulum.maps.html" class="btn btn-neutral float-left" title="bulum.maps package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.plots.html" class="btn btn-neutral float-right" title="bulum.plots package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, OD Hydrology.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

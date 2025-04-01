@@ -1,0 +1,416 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bulum.stats.negflo module &mdash; Bulum 0.2.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="bulum.stats.reliability_stats_class module" href="bulum.stats.reliability_stats_class.html" />
+    <link rel="prev" title="bulum.stats.ensemble_stats module" href="bulum.stats.ensemble_stats.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Bulum
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="bulum.html">bulum package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="bulum.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.html">bulum.io package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="bulum.stats.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#module-bulum.stats">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Bulum</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="bulum.html">bulum package</a></li>
+          <li class="breadcrumb-item"><a href="bulum.stats.html">bulum.stats package</a></li>
+      <li class="breadcrumb-item active">bulum.stats.negflo module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/bulum.stats.negflo.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-bulum.stats.negflo">
+<span id="bulum-stats-negflo-module"></span><h1>bulum.stats.negflo module<a class="headerlink" href="#module-bulum.stats.negflo" title="Link to this heading"></a></h1>
+<p>The input file contains the following information:</p>
+<ol class="arabic simple">
+<li><p>Start Date and End Date</p></li>
+<li><p>File Type
+= 0 for old IQQM format
+= 1 for IQMM GUI format
+= 2 for SOURCE input file (with no header lines)
+= 3 for SOURCE Export file (with 6 header lines)
+No of Header Lines</p></li>
+<li><p>observed Flow File name</p></li>
+<li><p>File Type
+= 0 for old IQQM format
+= 1 for IQMM GUI format
+= 2 for SOURCE input file (with no header lines)
+= 3 for SOURCE Export file (with 6 header lines)
+No of Header Lines</p></li>
+<li><p>Modelled Flow File name</p></li>
+<li><p>File Type
+= 0 for old IQQM format
+= 1 for IQMM GUI format
+= 2 for SOURCE input file (with no header lines)
+= 3 for SOURCE Export file (with 6 header lines)
+No of Header Lines</p></li>
+<li><p>Residual Flow File Name</p></li>
+<li><p>Flow Limit</p></li>
+<li><p>No of Segments (set to zero if want to smooth the whole period specified above)</p></li>
+<li><p>Start and End Date of Segment.</p></li>
+</ol>
+<p>A typical input file is given below.</p>
+<p>14 09 1979 30 09 2008
+Booncomb.sm9
+s12b1.sim
+residual.qqm
+0
+1
+14 09 1979 30 09 2008</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.stats.negflo.</span></span><span class="sig-name descname"><span class="pre">ContiguousTracker</span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Convenience class to track contiguous blocks of data as determined by index.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.add">
+<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.add" title="Link to this definition"></a></dt>
+<dd><p>Adds current index/val pair to tracker.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.force_add">
+<span class="sig-name descname"><span class="pre">force_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.force_add" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.get" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.indices">
+<span class="sig-name descname"><span class="pre">indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.indices" title="Link to this definition"></a></dt>
+<dd><p>Returns a range of (contiguous) indices of the associated collection for which values were tracked.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.is_member_of_block">
+<span class="sig-name descname"><span class="pre">is_member_of_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.is_member_of_block" title="Link to this definition"></a></dt>
+<dd><p>Asks whether the incoming index is part of the current tracked block.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.is_tracking">
+<span class="sig-name descname"><span class="pre">is_tracking</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.is_tracking" title="Link to this definition"></a></dt>
+<dd><p>Checks if the tracker is active.</p>
+<p>If start_idx is not null then it is required that last_idx is also not
+null.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.reset" title="Link to this definition"></a></dt>
+<dd><p>Resets to default or resets to current index/value (list).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousTracker.sum_and_reset">
+<span class="sig-name descname"><span class="pre">sum_and_reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousTracker.sum_and_reset" title="Link to this definition"></a></dt>
+<dd><p>Returns the sum of the underlying accumulator and resets the trackers.</p>
+<p>This appeared a few times so threw it in a util function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.stats.negflo.FileType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.stats.negflo.</span></span><span class="sig-name descname"><span class="pre">FileType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.FileType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.FileType.IQQM">
+<span class="sig-name descname"><span class="pre">IQQM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#bulum.stats.negflo.FileType.IQQM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.FileType.IQQM_GUI">
+<span class="sig-name descname"><span class="pre">IQQM_GUI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#bulum.stats.negflo.FileType.IQQM_GUI" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.FileType.SOURCE_INPUT">
+<span class="sig-name descname"><span class="pre">SOURCE_INPUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#bulum.stats.negflo.FileType.SOURCE_INPUT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.FileType.SOURCE_OUTPUT">
+<span class="sig-name descname"><span class="pre">SOURCE_OUTPUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#bulum.stats.negflo.FileType.SOURCE_OUTPUT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.stats.negflo.</span></span><span class="sig-name descname"><span class="pre">Negflo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_residual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p><a class="reference external" href="https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo">https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo</a></p>
+<p># Overview copied from the above page:
+NEGFLO6 can be used to calculate the difference between two IQQM format
+files. It is especially useful for calculating the residual catchment inflow
+by subtracting the upstream gauged flow routed through an IQQM reach model
+from the flow recorded at the downstream gauge.</p>
+<p>Because the routing in the IQQM may not match exactly the routing in the
+actual system, the subtraction can generate negative flows. If the flows are
+set to zero, the resultant modelled flows can significantly exceed the
+observed downstream flow. This can cause a particular problem if the reach
+flows into a dam, so the final model tends to predict higher dam levels than
+the recorded levels. Therefore, NEGFLO6 includes a number of methods for
+correcting the positive flows.</p>
+<p>If the residual flow contains a large number of negative flows, the
+following should be carried out.</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Review the routing and delays to see if the number of negative flows
+can be reduced.</p></li>
+<li><p>If the routed upstream flows are consistently greater than the observed
+downstream flows when there is no residual inflow, then review the
+ratings of the gauges.</p></li>
+<li><p>Consider including a waterhole and/or losses in the model before
+undertaking the residual inflow derivation.</p></li>
+</ol>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.cl1">
+<span class="sig-name descname"><span class="pre">cl1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.cl1" title="Link to this definition"></a></dt>
+<dd><p>Clip all negative flows to zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.from_file">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo.from_file" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.log">
+<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.run_all">
+<span class="sig-name descname"><span class="pre">run_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./residual'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo.run_all" title="Link to this definition"></a></dt>
+<dd><p>Runs all types of</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.rw1">
+<span class="sig-name descname"><span class="pre">rw1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.rw1" title="Link to this definition"></a></dt>
+<dd><p>This is the raw file created by subtracting the flows in the modelled
+file from the flows in the observed file. The file contains the negative
+flows.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm1">
+<span class="sig-name descname"><span class="pre">sm1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm1" title="Link to this definition"></a></dt>
+<dd><p>This file has been smoothed over the whole period. The negative flows
+have been set to zero and the excess positive flows have been adjusted
+by a factor of</p>
+<blockquote>
+<div><p>1 - abs(Total of the negative flows)/(Total of the positive flows)</p>
+</div></blockquote>
+<p>This file will be preserve the variability of the flows and maintain the
+mean annual flow at the downstream gauge. This method is most useful for
+preserving storage behaviour if the reach empties into a dam. (This is
+similar to NEGFLO4).</p>
+<p>IMPORTANT: this <em>may</em> differ from the NEGFLO implementation in that this
+does not multiply the <em>positive</em> flows but the <em>excess</em> flows (i.e.
+those above the flow limit) by the scaling factor. This behaviour can be
+recovered by setting the flow limit to zero.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm2">
+<span class="sig-name descname"><span class="pre">sm2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm2" title="Link to this definition"></a></dt>
+<dd><p>This method breaks the raw residual flows into periods. The period
+starts when the flow exceeds the specified flow limit. It accumulates
+the negative flow and the positive flow when the flow exceeds the flow
+limit. It then factors the flows exceeding the flow limit according to
+the formula above using the total of the negative flows from the period
+preceding the period of positive flows. This method is similar to
+NEGFLO3, except that it will not reduce the flow below the specified
+flow limit.</p>
+<p>This method accumulates the negative flows, so that if the positive
+flows above the flow limit in a period are not enough to balance all the
+preceding negative flows, the remaining negative flow is loaded into the
+next period.</p>
+<p>If the flow limit is set to zero flow, the flows will give modelled
+flows with a mean that is close to the mean of the measure flows.
+However, it can eliminate small flow peaks if there are a lot of
+negative flows.</p>
+<p>Setting the flow limit to a high flow preserves these peaks, but can
+severely reduce the high flows. It can give a ranked flow plot with a
+notch at the flow limit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm3">
+<span class="sig-name descname"><span class="pre">sm3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm3" title="Link to this definition"></a></dt>
+<dd><p>This file is produced using the same methodology as SM2 except that
+the negative flow total is not carried over to the next period of
+smoothing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm4">
+<span class="sig-name descname"><span class="pre">sm4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm4" title="Link to this definition"></a></dt>
+<dd><p>This method is similar to the method used to produce residual.sm2
+except that the negatives are spread over the preceding positive flows
+that exceed the flow limit. The first method is particularly useful if
+the negative flows mainly occur on the rising limb of the hydrograph.
+This method is more useful if the negative flows are generated on the
+falling limb of the hydrograph.</p>
+<p>If the difference between the positive flows and the flow limit does not
+exceed the sum of the negative flows, the remaining negative flow is
+carried over to the next period of positive flows exceeding the flow
+limit.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm5">
+<span class="sig-name descname"><span class="pre">sm5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm5" title="Link to this definition"></a></dt>
+<dd><p>This method is the same as that described above where the negative flows
+are spread over the preceding positive flows that exceed the flow limit.
+However, excess negative flows are not carried over to the next period.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm6">
+<span class="sig-name descname"><span class="pre">sm6</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm6" title="Link to this definition"></a></dt>
+<dd><p>This is the output file for averaging over the specified segments. The
+method in each specified segment is the same as described for
+residual.SM1, where negatives are averaged over the positive flows only
+within the specified segment.</p>
+<p>IMPORTANT: Unlike the original implementation, this version of SM6 does
+not set the flow limit to zero while averaging.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm7">
+<span class="sig-name descname"><span class="pre">sm7</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm7" title="Link to this definition"></a></dt>
+<dd><p>If the flow_limit is less than zero, the program uses the negative flows
+to determine the periods for spreading the negatives. The program checks
+the positive flows either side of the negative flows and distributes the
+negative flows over the larger positive flow. If the flow_limit is -0.5,
+the program will use a flow_limit of zero, but work from the negative
+flows. The smoothed residual flows are saved in a file called
+residual.SM7. The segment option does not work for a negative flow
+limit.</p>
+<p># TODO edit this documentation; this is not how this particular implementation of NEGFLO works, and instead we expect a non-negative flow limit and instead simply call this method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.to_file">
+<span class="sig-name descname"><span class="pre">to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo.to_file" title="Link to this definition"></a></dt>
+<dd><p>Saves the result dataframe to the output file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bulum.stats.ensemble_stats.html" class="btn btn-neutral float-left" title="bulum.stats.ensemble_stats module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.stats.reliability_stats_class.html" class="btn btn-neutral float-right" title="bulum.stats.reliability_stats_class module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, OD Hydrology.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
