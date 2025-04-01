@@ -450,7 +450,7 @@ class Negflo:
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
         # pre-processing to determine segments if non-existent
-        if use_predefined_segments == "default" and self.sm6_segment_boundaries is not None:
+        if use_predefined_segments and self.sm6_segment_boundaries is not None:
             pass
         else:
             if sampling_start_date is None:

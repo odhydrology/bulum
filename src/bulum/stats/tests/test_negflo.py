@@ -130,7 +130,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
-    def test_sm6(self):
+    def test_sm6_period_specification(self):
         """Tests if periods are working as expected."""
         df = pd.DataFrame({"a":
                            [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
@@ -150,11 +150,35 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
         self.assertEqual(negflo.neg_overflows["a"], -4)
 
-    # def test_sm6_sampling(self):
-    #     """Tests if periods are working as expected."""
+    def test_sm6_sampling(self):
+        """Tests if sampling working as expected."""
+        df = pd.DataFrame({"a":
+                           [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
+        expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0]})
+
+        def read_date(s):
+            return datetime.strptime(s, r"%d %m %y")
+        start_date = read_date("1 1 00")
+        expected.index = df.index = pd.date_range(start_date, periods=11)
+        negflo = Negflo(df)
+        negflo.sm6(sampling_frequency=pd.DateOffset(days=3))
+        self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
+        self.assertEqual(negflo.neg_overflows["a"], -4)
+
+    # def test_sm6_start_date(self):
+    #     """Tests if start date parameter working as expected."""
     #     df = pd.DataFrame({"a":
     #                        [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
     #     expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
+
+    #     def read_date(s):
+    #         return datetime.strptime(s, r"%d %m %y")
+    #     start_date = read_date("1 1 00")
+    #     expected.index = df.index = pd.date_range(start_date, periods=11)
+    #     negflo = Negflo(df)
+    #     negflo.sm6(sampling_frequency=pd.DateOffset(days=3))
+    #     self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
+    #     self.assertEqual(negflo.neg_overflows["a"], 0)
 
     def test_sm7(self):
         """Chooses the larger flow period?"""
