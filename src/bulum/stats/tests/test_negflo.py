@@ -96,7 +96,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(7, s[len(s) - 2])
 
     def test_sm4(self):
-        """Tests to make sure ordering is correct i.e. smooths backward and not forward."""
+        """Tests to make sure ordering is correct i.e. smooths backward not
+        forward."""
         df = pd.DataFrame({
             "a": [1, -1],
             "b": [-1, 1]
@@ -110,7 +111,8 @@ class Tests(unittest.TestCase):
         self.assertEqual(1, np.count_nonzero(negflo.df_residual["b"]))
 
     def test_sm4_carry(self):
-        """Tests to make sure ordering is correct i.e. smooths backward and not forward."""
+        """Tests to make sure ordering is correct i.e. smooths backward not
+        forward."""
         df = pd.DataFrame({
             "a": [-1.0, 0.0, 3.0, -2.0, 4.0, -1.0],
         })
@@ -120,7 +122,8 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     def test_sm5_carry(self):
-        """Tests to make sure ordering is correct i.e. smooths backward and not forward."""
+        """Tests to make sure ordering is correct i.e. smooths backward not
+        forward."""
         df = pd.DataFrame({
             "a": [-1, 0, 3, -2, 4, -1],
         })
@@ -131,7 +134,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     def test_sm6_period_specification(self):
-        """Tests if periods are working as expected."""
+        """Period specification working?"""
         df = pd.DataFrame({"a":
                            [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
         expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
@@ -151,7 +154,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(negflo.neg_overflows["a"], -4)
 
     def test_sm6_sampling(self):
-        """Tests if sampling working as expected."""
+        """Sampling working as expected?"""
         df = pd.DataFrame({"a":
                            [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
         expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0]})
@@ -166,7 +169,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(negflo.neg_overflows["a"], -4)
 
     def test_sm6_start_date(self):
-        """Tests if start date parameter working as expected."""
+        """SM6 start date parameter working?"""
         df = pd.DataFrame({"a":
                            [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
         expected = pd.DataFrame({"a": [-2, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
