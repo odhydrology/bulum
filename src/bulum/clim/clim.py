@@ -3,20 +3,20 @@ import pandas as pd
 
 
 def derive_transformation_curves(original_ts: pd.Series, augmented_ts: pd.Series, season_start_months=[1,2,3,4,5,6,7,8,9,10,11,12], epsilon=1e-3) -> dict:
-    """Returns a dictionary of exceedence-based transformation curves - one for each season 
-    with the season's start month as the key. These are tables that map from exceedance 
-    (cunnane plotting position as a fraction) to a scaling factor. These are intended to 
-    be used to
-    effectively summarise climate-change adjustments, and allow them to be transported from
-    one timeseries to another.
+    """Returns a dictionary of exceedence-based transformation curves - one for
+    each season with the season's start month as the key. These are tables that
+    map from exceedance (cunnane plotting position as a fraction) to a scaling
+    factor. These are intended to be used to effectively summarise
+    climate-change adjustments, and allow them to be transported from one
+    timeseries to another.
 
-    Args:
-        original_ts (pd.Series): _description_
-        augmented_ts (pd.Series): _description_
-        season_start_months (list, optional): _description_. Defaults to [1,2,3,4,5,6,7,8,9,10,11,12].
-
-    Returns:
-        dict: _description_
+    Parameters
+    ----------
+    original_ts : pd.Series
+    augmented_ts : pd.Series
+    season_start_months : list, optional
+        Defaults to [1,2,3,4,5,6,7,8,9,10,11,12].
+    
     """
     df = pd.DataFrame()
     df["x"] = original_ts
@@ -43,17 +43,19 @@ def derive_transformation_curves(original_ts: pd.Series, augmented_ts: pd.Series
     
 def apply_transformation_curves(tranformation_curves: dict, series: pd.Series) -> pd.Series:
     """Applies seasonal transformation curves to an input series.
-    Refer to the function 'derive_transformation_curves(...)'.
+    Refer to the function `derive_transformation_curves`.
 
-    Args:
-        tranformation_curves (dict): _description_
-        series (pd.Series): _description_
+    Parameters
+    ----------
+    tranformation_curves : dict
+    series : pd.Series
 
-    Returns:
-        pd.Series: _description_
+    Returns
+    -------
+    pd.Series
     """
     dates = series.index
-    answer = series.copy()    
+    answer = series.copy()
     # Apply each transformation curves to the whole series. Splice the appropriate 
     # parts (seasons) into the 'answer' series as we go. 
     season_start_months = sorted(tranformation_curves.keys())
@@ -88,14 +90,15 @@ def derive_transformation_factors(original_ts: pd.Series, augmented_ts: pd.Serie
     be used to effectively summarise climate-change adjustments, and allow them to be 
     transported from one timeseries to another.
 
-    Args:
-        original_ts (pd.Series): _description_
-        augmented_ts (pd.Series): _description_
-        season_start_months (list, optional): _description_. Defaults to [1,2,3,4,5,6,7,8,9,10,11,12].
-        epsilon: Threshold below which values are treated as zero, and the associated factor defaults to 1.
+    Parameters
+    ----------
+    original_ts : pd.Series
+    augmented_ts : pd.Series
+    season_start_months : list, optional
+        [1,2,3,4,5,6,7,8,9,10,11,12].
+    epsilon : float 
+        Threshold below which values are treated as zero, and the associated factor defaults to 1.
 
-    Returns:
-        dict: _description_
     """
     # Create a map of month -> season_start_month (for all months)
     month_to_season_map = {}
@@ -116,25 +119,24 @@ def derive_transformation_factors(original_ts: pd.Series, augmented_ts: pd.Serie
     return df2['f'].to_dict()
 
     
-def apply_transformation_factors(tranformation_factors: dict, series: pd.Series) -> pd.Series:
+def apply_transformation_factors(transformation_factors: dict, series: pd.Series) -> pd.Series:
     """Applies seasonal transformation factors to an input series.
-    Refer to the function 'derive_transformation_factors(...)'.
+    Refer to the function `derive_transformation_curves`.
 
-    Args:
-        tranformation_curves (dict): _description_
-        series (pd.Series): _description_
+    Parameters
+    ----------
+    transformation_curves : dict
+    series : pd.Series
 
-    Returns:
-        pd.Series: _description_
     """
     # Create a map of month -> factor (containing all months)
-    season_start_months = sorted(tranformation_factors.keys())
+    season_start_months = sorted(transformation_factors.keys())
     month_to_factor_map = {}
     key = max(season_start_months)
     for m in [1,2,3,4,5,6,7,8,9,10,11,12]:
         if m in season_start_months:
             key = m
-        month_to_factor_map[m] = tranformation_factors[key]
+        month_to_factor_map[m] = transformation_factors[key]
     # Apply transformation factors to the whole series. Splice the appropriate 
     df = pd.DataFrame()
     df['x'] = series
@@ -144,7 +146,3 @@ def apply_transformation_factors(tranformation_factors: dict, series: pd.Series)
     answer = df['y']
     answer.name = series.name
     return answer
-
-    
-    
-    
