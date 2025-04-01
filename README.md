@@ -28,6 +28,8 @@ bulum.__version__
 bulum.hello_world()
 ```
 
+API documentation is available at [odhydrology.github.io/bulum](https://odhydrology.github.io/bulum/).
+
 ## Build and Upload to PyPi
 
 First build a distribution from an anaconda prompt in the root of your project, and then upload the dist to PyPi using Twine.
