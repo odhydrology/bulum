@@ -165,20 +165,21 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
         self.assertEqual(negflo.neg_overflows["a"], -4)
 
-    # def test_sm6_start_date(self):
-    #     """Tests if start date parameter working as expected."""
-    #     df = pd.DataFrame({"a":
-    #                        [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
-    #     expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
+    def test_sm6_start_date(self):
+        """Tests if start date parameter working as expected."""
+        df = pd.DataFrame({"a":
+                           [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
+        expected = pd.DataFrame({"a": [-2, 1, 1, 0, 1, 1, 0, 0, 0, -1, 1]})
 
-    #     def read_date(s):
-    #         return datetime.strptime(s, r"%d %m %y")
-    #     start_date = read_date("1 1 00")
-    #     expected.index = df.index = pd.date_range(start_date, periods=11)
-    #     negflo = Negflo(df)
-    #     negflo.sm6(sampling_frequency=pd.DateOffset(days=3))
-    #     self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
-    #     self.assertEqual(negflo.neg_overflows["a"], 0)
+        def read_date(s):
+            return datetime.strptime(s, r"%d %m %y")
+        idx_start_date = read_date("1 1 00")
+        expected.index = df.index = pd.date_range(idx_start_date, periods=11)
+        sample_start_date = read_date("3 1 00")
+        negflo = Negflo(df)
+        negflo.sm6(sampling_start_date=sample_start_date)
+        self.assertEqual(negflo.df_residual["a"].iloc[0], -2,
+                         f"Got\n{negflo.df_residual}\nExpected\n{expected}")
 
     def test_sm7(self):
         """Chooses the larger flow period?"""
