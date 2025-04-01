@@ -1,7 +1,11 @@
 """
 Bulum implementation of Negflo and supporting classes.
 
-C.f. https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
+Experimental implementation of NEGFLO. Should be mostly ok to use, but not
+guaranteed to have a stable API at present, especially regarding
+configuration files, pending confirmation of expected outputs etc.
+
+Spec obtained from: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 """
 
 import itertools
@@ -9,7 +13,6 @@ import logging
 import re
 from collections.abc import MutableSequence
 from typing import Any, Optional
-import datetime
 
 import pandas as pd
 
@@ -21,14 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 class Negflo:
-    """Bulum implementation of NEGFLO. Incomplete.
-
-    Experimental implementation of NEGFLO. Should be mostly ok to use, but not
-    guaranteed to have a stable API at present, especially regarding
-    configuration files, pending confirmation of expected outputs etc.
-
-    Spec obtained from: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
-    """
+    """Bulum implementation of NEGFLO."""
 
     def __init__(self,
                  df_residual: pd.DataFrame | TimeseriesDataframe,
@@ -171,8 +167,8 @@ class Negflo:
                       ) -> tuple[Any, MutableSequence | pd.Series]:
         """Smooth the accumulated positive flows.
 
-        Return
-        ------
+        Returns
+        -------
         A couple containing:
         - the remaining negative flows (number)
         - the smoothed sequence
@@ -199,8 +195,8 @@ class Negflo:
     def _sm_global_series(self, residual: pd.Series) -> tuple[pd.Series, float]:
         """Smooth the entire input series on aggregate.
 
-        Return
-        ------
+        Returns
+        -------
         pd.Series
             The smoothed series
         float
@@ -213,10 +209,6 @@ class Negflo:
         for i, _ in enumerate(smoothed_residual):
             residual.iloc[i] = smoothed_residual[i]
         return residual, neg_sum
-
-    # TODO is there a way to refactor the following three helpers into one
-    #      method with additional options? Look at the order of execution and
-    #      boundary conditionals.
 
     @helpers.dec_sm_helpers_log_neg_rem
     def _sm_forward_series(self, residual: pd.Series, *,
@@ -283,11 +275,10 @@ class Negflo:
 
         Note
         ----
-        Current implementation only distributes flows at the conclusion of the
-        RHS tracker (or at the end of all flow). 
+        Current implementation only distributes flows when the positive flow
+        event succeeding a negative flow event occurs, or at the end of the
+        recorded period. 
         """
-        # TODO Check whether this is the expected behaviour or if it should be
-        #      distributed at every negative flow event.
         # TODO Distribute over other positive flow event if it flattens the
         #      larger? Or if it would flatten one, then flatten both
         #      simultaneously?
@@ -295,7 +286,9 @@ class Negflo:
         right_tracker = helpers.ContiguousIndexTracker()
         neg_acc = 0
 
-        def greater_tracker(left: helpers.ContiguousIndexTracker, right: helpers.ContiguousIndexTracker) -> helpers.ContiguousIndexTracker:
+        def greater_tracker(left: helpers.ContiguousIndexTracker,
+                            right: helpers.ContiguousIndexTracker
+                            ) -> helpers.ContiguousIndexTracker:
             """Returns the tracker that has the greater total flow above the
             flow limit."""
             left_sum = sum(left.offset(-self.flow_limit))
@@ -423,7 +416,8 @@ class Negflo:
         self.df_residual = self.df_residual.apply(self._sm_backward_series, carry_negative=False)
 
     def sm6(self, *, use_predefined_segments=True,
-            sampling_frequency=None, sampling_start_date=None) -> None:
+            sampling_frequency: Optional[pd.DateOffset] = None,
+            sampling_start_date: Optional[pd.Timestamp] = None) -> None:
         """Smooths over the specified segments.
 
         Applies the SM1 smoothing algorithm (ie global smoothing) for flows
@@ -438,20 +432,21 @@ class Negflo:
 
         Parameters
         ----------
-            use_predefined_segments : bool, default True
-                Use the stored segments (`self.sm6_segment_boundaries`) if they
-                exist. Otherwise the segments will be computed when this method
-                is called.
-            sampling_frequency : pd.DateOffset, optional
-                Specifies the time interval for smoothing periods. Defaults to
-                one year.
-            sampling_start_date : pd.Timestamp, optional
-                Specifies the start of the first period for sampling. Defaults
-                to the start of the data period.
+        use_predefined_segments : bool, default True
+            Use the stored segments (`self.sm6_segment_boundaries`) if they
+            exist. Otherwise the segments will be computed when this method
+            is called.
+        sampling_frequency : pd.DateOffset, optional
+            Specifies the time interval for smoothing periods. Defaults to
+            one year.
+        sampling_start_date : pd.Timestamp, optional
+            Specifies the start of the first period for sampling. Defaults
+            to the start of the data period.
 
         Returns
         -------
         Writes the result to `self.df_residual`.
+
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
         # pre-processing to determine segments if non-existent
@@ -508,6 +503,8 @@ class Negflo:
 
     def log(self) -> None:
         """
+        Not yet implemented.
+
         Input_file_name.LOG
 
         A file is also created which gives the total of the positive and negative
