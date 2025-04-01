@@ -1,14 +1,12 @@
-"""TimeseriesDataframes and DataframeEnsembles.
+"""
+Provides extensions to dataframes which facilitates tracking and bulk analysis.
 
-TODO ---DESCRIBE--- 
-TimeseriesDataframes (TSDF) are a wrapper around pandas
-dataframes, with extra fields (tags, name, source, ...) and methods that
-facilitate working with these fields.
+TimeseriesDataframes (TSDF) are a wrapper around pandas dataframes, with extra
+fields (tags, name, source, ...) and methods that facilitate working with these
+fields.
 
 DataframeEnsembles are a way to organise multiple TSDFs, with methods that work
 (at present) primarily with the tags associated with TSDFs.
-
-TODO ---API--- 
 
 """
 
@@ -31,10 +29,10 @@ class TimeseriesDataframe(pd.DataFrame):
     """
     A TimeseriesDataframe is thinly extended pd.Dataframe. Abbreviated casually
     as TSDF throughout the documentation. It adds the following fields:
-        - name (str)
-        - source (str)
-        - description (str)
-        - a string of tags (str)
+    - name (str)
+    - source (str)
+    - description (str)
+    - a string of tags (str)
 
     ---API---
     TODO 
@@ -48,6 +46,7 @@ class TimeseriesDataframe(pd.DataFrame):
     has_tag():
 
     """
+
     TAG_DELIMITER = ','
 
     def __init__(self) -> None:
@@ -98,17 +97,20 @@ class TimeseriesDataframe(pd.DataFrame):
         """Check if the provided tag matches any of the dataframe's tags.
 
         Args:
-            pattern: string pattern, regex pattern, or compiled regex object
-            regex: Optional[RegexArg (enum)]; keyword-only
-                None    Uses python `in` operation to check for membership; 
-                        expects a string to be supplied to pattern
-                PATTERN non-compiled regex pattern 
-                OBJECT  compiled regex pattern
-            exact: bool
-                Whether we require an exact match of the tag to return True.
+            pattern (Optional[RegexArg (enum)], keyword-only): None: Uses python
+                `in` operation to check for membership; expects a string to be
+                supplied to pattern.
+                PATTERN: non-compiled regex pattern OBJECT: compiled regex
+                pattern
+            exact (bool): Whether we require an exact match of the tag to return
+            True.
                 This argument is superceded by a non-None `regex` argument, and
                 may be accomplished (depending on the particulars) via regex by
                 `\\bregex\\b`.
+
+        Returns:
+            bool Has the tag been found?
+
         """
         match regex:
             case None:
@@ -250,11 +252,11 @@ class DataframeEnsemble:
         keyword arguments.
 
         Args:
-            tag
-                The tag to match. String, regex pattern, or compiled regex pattern. 
-                (Regex requires regex argument to be set)
-            exclude
-                If True, it will filter *out* all dataframes which match the tag.
+            tag: The tag to match. String, regex pattern, or compiled regex
+                pattern. (Regex requires regex argument to be set)
+            exclude: If True, it will filter *out* all dataframes which match
+                the tag.
+
         """
         subensemble = DataframeEnsemble()
         for key, tsdf in self.ensemble.items():

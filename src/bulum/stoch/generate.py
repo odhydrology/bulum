@@ -20,10 +20,10 @@ def from_pattern(dates, daily_pattern=[1], monthly_pattern=[], annual_pattern=[]
 
     Raises:
         Exception: _description_
-        Exception: _description_
 
     Returns:
         _type_: _description_
+
     """
     # Guard
     if len(dates) == 0:
