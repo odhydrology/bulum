@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.datetime_functions module &mdash; Bulum 0.2.9 documentation</title>
+  <title>bulum.utils.datetime_functions module &mdash; Bulum 0.2.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -60,8 +60,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -96,13 +94,13 @@
 <span id="bulum-utils-datetime-functions-module"></span><h1>bulum.utils.datetime_functions module<a class="headerlink" href="#module-bulum.utils.datetime_functions" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_date_format">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_date_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_date_format" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_date_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_date_format" title="Link to this definition"></a></dt>
 <dd><p>Trial and error approach to determining the date format of a date string.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_dates">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_dates" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_dates" title="Link to this definition"></a></dt>
 <dd><p>Generates a list of daily datetime values from a given start date. The length
 may be defined by an end_date, or a number of days, or a number of years. This
 function may be useful for working with daily datasets and models.</p>
@@ -110,28 +108,28 @@ function may be useful for working with daily datasets and models.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_month">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_month</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_month" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_month</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_month" title="Link to this definition"></a></dt>
 <dd><p>Returns month, as a list of ints, for a given array of dates.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_next_month_start">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_next_month_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_next_month_start" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_next_month_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_next_month_start" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_prev_month_end">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_prev_month_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_prev_month_end" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_prev_month_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_prev_month_end" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_this_month_end">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_this_month_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_this_month_end" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_this_month_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stringdate</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_this_month_end" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_wy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_end_year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_wy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_end_year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy" title="Link to this definition"></a></dt>
 <dd><p>Returns water years, as a list of ints, for a given array of dates. Use this to
 add water year info into a pandas DataFrame.</p>
 <p>The default (using_end_year=False) aligns water years with the primary water
@@ -143,7 +141,7 @@ from 2021-07-01 to 2022-06-30 inclusive.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy_end_date">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_wy_end_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_end_date" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_wy_end_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_end_date" title="Link to this definition"></a></dt>
 <dd><p>Returns an appropriate water year end date based on data frame dates and the
 water year start month.</p>
 <dl class="field-list simple">
@@ -164,7 +162,7 @@ water year start month.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy_start_date">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_wy_start_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_start_date" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_wy_start_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_start_date" title="Link to this definition"></a></dt>
 <dd><p>Returns an appropriate water year start date based on data frame dates and the
 water year start month.</p>
 <dl class="field-list simple">
@@ -185,21 +183,21 @@ water year start month.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_year_and_month">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">get_year_and_month</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_year_and_month" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_year_and_month</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_year_and_month" title="Link to this definition"></a></dt>
 <dd><p>Returns year and month string e.g. “2022_01”, as a list for a given array of dates.
 Use this to aggregate by month.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.standardize_datestring_format">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">standardize_datestring_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.standardize_datestring_format" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">standardize_datestring_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.standardize_datestring_format" title="Link to this definition"></a></dt>
 <dd><p>Converts a list of date strings into a list of date strings in the format YYYY-MM-DD.
 Tested over the range 0001-01-01 to 9999-12-31.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.to_np_datetimes64d">
-<span class="sig-prename descclassname"><span class="pre">bulum.utils.datetime_functions.</span></span><span class="sig-name descname"><span class="pre">to_np_datetimes64d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.to_np_datetimes64d" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">to_np_datetimes64d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.to_np_datetimes64d" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 </section>

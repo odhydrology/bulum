@@ -11,11 +11,3 @@ Submodules
    bulum.utils.dataframe_functions
    bulum.utils.datetime_functions
    bulum.utils.interpolation
-
-Module contents
----------------
-
-.. automodule:: bulum.utils
-   :members:
-   :show-inheritance:
-   :undoc-members:

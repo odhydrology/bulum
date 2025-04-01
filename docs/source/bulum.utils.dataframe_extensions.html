@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.2.9 documentation</title>
+  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.2.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -60,8 +60,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -104,7 +102,7 @@ facilitate working with these fields.</p>
 <p>TODO —API—</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.utils.dataframe_extensions.</span></span><span class="sig-name descname"><span class="pre">DataframeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataframeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A DataframeEnsemble is an collection of bulum-style timeseries
 dataframes, which might represent collected results from a set of model
@@ -169,7 +167,7 @@ the dataframe at the given key.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.utils.dataframe_extensions.</span></span><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
 <p>Specifies the type of argument supplied to filtering functions in TSDF and</p>
 <dl class="py attribute">
@@ -186,7 +184,7 @@ the dataframe at the given key.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bulum.utils.dataframe_extensions.</span></span><span class="sig-name descname"><span class="pre">TimeseriesDataframe</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeseriesDataframe</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
 <p>A TimeseriesDataframe is thinly extended pd.Dataframe. Abbreviated casually
 as TSDF throughout the documentation. It adds the following fields:</p>

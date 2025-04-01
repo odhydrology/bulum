@@ -14,11 +14,3 @@ Submodules
    bulum.io.iqqm_out_reader
    bulum.io.lqn_io
    bulum.io.res_csv_io
-
-Module contents
----------------
-
-.. automodule:: bulum.io
-   :members:
-   :show-inheritance:
-   :undoc-members:

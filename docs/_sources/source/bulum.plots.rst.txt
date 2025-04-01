@@ -12,11 +12,3 @@ Submodules
    bulum.plots.node_diagrams
    bulum.plots.plot_functions
    bulum.plots.plotly_helpers
-
-Module contents
----------------
-
-.. automodule:: bulum.plots
-   :members:
-   :show-inheritance:
-   :undoc-members:

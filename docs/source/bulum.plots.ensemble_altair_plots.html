@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.plots.ensemble_altair_plots module &mdash; Bulum 0.2.9 documentation</title>
+  <title>bulum.plots.ensemble_altair_plots module &mdash; Bulum 0.2.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=14672bda"></script>
+      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -51,7 +51,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.plots.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.plots.html#module-bulum.plots">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a></li>
@@ -60,8 +59,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="bulum.html#module-bulum">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -96,7 +93,7 @@
 <span id="bulum-plots-ensemble-altair-plots-module"></span><h1>bulum.plots.ensemble_altair_plots module<a class="headerlink" href="#module-bulum.plots.ensemble_altair_plots" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.plots.ensemble_altair_plots.ensemble_probability_plot">
-<span class="sig-prename descclassname"><span class="pre">bulum.plots.ensemble_altair_plots.</span></span><span class="sig-name descname"><span class="pre">ensemble_probability_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.ensemble_altair_plots.ensemble_probability_plot" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ensemble_probability_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">variable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stat_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">800</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.plots.ensemble_altair_plots.ensemble_probability_plot" title="Link to this definition"></a></dt>
 <dd><p>Returns a plot of typical probabilistic outputs from DataframeEnsemble inputs. Available statistics: [stats.ensemble_stats.cumulative_risk, stats.ensemble_stats.incremental_risk, stats.ensemble_stats.annual_incremental_risk, stats.ensemble_stats.percentile_envelope]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
