@@ -1,32 +1,52 @@
-import pandas as pd
+import calendar
+from datetime import datetime, timedelta
+from typing import Union
+
 import altair as alt
 import numpy as np
-from typing import Union
-from bulum import utils
-from bulum import io
-from bulum import trans
-import calendar
+import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-from datetime import datetime, timedelta
 
-def wy_event_heatmap(df=Union[pd.DataFrame,pd.Series],criteria=1,y_title="Series",pass_label="Pass",fail_label="Fail",pass_colour="white",fail_colour="red",width=None,height=None,stroke='black',strokeWidth=0.3):
-    """Returns an Altair heatmap chart from a timeseries input of event count by Water Year.
+from bulum import trans, utils
 
-    Args:
-        df (DataFrame | Series): Annual (WY) index timeseries of no. of 'events' in a year i.e. output of StorageLevelAssessment.AnnualDaysBelowSummary()
-        criteria (int, optional): Minimum integer in df that triggers a 'failure'. Defaults to 1.
-        y_title (str, optional): Y axis title. Defaults to "Series".
-        pass_label (str, optional): Label for years that don't meet the criteria. Defaults to "Pass".
-        fail_label (str, optional): Label for years that meet the criteria. Defaults to "Fail".
-        pass_colour (str, optional): Colour for years that don't meet the criteria. Defaults to "white".
-        fail_colour (str, optional): Colour for years that meet the criteria. Defaults to "red".
-        width (int, optional): Width of chart output. Defaults to None.
-        height (int, optional): Height of chart output. Defaults to None.
-        stroke (str, optional): Colour of rectangle outline. Defaults to black.
-        strokeWidth (float, optional): Width of rectangle outline. Defaults to 0.3.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+def wy_event_heatmap(df=Union[pd.DataFrame, pd.Series], criteria=1, y_title="Series",
+                     pass_label="Pass", fail_label="Fail",
+                     pass_colour="white", fail_colour="red",
+                     width=None, height=None,
+                     stroke='black', stroke_width=0.3) -> alt.Chart:
+    """Returns an Altair heatmap chart from a timeseries input of event count by
+    Water Year.
+
+    Parameters
+    ----------
+    df : DataFrame | Series
+        Annual (WY) index timeseries of no. of 'events' in a year i.e. output of
+        `StorageLevelAssessment.AnnualDaysBelowSummary()`
+    criteria : int, optional
+        Minimum integer in df that triggers a 'failure'. Defaults to 1.
+    y_title : str, optional
+        Y axis title. Defaults to "Series".
+    pass_label : str, optional
+        Label for years that don't meet the criteria. Defaults to "Pass".
+    fail_label : str, optional
+        Label for years that meet the criteria. Defaults to "Fail".
+    pass_colour : str, optional
+        Colour for years that don't meet the criteria. Defaults to "white".
+    fail_colour : str, optional
+        Colour for years that meet the criteria. Defaults to "red".
+    width : int, optional
+        Width of chart output. Defaults to None.
+    height : int, optional
+        Height of chart output. Defaults to None.
+    stroke : str, optional
+        Colour of rectangle outline. Defaults to black.
+    strokeWidth : float, optional
+        Width of rectangle outline. Defaults to 0.3.
+
+    Returns
+    -------
+    `altair.Chart`
     """
 
     # If df input is a Series, first convert to DataFrame
@@ -65,7 +85,7 @@ def wy_event_heatmap(df=Union[pd.DataFrame,pd.Series],criteria=1,y_title="Series
     ).transform_lookup( # Convert 1 and 0 to pass and fail
         lookup='value',
         from_=alt.LookupData(lookup, key='key', fields=['y'])
-    ).mark_rect(stroke=stroke, strokeWidth=strokeWidth
+    ).mark_rect(stroke=stroke, strokeWidth=stroke_width
     ).encode(
         alt.X('index:O', title='Water Year'),
         alt.Y('column:N',sort=None, title=y_title),
@@ -77,32 +97,54 @@ def wy_event_heatmap(df=Union[pd.DataFrame,pd.Series],criteria=1,y_title="Series
 
     return chart_wy_event
 
-def pyblo(dflist: list, sites: list, series: list, wy_month=1, site_order=None, series_order=None, colours=None, start_date=None, end_date=None, series_label="Series", site_label=None, label_freq=10, subtitle=True, width=None, height=35, stroke_width=0.5, stroke_colour='black',font_size=12, grid_colour='lightgrey'):
-    """Returns a chart depicting available data by Water Year. Data is arranged by site with colour assigned by series. 
+def pyblo(dflist: list[pd.Series], sites: list, series: list, wy_month=1, site_order=None, series_order=None, colours=None, start_date=None, end_date=None, series_label="Series", site_label=None, label_freq=10, subtitle=True, width=None, height=35, stroke_width=0.5, stroke_colour='black',font_size=12, grid_colour='lightgrey'):
+    """Returns a chart depicting available data by Water Year. Data is arranged
+    by site with colour assigned by series. 
 
-    Args:
-        dflist (list): List of pd.Series data.
-        sites (list): List of strings by which corresponding data in dflist is grouped by chart row.
-        series (list): List of strings by which corresponding data in dflist is grouped by colour.
-        wy_month (int, optional): Water year start month. Defaults to 1.
-        site_order (list, optional): Optional order to arrange Sites by. Defaults to order in sites.
-        series_order (list, optional): Optional order to arrange Series by. Defaults to order in series.
-        colours (list, optional): Optional list of colours (arranged by series_order) to apply to Series. Defaults to selection from "muted rainbow" colour scheme.
-        start_date (DateTime, optional): Optional minimum date (%d/%m/%Y) to display. Defaults to None.
-        end_date (DateTime, optional): Optional maximum date (%d/%m/%Y) to display. Defaults to None.
-        series_label (str, optional): Optional Series label for legend. Defaults to "Series".
-        site_label (str, optional): Optional Site y-axis title. Defaults to None.
-        label_freq (int, optional): Optional frequency to display year label. Defaults to 10 (years).
-        subtitle (bool, optional): Whether to show subtitle. Defaults to True.
-        width (int, optional): Optional chart width parameter. Defaults to function of total years.
-        height (int, optional): Optional chart height parameter. Represents height per facet/site. Defaults to 35.
-        stroke_width (float, optional): Optional width of bar outline. Defaults to 0.5.
-        stroke_colour (str, optional): Optional colour of bar outline. Defaults to 'black'.
-        font_size (int, optional): Optional font size to apply to all text. Defaults to 12.
-        grid_colour (str, optional): Optional colour of gridlines. Defaults to 'lightgrey'.
+    Parameters
+    ----------
+    dflist : list of Series
+        List of pd.Series data.
+    sites : list of str
+        List of strings by which corresponding data in dflist is grouped by chart row.
+    series (list)
+        List of strings by which corresponding data in dflist is grouped by colour.
+    wy_month (int, optional)
+        Water year start month. Defaults to 1.
+    site_order (list, optional)
+        Optional order to arrange Sites by. Defaults to order in sites.
+    series_order (list, optional)
+        Optional order to arrange Series by. Defaults to order in series.
+    colours (list, optional)
+        Optional list of colours (arranged by series_order) to apply to Series. Defaults to selection from "muted rainbow" colour scheme.
+    start_date (DateTime, optional)
+        Optional minimum date (%d/%m/%Y) to display. Defaults to None.
+    end_date (DateTime, optional)
+        Optional maximum date (%d/%m/%Y) to display. Defaults to None.
+    series_label (str, optional)
+        Optional Series label for legend. Defaults to "Series".
+    site_label (str, optional)
+        Optional Site y-axis title. Defaults to None.
+    label_freq (int, optional)
+        Optional frequency to display year label. Defaults to 10 (years).
+    subtitle (bool, optional)
+        Whether to show subtitle. Defaults to True.
+    width (int, optional)
+        Optional chart width parameter. Defaults to function of total years.
+    height (int, optional)
+        Optional chart height parameter. Represents height per facet/site. Defaults to 35.
+    stroke_width (float, optional)
+        Optional width of bar outline. Defaults to 0.5.
+    stroke_colour (str, optional)
+        Optional colour of bar outline. Defaults to 'black'.
+    font_size (int, optional)
+        Optional font size to apply to all text. Defaults to 12.
+    grid_colour (str, optional)
+        Optional colour of gridlines. Defaults to 'lightgrey'.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
     """
 
     # Check that inputs are the same length
@@ -414,19 +456,27 @@ def exceedance_plot(df: pd.DataFrame, yLabel='Flow (ML/d)',
     return exc_plot
 
 
-def daily_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',legendTitle='Data set',plotWidth=500,plotHeight=300):
+def daily_plot(df: pd.DataFrame, yLabel='Flow (ML/d)', legendTitle='Data set',
+               plotWidth=500, plotHeight=300) -> alt.Chart:
     """
     Daily plot of timeseries data.
 
-    Args:
-        df (DataFrame): Dataframe of daily timeseries data.
-        yLabel (str, optional): Y axis title. Defaults to 'Flow (ML/d)'.
-        legendTitle (str, optional): Legend title. Defaults to 'Data set'.
-        plotWidth (int, optional): Chart width. Defaults to 500.
-        plotHeight (int, optional): Chart height. Defaults to 300.
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe of daily timeseries data.
+    yLabel : str, optional
+        Y axis title. Defaults to 'Flow (ML/d)'.
+    legendTitle : str, optional
+        Legend title. Defaults to 'Data set'.
+    plotWidth : int, optional
+        Chart width. Defaults to 500.
+    plotHeight : int, optional
+        Chart height. Defaults to 300.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
     """
 
     alt.data_transformers.disable_max_rows()
@@ -445,23 +495,31 @@ def daily_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',legendTitle='Data set',plotW
     return dailyPlot
 
 
-def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wyStartMonth=7,plotWidth=500,plotHeight=300):
+def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wyStartMonth=7,plotWidth=500,plotHeight=300) -> alt.Chart:
     """
     Annual plot of timeseries data.
 
-    Args:
-        df (DataFrame): Dataframe of daily timeseries data.
-        yLabel (str, optional): Y axis title. Defaults to 'Flow (ML/a)'.
-        legendTitle (str, optional): Legend title. Defaults to 'Data set'.
-        wyStartMonth (int, optional): Water year start month. Defaults to 7.
-        plotWidth (int, optional): Chart width. Defaults to 500.
-        plotHeight (int, optional): Chart height. Defaults to 300.
+    Parameters
+    ----------
+    df : DataFrame 
+        Dataframe of daily timeseries data.
+    yLabel : str, optional 
+        Y axis title. Defaults to 'Flow (ML/a)'.
+    legendTitle : str, optional 
+        Legend title. Defaults to 'Data set'.
+    wyStartMonth : int, optional 
+        Water year start month. Defaults to 7.
+    plotWidth : int, optional 
+        Chart width. Defaults to 500.
+    plotHeight : int, optional 
+        Chart height. Defaults to 300.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
+
     """
-
-    # "annual_plot()" is not currently compatable with string dates, so copy dataframe and convert to datetime if necessary
+    # "annual_plot()" is not currently compatible with string dates, so copy dataframe and convert to datetime if necessary
     if (not is_datetime(df.index)):
         df = utils.convert_index_to_datetime(df.copy(deep=True))
 
@@ -499,19 +557,27 @@ def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wySt
     
     return annualPlot
 
-def residual_mass_curve(df:pd.DataFrame,yLabel='Flow residual mass (ML)',legendTitle='Data set',plotWidth=500,plotHeight=300):
+def residual_mass_curve(df:pd.DataFrame,yLabel='Flow residual mass (ML)',legendTitle='Data set',
+                        plotWidth=500,plotHeight=300) -> alt.Chart:
     """
     Residual mass curve of timeseries data.
 
-    Args:
-        df (DataFrame): Dataframe of daily timeseries data.
-        yLabel (str, optional): Y axis title. Defaults to 'Flow residual mass (ML)'.
-        legendTitle (str, optional): Legend title. Defaults to 'Data set'.
-        plotWidth (int, optional): Chart width. Defaults to 500.
-        plotHeight (int, optional): Chart height. Defaults to 300.
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe of daily timeseries data.
+    yLabel : str, optional
+        Y axis title. Defaults to 'Flow residual mass : ML)'.
+    legendTitle : str, optional
+        Legend title. Defaults to 'Data set'.
+    plotWidth : int, optional
+        Chart width. Defaults to 500.
+    plotHeight : int, optional
+        Chart height. Defaults to 300.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
     """
 
     alt.data_transformers.disable_max_rows()
@@ -546,26 +612,45 @@ def residual_mass_curve(df:pd.DataFrame,yLabel='Flow residual mass (ML)',legendT
     
     return residMassPlot
 
-def storage_plot(df:pd.DataFrame, triggers=None, data_labels=None, colours=None, ylabel="Volume (ML)", xlabel="Date", legend="Key", caption=None, lineWidth=2, plotWidth=800, plotHeight=300, plot2Height=None, show_tooltip=True):
-    """Daily storage plot of timeseries data.
+def storage_plot(df:pd.DataFrame, triggers=None, data_labels=None, colours=None, 
+                 ylabel="Volume (ML)", xlabel="Date", legend="Key", caption=None, 
+                 lineWidth=2, plotWidth=800, plotHeight=300, plot2Height=None, 
+                 show_tooltip=True) -> alt.Chart:
+    """
+    Daily storage plot of timeseries data.
 
-    Args:
-        df (pd.DataFrame): pd.Dataframe of daily timeseries to plot.
-        triggers (dict, optional): Optional horizontal lines to mark on chart e.g. DSV, FSV. Dictionary where {key: value} = {'Trigger name':  Y value}. Defaults to None.
-        data_label (str, optional): Optional string to assign to supplied timeseries. Defaults to df column names.
-        colours (list, optional): Optional list of colours to apply to data. Defaults to Altair default.
-        ylabel (str, optional): Optional label for y axis. Defaults to "Volume (ML)".
-        xlabel (str, optional): Optional label for x axis. Defaults to "Date".
-        legend (str, optional): Optional label for legend. Defaults to "Key".
-        caption (str, optional): Optional caption for figure. Defaults to None.
-        lineWidth (float, optional): Optional width of figure lines. Defaults to 2.
-        plotWidth (float, optional): Optional overall width of figure. Defaults to 800.
-        plotHeight (float, optional): Optional overall height of main figure. Defaults to 300.
-        plot2Height (float, optional): Optional height of secondary figure. Defaults to 10% of main figure height.
-        show_tooltip (bool, optional): Optionally show tooltip. Defaults to True.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        pd.Dataframe of daily timeseries to plot.
+    triggers : dict, optional
+        Optional horizontal lines to mark on chart e.g. DSV, FSV. Dictionary where {key: value} = {'Trigger name':  Y value}. Defaults to None.
+    data_label : str, optional
+        Optional string to assign to supplied timeseries. Defaults to df column names.
+    colours : list, optional
+        Optional list of colours to apply to data. Defaults to Altair default.
+    ylabel : str, optional
+        Optional label for y axis. Defaults to "Volume (ML)".
+    xlabel : str, optional
+        Optional label for x axis. Defaults to "Date".
+    legend : str, optional
+        Optional label for legend. Defaults to "Key".
+    caption : str, optional
+        Optional caption for figure. Defaults to None.
+    lineWidth : float, optional
+        Optional width of figure lines. Defaults to 2.
+    plotWidth : float, optional
+        Optional overall width of figure. Defaults to 800.
+    plotHeight : float, optional
+        Optional overall height of main figure. Defaults to 300.
+    plot2Height : float, optional
+        Optional height of secondary figure. Defaults to 10% of main figure height.
+    show_tooltip : bool, optional
+        Optionally show tooltip. Defaults to True.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
     """
     #In case of pd.Series
     df=pd.DataFrame(df)
@@ -596,13 +681,15 @@ def storage_plot(df:pd.DataFrame, triggers=None, data_labels=None, colours=None,
         caption=''
 
     if show_tooltip:
-        tooltip = ['Date:T',alt.Tooltip('column:N',title=legend),alt.Tooltip('value:Q',title=ylabel, format=',.1f')]
+        tooltip = ['Date:T',alt.Tooltip('column:N',title=legend),
+                   alt.Tooltip('value:Q',title=ylabel, format=',.1f')]
     else:
         tooltip = []
 
     #Default altair colours
     if colours is None:
-        colours = ["#4c78a8", "#f58518", "#e45756", "#72b7b2", "#54a24b", "#eeca3b", "#b279a2", "#ff9da6", "#9d755d", "#bab0ac"]
+        colours = ["#4c78a8", "#f58518", "#e45756", "#72b7b2", "#54a24b", 
+                   "#eeca3b", "#b279a2", "#ff9da6", "#9d755d", "#bab0ac"]
 
     interval = alt.selection_interval(encodings=['x'])   
 
@@ -653,7 +740,7 @@ def storage_plot(df:pd.DataFrame, triggers=None, data_labels=None, colours=None,
     #If triggers provided, rules figure
     if trigger_flag:
         df_trig=pd.DataFrame.from_dict({"value": triggers}).reset_index()
-        
+
         rule=alt.Chart(df_trig).mark_rule(
             strokeWidth=lineWidth,
             opacity=0.9
@@ -668,28 +755,47 @@ def storage_plot(df:pd.DataFrame, triggers=None, data_labels=None, colours=None,
     else:
         combined=chart
 
-    return (combined.interactive(bind_x=False) & view)
+    return combined.interactive(bind_x=False) & view
 
-def annual_demand_supply_plot(demand: pd.DataFrame, supply: pd.DataFrame, wy_month=7, colours=None, plotWidth=1400, plotHeight=500, show_tooltip=True, label_freq=5, caption=None, legend="Key", xlabel="WY", ylabel="ML/a", sup_opacity = 1):
+def annual_demand_supply_plot(demand: pd.DataFrame, supply: pd.DataFrame, 
+                              wy_month=7, colours=None, plotWidth=1400, plotHeight=500, 
+                              show_tooltip=True, label_freq=5, caption=None, legend="Key", 
+                              xlabel="WY", ylabel="ML/a", sup_opacity = 1) -> alt.Chart:
     """Annual plot of demand and supply from daily timeseries input.
 
-    Args:
-        demand (pd.DataFrame): pd.Dataframe of daily demand timeseries to plot.
-        supply (pd.DataFrame): pd.Dataframe of daily supply timeseries to plot.
-        wy_month (int, optional): Water year start month. Defaults to 7.
-        colours (list, optional): Optional list of colours to apply to data. Defaults to selection from "muted rainbow" colour scheme.
-        plotWidth (float, optional): Optional overall width of figure. Defaults to 1400.
-        plotHeight (float, optional): Optional overall height of figure. Defaults to 500.
-        show_tooltip (bool, optional): Optionally show tooltip. Defaults to True.
-        label_freq (int, optional): Optional frequency to display year label. Defaults to 5 (years).
-        caption (str, optional): Optional figure caption. Defaults to None.
-        legend (str, optional): Optional legend label. Defaults to "Key".
-        xlabel (str, optional): Optional x axis label. Defaults to "WY".
-        ylabel (str, optional): Optional y axis label. Defaults to "ML/a".
-        sup_opacity (float, optional): Optional opacity of supply series. Defaults to 1.
+    Parameters
+    ----------
+    demand : pd.DataFrame
+        pd.Dataframe of daily demand timeseries to plot.
+    supply : pd.DataFrame
+        pd.Dataframe of daily supply timeseries to plot.
+    wy_month : int, optional
+        Water year start month. Defaults to 7.
+    colours : list, optional
+        Optional list of colours to apply to data. Defaults to selection from
+        "muted rainbow" colour scheme.
+    plotWidth : float, optional
+        Optional overall width of figure. Defaults to 1400.
+    plotHeight : float, optional
+        Optional overall height of figure. Defaults to 500.
+    show_tooltip : bool, optional
+        Optionally show tooltip. Defaults to True.
+    label_freq : int, optional
+        Optional frequency to display year label. Defaults to 5 (years).
+    caption : str, optional
+        Optional figure caption. Defaults to None.
+    legend : str, optional
+        Optional legend label. Defaults to "Key".
+    xlabel : str, optional
+        Optional x axis label. Defaults to "WY".
+    ylabel : str, optional
+        Optional y axis label. Defaults to "ML/a".
+    sup_opacity : float, optional
+        Optional opacity of supply series. Defaults to 1.
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+    Returns
+    -------
+    `altair.Chart`
     """        
 
     if colours is None:
@@ -741,4 +847,4 @@ def annual_demand_supply_plot(demand: pd.DataFrame, supply: pd.DataFrame, wy_mon
         height=plotHeight,
     )
 
-    return (cht_dem+cht_sup)
+    return cht_dem+cht_sup

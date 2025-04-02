@@ -1,8 +1,9 @@
 """
 Statistical analyses of `DataframeEnsemble`
 """
-import pandas as pd
 import altair as alt
+import pandas as pd
+
 from bulum import utils
 
 
@@ -15,20 +16,20 @@ def ensemble_probability_plot(input: utils.DataframeEnsemble | list,
 
     Parameters
     ----------
-    input : DataframeEnsemble | list
+    input : DataframeEnsemble | list of DataframeEnsemble
         A (likely) filtered DataframeEnsemble (or list of DataframeEnsembles).
     variable : str
         Timeseries column of interest from the ensembled DataFrames e.g.
-        'Storage Volume'. parameters (list): List of parameters to test
-        (relevant to function type). 
+        'Storage Volume'. 
+    parameters : list
+        List of parameters to test (relevant to function type). 
     stat_function : function 
-        Function from `bulum.stats.ensemble_stats`, namely from the
-        following list,
+        Function from the `bulum.stats.ensemble_stats` module, namely from the
+        following list:
         - `cumulative_risk`
         - `incremental_risk`
         - `annual_incremental_risk`
         - `percentile_envelope`
-
     labels : list of str, optional
         List of label strings.
     width : int, optional
@@ -88,20 +89,14 @@ def ensemble_probability_plot(input: utils.DataframeEnsemble | list,
         scale_domain="unaggregated"
         y_units="Units"
 
-    chart = alt.Chart(input_concat.reset_index()).mark_line(
-    ).transform_fold(
-        label,
-        as_=['column','value']
-    ).transform_calculate(
-        value='round(datum.value * 10)/10'
-    ).encode(
-            x=alt.X('Date:T'),
-            y=alt.Y('value:Q', scale=alt.Scale(domain=scale_domain), title=y_units),
-            color=alt.Color('column:N', legend=alt.Legend(title="Parameter"), sort=None),
-            strokeDash=alt.StrokeDash('Series:N', sort=None)
-    ).properties(
-        width=width,
-        height=height
-    )
+    chart = (alt.Chart(input_concat.reset_index())
+             .mark_line()
+             .transform_fold(label, as_=['column', 'value'])
+             .transform_calculate(value='round(datum.value * 10)/10')
+             .encode(x=alt.X('Date:T'), 
+                     y=alt.Y('value:Q', scale=alt.Scale(domain=scale_domain), title=y_units),
+                     color=alt.Color('column:N', legend=alt.Legend(title="Parameter"), sort=None),
+                     strokeDash=alt.StrokeDash('Series:N', sort=None))
+             .properties(width=width, height=height))
 
     return chart
