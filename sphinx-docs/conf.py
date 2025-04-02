@@ -20,7 +20,8 @@ extensions = [
     "sphinx.ext.githubpages",
     # "sphinx.ext.apidoc",
     'sphinx.ext.napoleon',
-    "myst_parser"
+    "myst_parser",
+    "sphinx.ext.intersphinx",
 ]
 
 templates_path = ['_templates']
@@ -48,6 +49,11 @@ apidoc_modules = [
         },
     },
 ]
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+}
 
 
 # -- Options for HTML output -------------------------------------------------
