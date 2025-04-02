@@ -340,22 +340,41 @@ def pyblo(dflist: list, sites: list, series: list, wy_month=1, site_order=None, 
     
     return chart
 
-def exceedence_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',xLog=False,yLog=False,legendTitle='Data set',plotWidth=500,plotHeight=300,plottingPosition="cunnane"):
+def exceedence_plot(*args, **kwargs):
+    """ 
+    .. deprecated:: v0.2.10 misspelt historically, see ``exceedance_plot()``.
     """
-    Exceedance plot of timeseries data.
+    return exceedance_plot(*args, **kwargs)
 
-    Args:
-        df (pd.DataFrame): Dataframe of daily timeseries data.
-        yLabel (str, optional): Y axis title. Defaults to 'Flow (ML/d)'.
-        xLog (bool, optional): X axis log flag. Defaults to False.
-        yLog (bool, optional): Y axis log flag. Defaults to False.
-        legendTitle (str, optional): Legend title. Defaults to 'Data set'.
-        plotWidth (int, optional): Chart width. Defaults to 500.
-        plotHeight (int, optional): Chart height. Defaults to 300.
-        plottingPosition (str, optional): Defaults to "cunnane". Other supported values: "weibull", "gringorten". See https://glossary.ametsoc.org/wiki/Plotting_position
 
-    Returns:
-        altair.Chart: Returns an Altair chart object
+def exceedance_plot(df: pd.DataFrame, yLabel='Flow (ML/d)',
+                    xLog=False, yLog=False, legendTitle='Data set',
+                    plotWidth=500, plotHeight=300, plottingPosition="cunnane") -> alt.Chart:
+    """Exceedance plot of timeseries data.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe of daily timeseries data.
+    yLabel : str, optional
+        Y axis title. Defaults to 'Flow (ML/d)'.
+    xLog : bool, optional
+        X axis log flag. Defaults to False.
+    yLog : bool, optional
+        Y axis log flag. Defaults to False.
+    legendTitle : str, optional
+        Legend title. Defaults to 'Data set'.
+    plotWidth : int, optional
+        Chart width. Defaults to 500.
+    plotHeight : int, optional
+        Chart height. Defaults to 300.
+    plottingPosition : str, optional
+        Defaults to "cunnane". Other supported values: "weibull", "gringorten".
+        See https://glossary.ametsoc.org/wiki/Plotting_position
+
+    Returns
+    -------
+    `altair.Chart`
     """
     alt.data_transformers.disable_max_rows()
 
@@ -364,12 +383,11 @@ def exceedence_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',xLog=False,yLog=False,l
 
     df_exceedence = df.dropna()
     nn = len(df_exceedence)
-    df_exceedence["Exceedence"] = trans.get_exceedence_plotting_position(nn,plotting_position=plottingPosition)
-    df_exceedence.set_index("Exceedence", inplace=True)
+    df_exceedence["Exceedance"] = trans.get_exceedence_plotting_position(nn,plotting_position=plottingPosition)
+    df_exceedence.set_index("Exceedance", inplace=True)
 
     for i in range(len(df_exceedence.columns)):
         col = df_exceedence.columns[i]
-        lab = col
         df_exceedence[col] = df_exceedence[col].sort_values(ascending=False).values
     
     if xLog:
@@ -382,18 +400,18 @@ def exceedence_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',xLog=False,yLog=False,l
     else:
         yType="linear"
 
-    df_exc_melted = df_exceedence.reset_index().melt('Exceedence')
+    df_exc_melted = df_exceedence.reset_index().melt('Exceedance')
     df_exc_melted.rename(columns={'value':yLabel,'variable':legendTitle}, inplace=True)
-    excPlot=alt.Chart(df_exc_melted).mark_line().encode(
-        alt.X('Exceedence:Q',
+    exc_plot=alt.Chart(df_exc_melted).mark_line().encode(
+        alt.X('Exceedance:Q',
           axis=alt.Axis(title='Exceedance probability (%)')).scale(type=xType),
         alt.Y(yLabel + ':Q',
           axis=alt.Axis(title=yLabel)).scale(type=yType),
         color=legendTitle,
-        tooltip=[alt.Tooltip('Exceedence',format=',.1f',title='Exceedence (%)'),alt.Tooltip(yLabel,format=',.0f')]
+        tooltip=[alt.Tooltip('Exceedance',format=',.1f',title='Exceedance (%)'),alt.Tooltip(yLabel,format=',.0f')]
     ).properties(width=plotWidth,height=plotHeight).interactive(bind_y=False)
     
-    return excPlot
+    return exc_plot
 
 
 def daily_plot(df:pd.DataFrame,yLabel='Flow (ML/d)',legendTitle='Data set',plotWidth=500,plotHeight=300):

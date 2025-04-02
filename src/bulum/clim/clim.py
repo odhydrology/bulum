@@ -75,7 +75,7 @@ def apply_transformation_curves(tranformation_curves: dict, series: pd.Series) -
         # And get their ranks and plotting positions
         rank_starting_at_one = values.rank(ascending=True) # This function is nice because equal values are assigned the same (averaged) rank.
         n = len(values)
-        p = [(r - 0.4)/(n + 0.2) for r in rank_starting_at_one] # plotting position
+        p = [(r - 0.4)/(n + 0.2) for r in rank_starting_at_one] # Cunnane plotting position
         f = np.interp(p, xp, fp) # interpolated scaling factors
         # Calcualte new values and update the answer
         new_values = pd.Series([values.iloc[i] * f[i] for i in range(n)], index=season_dates)

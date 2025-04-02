@@ -55,7 +55,7 @@ How do I make a new API token? Go to your PyPi account settings, and click on "A
 
 ## Unit Tests
 
-WARNING: Run unit tests from an anaconda environment with compatable dependencies!
+WARNING: Run unit tests from an anaconda environment with compatible dependencies!
 
 Install the nose2 test-runner framework. 
 
