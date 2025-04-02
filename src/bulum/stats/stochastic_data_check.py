@@ -141,9 +141,14 @@ class StochasticDataComparison:
     def __CalcDistributions(self):
         """Internal function to calculate timeseries distribution.
 
-        Returns:
-            pd.DataFrame: Multi-index df with distribution of each timeseries grouped by - Period (annual vs. months), Timeseries, Dataset 
-        """        
+        Returns
+        -------
+        pd.DataFrame
+            Multi-index df with distribution of each timeseries grouped by 
+            - Period (annual vs. months), 
+            - Timeseries, 
+            - Dataset 
+        """
         distr={}
 
         months=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
@@ -406,4 +411,4 @@ class StochasticDataComparison:
                     color=alt.Color('key:N', title='Dataset')
                 ).properties(title=f'{y} {i}')
                             
-        return charts 
+        return charts

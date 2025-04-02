@@ -1,25 +1,49 @@
-import pandas as pd
-import numpy as np
 import calendar
+from typing import Literal, Union
+
+import numpy as np
+import pandas as pd
+
 from bulum import utils
-from datetime import datetime, timedelta
-from typing import Union
-from typing import Literal
+
 
 class Reliability:
+    """ 
+    Reliability of water supply statistics generator.
+    """
 
-    def __init__(self, demand: Union[pd.Series,list,float,int], supply: pd.Series, demand_timescale: Literal["daily","monthly","yearly"]="daily", demand_type: Literal["total","daily_constant"]="total", ignore_leap_years=False, quiet=False) -> None:
-        """Initialise Reliability class. Functions available are Reliability.DemandTS, Reliability.MonthlyReliability and Reliability.AnnualReliability.
+    def __init__(self, demand: Union[pd.Series, list, float, int], supply: pd.Series,
+                 demand_timescale: Literal["daily", "monthly", "yearly"] = "daily",
+                 demand_type: Literal["total", "daily_constant"] = "total",
+                 ignore_leap_years=False, quiet=False) -> None:
+        """Initialise Reliability class. Functions available are
+        - `Reliability.DemandTS`, 
+        - `Reliability.MonthlyReliability`, and
+        - `Reliability.AnnualReliability`.
         
-        Args:
-            demand (Union[pd.Series,list,float,int]): Demand timeseries with date string as index. Alternatively, a list of monthly values or single demand which will be disaggregated according to other input parameters.
-            supply (pd.Series): Daily supply timeseries with date as index.
-            demand_timescale (Literal["daily","monthly","yearly"], optional): If a float or int demand is provided, which timescale does it apply to. Defaults to "daily".
-            demand_type (Literal["total","daily_constant"], optional): If a non-Series demand is provided, does the monthly list or float/int refer to a total demand over 'demand_timescale', or a daily constant value to be applied. Defaults to "total".
-            ignore_leap_years (bool, optional): Decide whether leap years should be ignored in demand disaggregation. When True, calculations will always be based on 28 days in Feb, and value for the 29th Feb will be equal to the 28th of Feb value. Defaults to False.
+        Parameters
+        ----------
+        demand : Union[pd.Series,list,float,int]
+            Demand timeseries with date string as index. Alternatively, a list
+            of monthly values or single demand which will be disaggregated
+            according to other input parameters.
+        supply : pd.Series
+            Daily supply timeseries with date as index.
+        demand_timescale : Literal["daily","monthly","yearly"], optional
+            If a float or int demand is provided, which timescale does it apply
+            to. Defaults to "daily".
+        demand_type : Literal["total","daily_constant"], optional
+            If a non-Series demand is provided, does the monthly list or
+            float/int refer to a total demand over 'demand_timescale', or a
+            daily constant value to be applied. Defaults to "total".
+        ignore_leap_years : bool, optional
+            Decide whether leap years should be ignored in demand
+            disaggregation. When True, calculations will always be based on 28
+            days in Feb, and value for the 29th Feb will be equal to the 28th of
+            Feb value. Defaults to False.
 
-        """        
-        
+        """
+
         def maybe_print(string):
             if not quiet:
                 print(string)
@@ -31,7 +55,7 @@ class Reliability:
             raise Exception("Supply must be a single column of a date-indexed dataframe (pd.Series).")
         
         if type(demand) == pd.Series:
-            maybe_print(f"Comparing provided demand timeseries with supply timeseries.")
+            maybe_print("Comparing provided demand timeseries with supply timeseries.")
             state = "ts"
 
         if type(demand) != pd.Series:
@@ -44,36 +68,35 @@ class Reliability:
             if ignore_leap_years not in [True, False]:
                     raise Exception(f"ignore_leap_years must be one of {True} or {False}.")
 
-        lookup_leap = {True: 28,
-                False: 29}
+        lookup_leap = {True: 28, False: 29}
 
         if type(demand) is list:
             if len(demand)<12:
                 raise Exception("Monthly demand list must have a length of 12.")
             
-            maybe_print(f"Comparing list of monthly demands with supply timeseries. demand_timescale parameter is unused.")
+            maybe_print("Comparing list of monthly demands with supply timeseries. demand_timescale parameter is unused.")
 
             if demand_type == "daily_constant":
-                maybe_print(f"Each monthly value in demand list will be applied as the daily demand for the respective month.")
-                maybe_print(f"ignore_leap_years parameter is unused.")
+                maybe_print("Each monthly value in demand list will be applied as the daily demand for the respective month.")
+                maybe_print("ignore_leap_years parameter is unused.")
                 state = "monthly_constant_list"
             else:
-                maybe_print(f"Each monthly total in demand list will be disaggregated to a daily demand for the respective month.")
+                maybe_print("Each monthly total in demand list will be disaggregated to a daily demand for the respective month.")
                 maybe_print(f"Leap years will be disaggregated assuming {lookup_leap[ignore_leap_years]} days in February.")
                 state = "monthly_total_list"
 
         if type(demand) in [float, int]:
             if not quiet:
-                maybe_print(f"Comparing provided demand with supply timeseries.")
+                maybe_print("Comparing provided demand with supply timeseries.")
             if (demand_timescale == "daily") or (demand_type == "daily_constant"):
                 maybe_print(f"Assumed that daily demand is a constant {demand} ML/d.")
                 if (demand_timescale == "daily") and (demand_type == "daily_constant"):
                     maybe_print(f"Only one of demand_timescale = {demand_timescale} and demand_type = {demand_type} were required.")
-                    maybe_print(f"ignore_leap_years parameter is unused.")
+                    maybe_print("ignore_leap_years parameter is unused.")
                 if (demand_timescale == "daily") and (demand_type != "daily_constant"):
-                    maybe_print(f"demand_type and ignore_leap_years parameters are unused.")
+                    maybe_print("demand_type and ignore_leap_years parameters are unused.")
                 if (demand_type == "daily_constant") and (demand_timescale != "daily"):
-                    maybe_print(f"demand_timescale and ignore_leap_years parameters are unused.")
+                    maybe_print("demand_timescale and ignore_leap_years parameters are unused.")
                 state="daily_constant"
             else:
                 maybe_print(f"Assumed that {demand} ML is the total demand over the {demand_timescale} timescale. {demand} ML {demand_timescale} will be disaggregated to ML/d.")
@@ -91,12 +114,13 @@ class Reliability:
         self.state=state
         
     def ReliabilityTS(self, wy_month):
-        """Returns demand as a timeseries for input to reliability statistics. Matches date range of supply timeseries input.
+        """Returns demand as a timeseries for input to reliability statistics.
+        Matches date range of supply timeseries input.
 
-        Args:
-
-        Returns:
-            pd.Series: Demand timeseries for input to reliability stats
+        Returns
+        -------
+        pd.Series
+            Demand timeseries for input to reliability stats
         """
         # If provided demand is a timeseries, just return timeseries.
         if self.state=="ts":
@@ -154,14 +178,21 @@ class Reliability:
     def MonthlyReliability(self, tol=1, allow_part_months=False, wy_month=7):
         """Returns the monthly reliability statistic for a daily timeseries of demand and supply.
 
-        Args:
-            tol (float, optional): Percentage of demand treated as full demand. Defaults to 1 (100%).
-            allow_part_months (bool, optional): Allow part months or only complete months. Defaults to False.
-            wy_month (int, optional): Water year start month. Defaults to 7.
+        Parameters
+        ----------
+        tol : float, optional
+            Percentage of demand treated as full demand. Defaults to 1 (100%).
+        allow_part_months : bool, optional
+            Allow part months or only complete months. Defaults to False.
+        wy_month : int, optional
+            Water year start month. Defaults to 7.
 
-        Returns:
-            float: Monthly reliability (%)
-        """    
+        Returns
+        -------
+        float
+            Monthly reliability (%)
+
+        """
         # Pass input to reliability_ts first and enforce common date range.
         demand_ts=self.ReliabilityTS(wy_month)
 
@@ -195,13 +226,19 @@ class Reliability:
     def AnnualReliability(self, tol=1, wy_month=7, allow_part_years=False):
         """Returns the annual reliability statistic for a daily timeseries of demand and supply.
 
-        Args:       
-            tol (float, optional): Percentage of demand treated as full demand. Defaults to 1 (100%).
-            wy_month (int, optional): Water year start month. Defaults to 7.
-            allow_part_years (bool, optional): Allow part water years or only complete water years. Defaults to False.
+        Parameters
+        ----------
+        tol : float, optional
+            Percentage of demand treated as full demand. Defaults to 1 (100%).
+        wy_month : int, optional
+            Water year start month. Defaults to 7.
+        allow_part_years : bool, optional
+            Allow part water years or only complete water years. Defaults to False.
 
-        Returns:
-            float: Annual reliability (%)
+        Returns
+        -------
+        float
+            Annual reliability (%)
         """
         
         # Pass input to reliability_ts first and enforce common date range.
