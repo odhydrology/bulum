@@ -16,8 +16,6 @@ from typing import Any, Iterable, Optional
 
 import pandas as pd
 
-# import bulum.io as oio
-
 
 class RegexArg(enum.Enum):
     """Specifies the type of argument supplied to filtering functions in TSDF and """
@@ -33,57 +31,38 @@ class TimeseriesDataframe(pd.DataFrame):
     - source (str)
     - description (str)
     - a string of tags (str)
-
-    ---API---
-    TODO 
-
-    init()
-
-    copy_from_dataframe(df)
-
-    ...
-
-    has_tag():
-
     """
 
     TAG_DELIMITER = ','
+    """Used to consistently separate tags. 
+    Kept as a variable for semantic purposes."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, name="", source="", description="") -> None:
         """
-        A TimeseriesDataframe is thinly extended pd.Dataframe. In addition to the
-        normal dataframe stuff, it also has:
-            a name (str)
-            a source (str)
-            a description (str)
-            a string of tags (str)
-            some useful methods.
+        Parameters
+        ----------
+        name : str 
+        source : str
+        description : str
 
-        Args:
-            None
+        See also
+        --------
+        `TimeseriesDataframe.add_tag()` to add tags.
         """
         super().__init__()
-        self.name = ""
-        self.source = ""
-        self.description = ""
+        self.name = name
+        self.source = source
+        self.description = description
         self.tags = ""
 
     def copy_from_dataframe(self, df):
         super().__init__(df)
 
-#    def copy_from_file(self, filename):
-#        super().__init__(oio.read(filename))
-#        self.source = filename
-
     @classmethod
-    def from_dataframe(cls, df):
-        tsdf = cls()
+    def from_dataframe(cls, df, **kwargs):
+        tsdf = cls(**kwargs)
         tsdf.copy_from_dataframe(df)
         return tsdf
-
-#    @classmethod
-#    def from_file(cls, filename):
-#        return cls.from_dataframe(oio.read(filename))
 
     def print_summary(self):
         print(f"Name: {self.name}")
@@ -96,20 +75,17 @@ class TimeseriesDataframe(pd.DataFrame):
                 exact=False) -> bool:
         """Check if the provided tag matches any of the dataframe's tags.
 
-        Args:
-            pattern (Optional[RegexArg (enum)], keyword-only): None: Uses python
-                `in` operation to check for membership; expects a string to be
-                supplied to pattern.
-                PATTERN: non-compiled regex pattern OBJECT: compiled regex
-                pattern
-            exact (bool): Whether we require an exact match of the tag to return
-            True.
-                This argument is superceded by a non-None `regex` argument, and
-                may be accomplished (depending on the particulars) via regex by
-                `\\bregex\\b`.
-
-        Returns:
-            bool Has the tag been found?
+        Parameters
+        ----------
+        pattern : RegexArg, optional, keyword-only)
+            - None: Uses python `in` operation to check for membership; expects
+              a string to be supplied to pattern.
+            - `RegexArg`: Uses the regex engine to search for the tag.
+        exact : bool
+            Whether we require an exact match of the tag.
+            This argument is superceded by a non-None `regex` argument, and
+            may be accomplished (depending on the particulars) via regex by
+            ``\\b<regex>\\b``.
 
         """
         match regex:
@@ -137,6 +113,8 @@ class TimeseriesDataframe(pd.DataFrame):
         add multiple tags separated by the designated tag delimiter (by default,
         a comma ,).
 
+        Examples
+        --------
         The `check_membership` flag will ensure that `tag` does not match with
         existing tags, but will not (at present) check the other way around. For
         example, the following will not raise an error: 
@@ -242,20 +220,22 @@ class DataframeEnsemble:
                     f" but the ensemble members have shape {first_shape}!"
                 )
 
-    def filter_tag(self, tag, *, exclude: bool = False, **kwargs):
+    def filter_tag(self, tag: str, *, exclude: bool = False, **kwargs):
         """Return a new ensemble containing dataframes filtered by tag.
 
         By default, it will include all dataframes whose tags partially match
         the provided tag. 
 
-        This function delegates to TSDF.has_tag(), refer to that function for
+        This function delegates to `TSDF.has_tag()`, refer to that function for
         keyword arguments.
 
-        Args:
-            tag: The tag to match. String, regex pattern, or compiled regex
-                pattern. (Regex requires regex argument to be set)
-            exclude: If True, it will filter *out* all dataframes which match
-                the tag.
+        Parameters
+        ----------
+        tag
+            The tag to match. String, regex pattern, or compiled regex pattern.
+            (Regex requires regex argument to be set, c.f. `TSDF.has_tag()`)
+        exclude : bool
+            If True, it will *filter out* all dataframes which match the tag.
 
         """
         subensemble = DataframeEnsemble()
@@ -265,7 +245,7 @@ class DataframeEnsemble:
                 subensemble.add_dataframe(tsdf, key)
         return subensemble
 
-    def add_tag(self, tag):
-        """Add a tag to all dataframes."""
+    def add_tag(self, tag: str):
+        """Add a tag to all member dataframes."""
         for dataframe in self.ensemble.values():
             dataframe.add_tag(tag)
