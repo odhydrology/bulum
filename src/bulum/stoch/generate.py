@@ -1,7 +1,7 @@
 import calendar
 
-def from_pattern(dates, daily_pattern=[1], monthly_pattern=[], annual_pattern=[]):
-    """Generates a list of daily values from either a daily, montly, or annual pattern.
+def from_pattern(dates, daily_pattern=None, monthly_pattern=None, annual_pattern=None):
+    """Generates a list of daily values from either a daily, monthly, or annual pattern.
     The behaviour depends on what type of pattern is supplied. 
     Annual pattern => annual totals are disaggregated to daily by dividing by 365 or 366 as appropriate.
     Monthly pattern => 
@@ -28,6 +28,15 @@ def from_pattern(dates, daily_pattern=[1], monthly_pattern=[], annual_pattern=[]
     # Guard
     if len(dates) == 0:
         return []
+    
+    # Default args 
+    if daily_pattern is None:
+        daily_pattern = [1]
+    if monthly_pattern is None:
+        monthly_pattern = []
+    if annual_pattern is None :
+        annual_pattern = [] 
+
     # Generate data
     if len(annual_pattern) > 0:
         # Annual totals disaggregated to daily
@@ -56,3 +65,4 @@ def from_pattern(dates, daily_pattern=[1], monthly_pattern=[], annual_pattern=[]
             return [daily_pattern[d.timetuple().tm_yday - 1] for d in dates]
         else:
             raise Exception("Daily pattern must have 1, 7 or 366 values.")
+        
