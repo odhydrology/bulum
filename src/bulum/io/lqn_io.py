@@ -1,20 +1,31 @@
+"""
+IO functions for IQQM listquan. 
+"""
 import os
+
 import numpy as np
 import pandas as pd
+
 from bulum import utils
 
 
 def read_iqqm_lqn_output(filename, col_name=None, df=None) -> utils.TimeseriesDataframe:
     """
-    Reads the output of IQQM listquan. This is a space-separated is format with two columns (date, value) and data 
-    starting on line 7.
+    Reads the output of IQQM listquan. This is a space-separated is format with
+    two columns (date, value) and data starting on line 7.
 
-    Args:
-        filename (_type_): _description_
-        df (_type_, optional): _description_. Defaults to None.
+    Parameters
+    ----------
+    filename
+    col_name : optional
+        If supplied, sets the name for the resulting output column, otherwise
+        uses the filename.
+    df : DataFrame, optional
+        If supplied, joins the output to `df`.
 
-    Returns:
-        pd.DataFrame: _description_
+    Returns
+    -------
+    utils.TimeseriesDataframe
     """
     # If no df was supplied, instantiate a new one
     if df is None:

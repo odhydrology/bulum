@@ -31,6 +31,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # io.read() vs io.general_csv.read()
 add_module_names = False
 
+# -- Extension configuration -------------------------------------------------
+
 apidoc_modules = [
     {
         'path': '../src/bulum',
@@ -53,6 +55,7 @@ apidoc_modules = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None),
+    'pandas': ('https://pandas.pydata.org/docs/', None),
 }
 
 

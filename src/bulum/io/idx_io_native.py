@@ -1,6 +1,11 @@
+""" 
+IO functions for IDX format (binary) written in native Python.
+"""
 import os
-import pandas as pd
+
 import numpy as np
+import pandas as pd
+
 from bulum import utils
 
 
@@ -11,8 +16,10 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
     Fails if (not necessarily only if) the run was undertaken with only one
     source of data, i.e. the .idx file has only one entry.
 
-    Args:
-        b_data (np.ndarray): 2d array of binary data filled with float32 data. 
+    Parameters
+    ----------
+    b_data : np.ndarray
+        2d array of *binary data* filled with float32 data. 
     """
     b_data_slice: tuple[np.float32] = b_data[0]
     first_non_zero = b_data_slice[0] != 0.0
@@ -21,16 +28,21 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
 
 
 def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
-    """_summary_
+    """
+    Read IDX file.
 
-    Args:
-        filename (_type_): Name of the IDX file.
-        skip_header_bytes (bool | None): Whether to skip header bytes in the IDX
-          file (related to the compiler used for IQQM). If set to None, attempt
-          to detect the presence of header bytes automatically.
+    Parameters
+    ----------
+    filename
+        Name of the IDX file.
+    skip_header_bytes : bool, optional 
+        Whether to skip header bytes in the IDX file (related to the compiler
+        used for IQQM). If set to None, attempt to detect the presence of header
+        bytes automatically.
 
-    Returns:
-        utils.TimeseriesDataframe: _description_
+    Returns
+    -------
+    utils.TimeseriesDataframe
     """
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File does not exist: {filename}")
@@ -89,16 +101,22 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
 
     Assumes that data are homogeneous in units and type e.g. Precipitation & mm resp., or Flow & ML/d.
 
-    Args:
-        df (pd.Dataframe): DataFrame as per the output of read_idx(...).
-        filepath (str)   : Path to the IDX file to be written to including .IDX extension.
-        units (str, optional)      : Units for data in df. 
-        type (str, optional)       : Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.
+    Parameters
+    ----------
+    df : pd.Dataframe
+        DataFrame as per the output of read_idx(...).
+    filepath
+        Path to the IDX file to be written to including .IDX extension.
+    units : str, optional)      
+        Units for data in df. 
+    type : str, optional)
+        Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.
     """
     date_flag = 0
-    # TODO: When generalising to other frequencies, we may be able to simply read the data type off the time delta in df.index values
-    # As is, I've essentially copied what was done in the reader to flag that this should be implemented at the "same time".
-    # Verify valid date_flag
+    # TODO: When generalising to other frequencies, we may be able to simply
+    # read the data type off the time delta in df.index values As is, I've
+    # essentially copied what was done in the reader to flag that this should be
+    # implemented at the "same time". Verify valid date_flag
     match date_flag:
         case 0:
             pass  # valid
@@ -122,7 +140,8 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
         f.write(f"{first_date} {last_date} {date_flag}\n")
         # data
         # inline fn to ensure padded string is exactly l characters long
-        def ljust_or_truncate(s, l): return s.ljust(l)[0:l]
+        def ljust_or_truncate(s, l):
+            return s.ljust(l)[0:l]
         for idx, col_name in enumerate(col_names):
             source_entry = ljust_or_truncate(f"df_col{idx+1}", 12)
             name_entry = ljust_or_truncate(f"{col_name}", 40)

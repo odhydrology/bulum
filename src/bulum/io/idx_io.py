@@ -1,20 +1,20 @@
+""" 
+IO functions for IDX files. 
+
+See also :py:mod:`bulum.op.idx_io_native`.
+"""
 import os
-import pandas as pd
-import uuid
 import shutil
 import subprocess
+import uuid
+
 from bulum import utils
+
 from .csv_io import *
 
 
-
-def write_idx(df, filename, cleanup_tempfile=True):
-    """_summary_
-
-    Args:
-        df (_type_): _description_
-        filename (_type_): _description_
-    """
+def write_idx(df: pd.DataFrame, filename, cleanup_tempfile=True):
+    """Write IDX file from dataframe, requires csvidx.exe."""
     if shutil.which('csvidx') is None:
         raise Exception("This method relies on the external program 'csvidx.exe'. Please ensure it is in your path.")
     temp_filename = f"{uuid.uuid4().hex}.tempfile.csv"
@@ -26,17 +26,20 @@ def write_idx(df, filename, cleanup_tempfile=True):
         os.remove(temp_filename)
 
 
-
-def write_area_ts_csv(df, filename, units = "(mm.d^-1)"):
+def write_area_ts_csv(df, filename, units="(mm.d^-1)"):
     """_summary_
 
-    Args:
-        df (_type_): _description_
-        filename (_type_): _description_
-        units (str, optional): _description_. Defaults to "(mm.d^-1)".
+    Parameters
+    ----------
+    df : DataFrame
+    filename
+    units : str, optional
+        Defaults to "(mm.d^-1)".
 
-    Raises:
-        Exception: If shortenned field names are going to clash in output file.
+    Raises
+    ------
+    Exception
+        If shortened field names are going to clash in output file.
     """
     # ensures dataframe adheres to standards
     utils.assert_df_format_standards(df)
@@ -45,7 +48,7 @@ def write_area_ts_csv(df, filename, units = "(mm.d^-1)"):
     for c in df.columns:
         c12 = f"{c[:12]:<12}"
         if c12 in fields.keys():
-            raise Exception(f"Field names clash when shortenned to 12 chars: {c} and {fields[c12]}")
+            raise Exception(f"Field names clash when shortened to 12 chars: {c} and {fields[c12]}")
         fields[c12] = c
     # create the header text
     header = f"{units}"
@@ -60,5 +63,3 @@ def write_area_ts_csv(df, filename, units = "(mm.d^-1)"):
     with open(filename, "w+", newline='', encoding='utf-8') as file:        
         file.write(header)
         df.to_csv(file, header=False, na_rep=' NaN')
-        
-        

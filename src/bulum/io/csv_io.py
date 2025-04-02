@@ -1,20 +1,36 @@
+""" 
+Functions for reading CSVs, particularly time-series CSVs.
+"""
+
 import numpy as np
 import pandas as pd
 from bulum import utils
+import os
+
 na_values = ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan']
 
 
-def read_ts_csv(filename, date_format=None, df=None, colprefix=None, allow_nonnumeric=False, assert_date=True, **kwargs) -> utils.TimeseriesDataframe:
-    """Reads a daily timeseries csv into a DataFrame, and sets the index to string dates in the "%Y-%m-%d" format. 
-    The method assumes the first column are dates.
+def read_ts_csv(filename: str | os.PathLike, date_format=None,
+                df=None, colprefix=None, allow_nonnumeric=False,
+                assert_date=True, **kwargs) -> utils.TimeseriesDataframe:
+    """
+    Reads a daily timeseries csv into a DataFrame, and sets the index to string
+    dates in the "%Y-%m-%d" format. The method assumes the first column are
+    dates.
 
-    Args:
-        filename (_type_): _description_
-        date_format (str, optional): defaults to "%d/%m/%Y" as per Fors. Other common formats include "%Y-%m-%d", "%Y/%m/%d".
-        df (pd.DataFrame, optional): If provided, the reader will append columns to this dataframe. Defaults to None.
-        colprefix (str, optional): If provided, the reader will append this prefix to the start of each column name. Defaults to None.
-        allow_nonnumeric (bool, optional): If false, the method will assert that all columns are numerical. Defaults to False.
-        assert_date (bool, optional): If true, the method will assert that date index meets "%Y-%m-%d" format. Defaults to True.         
+    Parameters
+    ----------
+    filename : str | PathLike
+    date_format : str, optional
+        defaults to "%d/%m/%Y" as per Fors. Other common formats include "%Y-%m-%d", "%Y/%m/%d".
+    df : pd.DataFrame, optional
+        If provided, the reader will append columns to this dataframe. Defaults to None.
+    colprefix : str, optional
+        If provided, the reader will append this prefix to the start of each column name. Defaults to None.
+    allow_nonnumeric : bool, optional
+        If false, the method will assert that all columns are numerical. Defaults to False.
+    assert_date : bool, optional
+        If true, the method will assert that date index meets "%Y-%m-%d" format. Defaults to True.         
 
     Returns:
         pd.DataFrame: Dataframe containing the data from the csv file.
@@ -34,7 +50,7 @@ def read_ts_csv(filename, date_format=None, df=None, colprefix=None, allow_nonnu
     # Rename columns if required
     if colprefix is not None:
         for c in new_df.columns:
-            new_df.rename(columns = {c:f"{colprefix}{c}"}, inplace = True)
+            new_df.rename(columns={c: f"{colprefix}{c}"}, inplace=True)
     # Join to existing dataframe if required
     if df is None:
         df = new_df
@@ -49,11 +65,7 @@ def read_ts_csv(filename, date_format=None, df=None, colprefix=None, allow_nonnu
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_ts_csv(df: pd.DataFrame, filename: str):
-    """_summary_
-
-    Args:
-        df (pd.DataFrame): _description_
-        filename (str): _description_
-    """
-    df.to_csv(filename)
+def write_ts_csv(df: pd.DataFrame, filename: str,
+                 *args, **kwargs):
+    """Wrapper around ``pandas.DataFrame.to_csv()``."""
+    df.to_csv(filename, *args, **kwargs)
