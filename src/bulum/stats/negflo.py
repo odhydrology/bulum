@@ -55,7 +55,10 @@ class Negflo:
 
     @classmethod
     def from_config_file(cls, filepath, *, execute=False):
-        """Construct a Negflo analysis from a config file. Unfinished.
+        """Construct a Negflo analysis from a config file. 
+        
+        .. warning::
+            This function is incomplete.
 
         Args
         ----
@@ -277,7 +280,7 @@ class Negflo:
         ----
         Current implementation only distributes flows when the positive flow
         event succeeding a negative flow event occurs, or at the end of the
-        recorded period. 
+        recorded period.
         """
         # TODO Distribute over other positive flow event if it flattens the
         #      larger? Or if it would flatten one, then flatten both
@@ -333,9 +336,15 @@ class Negflo:
         """Redistribute negative flows across all positive flow events.
 
         The negative flows are set to zero and the excess positive flows have
-        been adjusted by a factor of
+        been adjusted by a factor of::
+        
             1 - abs(Total of the negative flows)/(Total of the positive flows)
 
+        If this is less than zero then...
+
+        .. error::
+            To be updated.
+            
         This will preserve the variability of the flows and maintain the mean
         annual flow at the downstream gauge. This method is most useful for
         preserving storage behaviour if the reach empties into a dam.
@@ -352,7 +361,10 @@ class Negflo:
         """Redistribute negative flows into future positive flow events, with
         carry-over.
 
-        ===== 
+        =====
+
+        .. error::
+            docs to be written 
 
         This method breaks the raw residual flows into periods. The period
         starts when the flow exceeds the specified flow limit. It accumulates
@@ -390,7 +402,11 @@ class Negflo:
         self.df_residual = self.df_residual.apply(self._sm_forward_series, carry_negative=False)
 
     def sm4(self) -> None:
-        """This method is similar to the method used to produce residual.sm2
+        """
+        .. error::
+            Docs to be written.
+        
+        This method is similar to the method used to produce residual.sm2
         except that the negatives are spread over the preceding positive flows
         that exceed the flow limit. The first method is particularly useful if
         the negative flows mainly occur on the rising limb of the hydrograph.
@@ -482,6 +498,9 @@ class Negflo:
 
     def sm7(self) -> None:
         """Smooths negative flows over the largest adjacent positive flow event.
+
+        .. error::
+            This documentation has been updated for this implementation of NEGFLO.
 
         The program checks the positive flows either side of the negative flows
         and distributes the negative flows over the larger positive flow.

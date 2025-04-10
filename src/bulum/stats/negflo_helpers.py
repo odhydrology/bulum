@@ -140,6 +140,9 @@ def dec_sm_helpers_log_neg_rem(func):
     execution. Internal use only.
 
     Short for "decorate smoothing helpers: log negative remaining flow"
+    
+    :meta private:
+    
     """
     @functools.wraps(func)
     def _impl(self, residual: pd.Series, *args, **kwargs):
