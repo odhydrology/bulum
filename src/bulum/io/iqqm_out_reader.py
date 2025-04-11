@@ -1,7 +1,8 @@
 """
-Read out files by calling on `lqmgui`.
+Read .OUT files by calling on `lqmgui`.
 """
 
+from math import floor
 import os
 import subprocess
 from typing import Any, Optional
@@ -13,24 +14,52 @@ from bulum import utils
 
 class IqqmOutReader:
     """
-    Requires the external program `iqmgui` to be on the path.
+    Requires the external program `iqmgui` to be on the PATH.
+
+    Examples
+    --------
+    Basic usage.
+    .. code-block:: python
+        reader = IqqmOutReader("abcd01.OUT")
+        reader.require(node=1)
+        reader.require(node=23)
+        df = reader.read()
     """
 
     def __init__(self, iqqm_out_filepath) -> None:
         self.iqqm_out_filepath = iqqm_out_filepath
         self.iqqm_out_folder = os.path.dirname(self.iqqm_out_filepath)
         self.iqqm_out_basename = os.path.basename(self.iqqm_out_filepath)[:-4]
-        self.required = {}
-        self.available = {}
-        self.__files_requiring_cleanup = []
-        self.__search_available_data()
+        self.required: dict = {}
+        """A dictionary of all nodes marked as 'required' i.e. to be read."""
+        self.available: dict = {}
+        """A dictionary of all nodes that are available to be read based off the .OUT file."""
+
+        self._lqn_filename = None
+        self._lqn_filepath = None
+        self._csv_filename = None
+        self._csv_filepath = None
+        self._files_requiring_cleanup: list[str] = []
+        self._search_available_data()
 
     def require(self, node: Optional[int | str] = None,
                 supertype: Optional[float] = None, type: Optional[float] = None,
-                output: Any = None):
+                output: Any = None) -> bool:
+        """Mark a node or multiple nodes as 'required' i.e. for reading.
+        At least one argument must be non-null.
+
+        Returns
+        -------
+        bool
+            `True` if at least one node was marked, `False` otherwise, likely
+            indicating failure or a bad node specification.
+        """
+        if node is None and supertype is None and type is None and output is None:
+            raise ValueError("At least one argument to require() must be non-null")
         # Coerce node and output into string formats padded with zeros.
         node = None if node is None else f"000{node}"[-3:]
         output = None if output is None else f"00{output}"[-2:]
+        pre_num_nodes = len(self.required)
         # Now loop over all available records and identify the ones required by the user.
         for k, v in self.available.items():
             if (
@@ -40,19 +69,20 @@ class IqqmOutReader:
                 ((output is None) or (output == v["output"]))
             ):
                 self.required[k] = v
+        return pre_num_nodes > len(self.required)
 
     def read(self, remove_temp_files=True, read_all_availabe=False) -> pd.DataFrame:
         if read_all_availabe:
             self.required = self.available
-        self.__write_iqqmgui_lqn_file()
-        self.__call_iqqmgui_lqn()
-        answer = self.__read_csv()
+        self._write_iqqmgui_lqn_file()
+        self._call_iqqmgui_lqn()
+        answer = self._read_iqqmgui_csv()
         if remove_temp_files:
-            self.__clean_up()
+            self._clean_up()
         return answer
 
-    def __search_available_data(self):
-        with open(self.iqqm_out_filepath, mode="r") as file:
+    def _search_available_data(self):
+        with open(self.iqqm_out_filepath, mode="r", encoding="UTF-8") as file:
             ss = file.readlines()
         ss2 = ss[2].split()  # line 3 in the file
         # Read the recorder-flag matrix
@@ -74,7 +104,7 @@ class IqqmOutReader:
             node_number = f"000{int(temp[0:3])}"[-3:]  # 053
             node_name = str.strip(temp[3:20])  # 'Unallocated Irr'
             node_type = float(temp[20:])  # 8.3
-            node_supertype = node_type.__floor__()  # 8
+            node_supertype = floor(node_type)  # 8
             for j in range(n_output_types):
                 if recorder_flags[node_supertype][j] == "0":
                     continue
@@ -87,11 +117,18 @@ class IqqmOutReader:
                     "output": recorder_number
                 }
 
-    def __write_iqqmgui_lqn_file(self) -> None:
+    def _write_iqqmgui_lqn_file(self) -> None:
         """Generates an iqqmgui lqn file so that we can use iqqm to extract data to csv."""
-        self.lqn_filename = f"temp.run"
-        self.lqn_filepath = f"{self.iqqm_out_folder}/{self.lqn_filename}"
-        with open(self.lqn_filepath, "w+", encoding='utf-8') as file:
+        if (
+            self._lqn_filename is None
+            or self._lqn_filepath is None
+            or self._csv_filename is None
+            or self._csv_filepath is None
+        ):
+            raise RuntimeError("Bad order of operations in IqqmOutReade; ", "Using filenames/paths before they are defined.")
+        self._lqn_filename = f"temp.run"
+        self._lqn_filepath = f"{self.iqqm_out_folder}/{self._lqn_filename}"
+        with open(self._lqn_filepath, "w+", encoding='utf-8') as file:
             file.write("Listing file generated by bulum\n")
             file.write(f"{self.start_dt_str} {self.end_dt_str} /\n")  # 01 01 1890 31 12 2008 / start date, end date
             file.write(f"'{self.iqqm_out_basename}' /\n")  # 'O02l' / Name of IQN File
@@ -100,37 +137,41 @@ class IqqmOutReader:
             for k, v in self.required.items():
                 i += 1
                 iqqm_ts_filepath = f"{self.iqqm_out_folder}/{k}"
-                self.__files_requiring_cleanup.append(iqqm_ts_filepath)
+                self._files_requiring_cleanup.append(iqqm_ts_filepath)
                 file.write(f"'{k}' 00 00 00 00 T / {[i]}\n")  # 'O02l#030.01d' 00 00 00 00 T / [1]
                 file.write(f"1 0 0 /\n")  # 1 0 0 /
                 file.write(f"{v['node']} {v['output']} /\n")  # 030 1 /
-            self.csv_filename = f"temp.csv"
-            self.csv_filepath = f"{self.iqqm_out_folder}/{self.csv_filename}"
-            file.write(f"{self.csv_filename} /\n")  # DW_Diversions.csv /
+            self._csv_filename = f"temp.csv"
+            self._csv_filepath = f"{self.iqqm_out_folder}/{self._csv_filename}"
+            file.write(f"{self._csv_filename} /\n")  # DW_Diversions.csv /
             file.write(f"1-{i} /\n")  # 1-17 /
-        self.__files_requiring_cleanup.append(self.lqn_filepath)
+        self._files_requiring_cleanup.append(self._lqn_filepath)
 
-    def __call_iqqmgui_lqn(self) -> None:
+    def _call_iqqmgui_lqn(self) -> None:
         """Uses iqqmgui to extract data to csv."""
-        process = subprocess.Popen(f"iqmgui {self.lqn_filename}", cwd=f"{self.iqqm_out_folder}")
+        if self._csv_filepath is None:
+            raise RuntimeError("Order of operations: method called before csv written.")
+        process = subprocess.Popen(f"iqmgui {self._lqn_filename}", cwd=f"{self.iqqm_out_folder}")
         process.wait()
-        self.__files_requiring_cleanup.append(self.csv_filepath)
-        self.__files_requiring_cleanup.append(f"{self.iqqm_out_folder}/iqqmml.txt")  # Artifact from running iqmgui
+        self._files_requiring_cleanup.append(self._csv_filepath)
+        self._files_requiring_cleanup.append(f"{self.iqqm_out_folder}/iqqmml.txt")  # Artifact from running iqmgui
 
-    def __read_csv(self) -> pd.DataFrame:
-        """Reads the csv into a dataframe."""
-        df = pd.read_csv(self.csv_filepath)
+    def _read_iqqmgui_csv(self) -> pd.DataFrame:
+        """Reads the csv from iqqmgui into a dataframe."""
+        if self._csv_filepath is None:
+            raise RuntimeError("Order of operations: method called before csv written.")
+        df = pd.read_csv(self._csv_filepath)
         df.columns = ["Date"] + [c.strip() for c in df.columns[1:]]
         # df = utils.set_index_dt(df)
         df.set_index("Date", inplace=True)
         utils.assert_df_format_standards(df)
         return df
 
-    def __clean_up(self) -> None:
+    def _clean_up(self) -> None:
         """Removes any file-artifacts created by this class."""
-        for f in self.__files_requiring_cleanup:
+        for f in self._files_requiring_cleanup:
             os.remove(f)
-        self.__files_requiring_cleanup.clear()
+        self._files_requiring_cleanup.clear()
 
 
 class iqqm_out_reader(IqqmOutReader):
