@@ -2,6 +2,7 @@
 IO functions for IDX format (binary) written in native Python.
 """
 import os
+from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -11,15 +12,15 @@ from bulum import utils
 
 def _detect_header_bytes(b_data: np.ndarray) -> bool:
     """
-    Helper function for read_idx. Detects whether the OUT file was written with
-    a version of IQQM with an old compiler with metadata/junk data as a header.
-    Fails if (not necessarily only if) the run was undertaken with only one
-    source of data, i.e. the .idx file has only one entry.
+    Helper function for :func:`read_idx`. Detects whether the .OUT file was
+    written with a version of IQQM with an old compiler with metadata/junk data
+    as a header. Fails if the run was undertaken with only one source of data,
+    i.e. the .idx file has only one entry.
 
     Parameters
     ----------
     b_data : np.ndarray
-        2d array of *binary data* filled with float32 data. 
+        2d array of binary data filled with float32 data
     """
     b_data_slice: tuple[np.float32] = b_data[0]
     first_non_zero = b_data_slice[0] != 0.0
@@ -27,7 +28,7 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
     return first_non_zero and rest_zeroes
 
 
-def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
+def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.TimeseriesDataframe:
     """
     Read IDX file.
 
@@ -36,9 +37,9 @@ def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
     filename
         Name of the IDX file.
     skip_header_bytes : bool, optional 
-        Whether to skip header bytes in the IDX file (related to the compiler
-        used for IQQM). If set to None, attempt to detect the presence of header
-        bytes automatically.
+        Whether to skip header bytes in the corresponding OUTs file (related to
+        the compiler used for IQQM). If set to None, attempt to detect the
+        presence of header bytes automatically.
 
     Returns
     -------
@@ -53,7 +54,7 @@ def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
         # Start date, end date, date interval
         stmp = f.readline().split()
         date_start = utils.standardize_datestring_format([stmp[0]])[0]
-        date_end = utils.standardize_datestring_format([stmp[1]])[0]        
+        date_end = utils.standardize_datestring_format([stmp[1]])[0]
         date_flag = int(stmp[2])
         snames = []
         for n, line in enumerate(f):
@@ -77,14 +78,14 @@ def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
     # Read data
     if date_flag == 0:
         daily_date_values = utils.datetime_functions.get_dates(
-            date_start, end_date=date_end, include_end_date=True)         
+            date_start, end_date=date_end, include_end_date=True)
         df = pd.DataFrame.from_records(b_data, index=daily_date_values)
         df.columns = snames
         df.index.name = "Date"
         # Check data types. If not 'float64' or 'int64', convert to 'float64'
-        x = df.select_dtypes(exclude=['int64','float64']).columns
-        if x.__len__()>0:
-            df=df.astype({i: 'float64' for i in x})
+        x = df.select_dtypes(exclude=['int64', 'float64']).columns
+        if x.__len__() > 0:
+            df = df.astype({i: 'float64' for i in x})
     elif date_flag == 1:
         raise NotImplementedError("Monthly data not yet supported")
     elif date_flag == 3:
@@ -96,20 +97,22 @@ def read_idx(filename, skip_header_bytes=None) -> utils.TimeseriesDataframe:
 
 
 def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> None:
-    """Writer for .IDX and corresponding .OUT binary files written in native Python.
-    Currently only supports daily data (date flag 0), as with the reader read_idx(...). 
+    """Writer for .IDX and corresponding .OUT binary files written in native
+    Python. Currently only supports daily data (date flag 0), as with the reader
+    :func:`read_idx`. 
 
-    Assumes that data are homogeneous in units and type e.g. Precipitation & mm resp., or Flow & ML/d.
+    Assumes that data are homogeneous in units and type e.g. Precipitation & mm
+    resp., or Flow & ML/d.
 
     Parameters
     ----------
     df : pd.Dataframe
-        DataFrame as per the output of read_idx(...).
+        DataFrame as per the output of :func:`read_idx`.
     filepath
         Path to the IDX file to be written to including .IDX extension.
-    units : str, optional)      
+    units : str, optional
         Units for data in df. 
-    type : str, optional)
+    type : str, optional
         Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.
     """
     date_flag = 0
@@ -140,6 +143,7 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
         f.write(f"{first_date} {last_date} {date_flag}\n")
         # data
         # inline fn to ensure padded string is exactly l characters long
+
         def ljust_or_truncate(s, l):
             return s.ljust(l)[0:l]
         for idx, col_name in enumerate(col_names):

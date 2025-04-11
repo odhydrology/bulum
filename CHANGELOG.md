@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Sphinx documentation, using `sphinx.ext.autodoc`; `.rst` files under `sphinx-docs/`
+- Sphinx documentation, using autodoc; the `.rst` files are under `sphinx-docs/`.
 
 ### Fixes
 
@@ -17,10 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated docstrings to numpy format.
+- Updated docstrings to numpy format and for compatibility with Sphinx documentation (ongoing effort).
 
 ### Deprecated
 
-- ``bulum.plots.exceedence_plot()`` superseded by ``bulum.plots.exceedance_plot()`` (spelling fix)
-- Marked ``bulum.utils.interp()`` as deprecated.
+- ``bulum.plots.exceedence_plot()`` deprecated in favour of ``bulum.plots.exceedance_plot()`` (spelling fix)
+- Marked ``bulum.utils.interp()`` as deprecated, as it should not be used over ``np.interp()``.
+- ``bulum.io.iqqm_out_reader`` deprecated in favour of ``bulum.io.IqqmOutReader`` (pythonic naming).
 
