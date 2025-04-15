@@ -9,6 +9,7 @@ from typing import Any, Literal, Optional
 
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 from bulum import utils
 
@@ -207,6 +208,16 @@ class IqqmOutReader:
         if not read_all:
             required_names = list(self.required.keys())
             df = df[required_names]
+
+        # set index to dates
+        assert self._start_dt_str and self._end_dt_str
+        start_dt = pd.to_datetime(self._start_dt_str, dayfirst=True)
+        end_dt = pd.to_datetime(self._end_dt_str, dayfirst=True)
+        date_range = pd.date_range(start_dt, end_dt, inclusive="both")
+        df["Date"] = date_range.map(lambda x: x.strftime(r"%Y-%m-%d"))
+        df.set_index("Date", inplace=True)
+        df = df.astype(np.float64)
+        utils.assert_df_format_standards(df)
         return df
 
     def _py_read_single_out_file(self, path, supertype: int) -> pd.DataFrame:
