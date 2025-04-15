@@ -5,9 +5,10 @@ Read .OUT files by calling on `lqmgui`.
 from math import floor
 import os
 import subprocess
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 import pandas as pd
+import numpy as np
 
 from bulum import utils
 
@@ -26,21 +27,42 @@ class IqqmOutReader:
     """
 
     def __init__(self, iqqm_out_filepath) -> None:
+        """
+        Parameters
+        ----------
+        iqqm_out_filepath
+            Path to the describing IQN file.
+        """
         self.iqqm_out_filepath = iqqm_out_filepath
+        # TODO replace iqqm_out_filepath with iqn_filepath
         self.iqqm_out_folder = os.path.dirname(self.iqqm_out_filepath)
+        self.iqn_filepath = iqqm_out_filepath
         self.iqqm_out_basename = os.path.basename(self.iqqm_out_filepath)[:-4]
         self.required: dict = {}
         """A dictionary of all nodes marked as 'required' i.e. to be read."""
         self.available: dict = {}
-        """A dictionary of all nodes that are available to be read based off the .OUT file."""
+        """A dictionary of all nodes that are available to be read based off the
+        .OUT file."""
 
-        self._lqn_filename = None
-        self._lqn_filepath = None
-        self._csv_filename = None
-        self._csv_filepath = None
+        # used for Python reader
+        self._out_node_order: dict[int, list[str]] = {}
+        """Maps node supertypes to the order in which data occurs in the
+        corresponding .OUT file, identified by node number and output number
+        (i.e. column of the recording matrix).
+        """
+
+        # used for IQQMGUI call
+        self._lqn_filename: Optional[str] = None
+        self._lqn_filepath: Optional[str] = None
+        self._csv_filename: Optional[str] = None
+        self._csv_filepath: Optional[str] = None
+        self._start_dt_str: Optional[str] = None
+        self._end_dt_str: Optional[str] = None
         self._files_requiring_cleanup: list[str] = []
+
         self._search_available_data()
 
+    # pylint: disable=w0622
     def require(self, node: Optional[int | str] = None,
                 supertype: Optional[float] = None, type: Optional[float] = None,
                 output: Any = None) -> bool:
@@ -56,8 +78,8 @@ class IqqmOutReader:
         if node is None and supertype is None and type is None and output is None:
             raise ValueError("At least one argument to require() must be non-null")
         # Coerce node and output into string formats padded with zeros.
-        node = None if node is None else f"000{node}"[-3:]
-        output = None if output is None else f"00{output}"[-2:]
+        node = None if node is None else f"{node:0>3}"
+        output = None if output is None else f"{output:0>2}"
         pre_num_nodes = len(self.required)
         # Now loop over all available records and identify the ones required by the user.
         for k, v in self.available.items():
@@ -71,97 +93,153 @@ class IqqmOutReader:
         return pre_num_nodes > len(self.required)
 
     def read(self, remove_temp_files=True, read_all_availabe=False, *,
-             use_iqqmgui=True, iqqmgui_path=None) -> pd.DataFrame:
+             engine: Literal["iqqmgui", "python"] = "iqqmgui", iqqmgui_path=None) -> pd.DataFrame:
         """
         Read data.
 
         Parameters
         ----------
-        remove_temp_files : bool, default True
-            Clean up after yourself (remove artifacts from running ``iqmgui``)
-        read_all_available : bool, default False
+        remove_temp_files : bool
+            Clean up after yourself (remove artifacts from running ``iqmgui``).
+        read_all_available : bool
             Read all nodes instead of just those previously marked by the user
             as required.
-        use_iqqmgui : bool, default True
-            Should this use ``iqqmgui`` to extract data?
-
-            .. note::
-                Native python implementation is not yet here, so this argument **must** be ``True``.
-
+        engine : "iqqmgui" or "python"
+            Decides how to parse the OUT file data. `"iqqmgui"` will call on the
+            executable (on path or provided by `iqqmgui_path`), while `python`
+            will use the bulum native implementation.
         iqqmgui_path : str, optional
-            If ``use_iqqmgui == True``, you can specify the executable to use to
-            extract data.
+            If `engine` is set to `iqqmgui`, you can specify the executable to
+            use to extract data.
 
         Returns
         -------
         pandas.DataFrame
         """
-        if read_all_availabe:
-            required = self.required
-            self.required = self.available
-        if use_iqqmgui:
+        if engine == "iqqmgui":
+            if read_all_availabe:
+                required_memo = self.required
+                self.required = self.available
             self._write_iqqmgui_lqn_file()
             self._call_iqqmgui_lqn(iqqmgui_path=iqqmgui_path)
             answer = self._read_iqqmgui_csv()
+            if remove_temp_files:
+                self._clean_up()
+            if read_all_availabe:
+                # Remember previous settings
+                self.required = required_memo
+        elif engine == "python":
+            answer = self._py_read_out(read_all=read_all_availabe)
         else:
-            raise NotImplementedError("Native python reading of .OUT files not yet supported.")
-        if read_all_availabe:
-            # Remember previous settings
-            self.required = required
-        if remove_temp_files:
-            self._clean_up()
+            raise ValueError(f"Invalid argument: {engine=}")
+
         return answer
 
-    def _search_available_data(self):
+    def _search_available_data(self) -> None:
+        """
+        Searches the .IQN file for data.
+        """
         with open(self.iqqm_out_filepath, mode="r", encoding="UTF-8") as file:
             ss = file.readlines()
         # Read the recorder-flag matrix
         ss2 = ss[2].split()  # line 3 in the file
         n_node_types = int(ss2[0])
         n_output_types = int(ss2[1])
-        recorder_flags = []
+        recorder_flags: list[list] = []
         for i in range(n_node_types):
-            temp = ss[3 + i].split()
-            recorder_flags.append(temp[0:n_output_types])
+            recorder_line = ss[3 + i].split()
+            recorder_flags.append(recorder_line[0:n_output_types])
+            self._out_node_order[i] = []
+
         # Read the date range
         ssx = ss[n_node_types + 3].split()  # 01/01/1890 31/12/2008  0
-        self.start_dt_str = ssx[0].replace('/', ' ')
-        self.end_dt_str = ssx[1].replace('/', ' ')
+        self._start_dt_str = ssx[0].replace('/', ' ')
+        self._end_dt_str = ssx[1].replace('/', ' ')
+
         # Read all the nodes (loop over the nodes)
         for i in range(n_node_types + 4, len(ss)):
-            temp = ss[i]
-            if str.strip(temp) == "":
+            node_line = ss[i]
+            if node_line.strip() == "":
                 break
-            node_number = f"000{int(temp[0:3])}"[-3:]  # 053
-            node_name = str.strip(temp[3:20])  # 'Unallocated Irr'
-            node_type = float(temp[20:])  # 8.3
+            node_number: str = f"{int(node_line[0:3]):0>3}"  # 053
+            # NOT USED; kept for posterity
+            # node_name = str.strip(temp[3:20])  # 'Unallocated Irr'
+            node_type = float(node_line[20:])  # 8.3
             node_supertype = floor(node_type)  # 8
             for j in range(n_output_types):
                 if recorder_flags[node_supertype][j] == "0":
                     continue
-                recorder_number = f"000{j + 1}"[-2:]  # 03; recorder numbers start at 1
-                temp = [node_number, recorder_number, node_name, node_type, node_supertype]
-                self.available[f"{node_number}_{recorder_number}.d"] = {
+                recorder_number = f"{j + 1:0>2}"  # 03; recorder numbers start at 1
+
+                node_recorder_ident = f"{node_number}_{recorder_number}.d"
+                self._out_node_order[node_supertype].append(node_recorder_ident)
+                self.available[node_recorder_ident] = {
                     "node": node_number,
                     "supertype": node_supertype,
                     "type": node_type,
-                    "output": recorder_number
+                    "output": recorder_number,
                 }
+
+    # -----------------------------
+    # --- NATIVE PYTHON READER ----
+    # -----------------------------
+
+    def _py_read_out(self, *, read_all=False) -> pd.DataFrame:
+        """python engine: reads out all required data"""
+        if read_all:
+            search_dict = self.available
+        else:
+            search_dict = self.required
+
+        required_supertypes = set()
+        for node in search_dict.values():
+            required_supertypes.add(node["supertype"])
+
+        df: Optional[pd.DataFrame] = None
+        for supertype in required_supertypes:
+            suffix = f"{supertype:0>2}.OUT"
+            path = self.iqn_filepath[:-4] + suffix
+            temp_df = self._py_read_single_out_file(path, supertype)
+            if df is None:
+                df = temp_df
+            else:
+                df = df.join(temp_df)
+
+        assert df is not None
+        if not read_all:
+            required_names = list(self.required.keys())
+            df = df[required_names]
+        return df
+
+    def _py_read_single_out_file(self, path, supertype: int) -> pd.DataFrame:
+        """python engine: read a single .OUT file.
+
+        Parameters
+        ----------
+        path
+            Path to the .OUT file
+        supertype
+            Supertype of node(s) of interest. Used to specify which ordered
+            nodes to grab data for.
+        """
+        output_order = self._out_node_order[supertype]
+        data_types = [(name, 'f4') for name in output_order]
+        data = np.fromfile(path, offset=4, dtype=data_types)
+        df = pd.DataFrame(data)
+        return df
+
+    # -----------------------------
+    # ------ IQQMGUI READER -------
+    # -----------------------------
 
     def _write_iqqmgui_lqn_file(self) -> None:
         """Generates an iqqmgui lqn file so that we can use iqqm to extract data to csv."""
-        if (
-            self._lqn_filename is None
-            or self._lqn_filepath is None
-            or self._csv_filename is None
-            or self._csv_filepath is None
-        ):
-            raise RuntimeError("Bad order of operations in IqqmOutReader; ", "Using filenames/paths before they are defined.")
         self._lqn_filename = "temp.run"
         self._lqn_filepath = f"{self.iqqm_out_folder}/{self._lqn_filename}"
         with open(self._lqn_filepath, "w+", encoding='utf-8') as file:
+            # pylint: disable=c0301
             file.write("Listing file generated by bulum\n")
-            file.write(f"{self.start_dt_str} {self.end_dt_str} /\n")  # 01 01 1890 31 12 2008 / start date, end date
+            file.write(f"{self._start_dt_str} {self._end_dt_str} /\n")  # 01 01 1890 31 12 2008 / start date, end date
             file.write(f"'{self.iqqm_out_basename}' /\n")  # 'O02l' / Name of IQN File
             file.write(f"{len(self.required)} 0 1 /\n")  # 17 0 1 /no files, no eqns, (no csv ?)
             i = 0
@@ -179,7 +257,13 @@ class IqqmOutReader:
         self._files_requiring_cleanup.append(self._lqn_filepath)
 
     def _call_iqqmgui_lqn(self, *, iqqmgui_path=None) -> None:
-        """Uses iqqmgui to extract data to csv."""
+        """Uses iqqmgui to extract data to csv.
+
+        Parameters
+        ----------
+        iqqmgui_path
+            Allows specification of a particular iqqmgui executable.
+        """
         if self._csv_filepath is None:
             raise RuntimeError("Order of operations: method called before csv written.")
 
@@ -199,7 +283,7 @@ class IqqmOutReader:
         if self._csv_filepath is None:
             raise RuntimeError("Order of operations: method called before csv written.")
         df = pd.read_csv(self._csv_filepath)
-        df.columns = ["Date"] + [c.strip() for c in df.columns[1:]]
+        df.columns = ["Date"] + [c.strip() for c in df.columns[1:]]  # type: ignore
         # df = utils.set_index_dt(df)
         df.set_index("Date", inplace=True)
         utils.assert_df_format_standards(df)

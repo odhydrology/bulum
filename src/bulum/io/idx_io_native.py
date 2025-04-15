@@ -48,7 +48,7 @@ def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.Timese
     # Read ".idx" file
     with open(filename, 'r', encoding="UTF-8") as file:
         # Skip line
-        stmp = file.readline()
+        file.readline()
         # Start date, end date, date interval
         stmp = file.readline().split()
         date_start = utils.standardize_datestring_format([stmp[0]])[0]
