@@ -14,7 +14,7 @@ setuptools.setup(
     description="Open source python library for assessing hydrologic model results in Queensland",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://bitbucket.org/odhydrology/bulum.git",
+    url="https://github.com/odhydrology/bulum",
     package_dir={'': 'src'},
     packages=setuptools.find_packages('src'),
     classifiers=[
