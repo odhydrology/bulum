@@ -18,7 +18,6 @@ class IqqmOutReader:
 
     Examples
     --------
-    Basic usage.
     .. code-block:: python
         reader = IqqmOutReader("abcd01.OUT")
         reader.require(node=1)
@@ -213,7 +212,7 @@ class IqqmOutReader:
         self._files_requiring_cleanup.clear()
 
 
-class iqqm_out_reader(IqqmOutReader):
+class iqqm_out_reader(IqqmOutReader):  # pylint: disable=invalid-name
     """
     For backwards compatibility. See :class:`IqqmOutReader`.
 

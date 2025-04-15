@@ -27,10 +27,11 @@ class TimeseriesDataframe(pd.DataFrame):
     """
     A TimeseriesDataframe is thinly extended pd.Dataframe. Abbreviated casually
     as TSDF throughout the documentation. It adds the following fields:
-    - name (str)
-    - source (str)
-    - description (str)
-    - a string of tags (str)
+    
+    * name (str)
+    * source (str)
+    * description (str)
+    * a string of tags (str)
     """
 
     TAG_DELIMITER = ','
