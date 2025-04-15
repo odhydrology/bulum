@@ -1,15 +1,12 @@
-"""
-Read .OUT files with an associated .IQN file.
-"""
+"""Read .OUT files with an associated .IQN file."""
 
-from math import floor
 import os
 import subprocess
+from math import floor
 from typing import Any, Literal, Optional
 
-import pandas as pd
 import numpy as np
-from datetime import datetime
+import pandas as pd
 
 from bulum import utils
 
@@ -37,9 +34,9 @@ class IqqmOutReader:
         self.iqqm_out_folder = os.path.dirname(self.iqqm_out_filepath)
         self.iqn_filepath = iqqm_out_filepath
         self.iqqm_out_basename = os.path.basename(self.iqqm_out_filepath)[:-4]
-        self.required: dict = {}
+        self.required: dict[str, dict[str, Any]] = {}
         """A dictionary of all nodes marked as 'required' i.e. to be read."""
-        self.available: dict = {}
+        self.available: dict[str, dict[str, Any]] = {}
         """A dictionary of all nodes that are available to be read based off the
         .OUT file."""
 
@@ -161,8 +158,7 @@ class IqqmOutReader:
             if node_line.strip() == "":
                 break
             node_number: str = f"{int(node_line[0:3]):0>3}"  # 053
-            # NOT USED; kept for posterity
-            # node_name = str.strip(temp[3:20])  # 'Unallocated Irr'
+            node_name = str.strip(node_line[3:20])  # 'Unallocated Irr'
             node_type = float(node_line[20:])  # 8.3
             node_supertype = floor(node_type)  # 8
             for j in range(n_output_types):
@@ -177,7 +173,33 @@ class IqqmOutReader:
                     "supertype": node_supertype,
                     "type": node_type,
                     "output": recorder_number,
+                    "node_name": node_name,
                 }
+
+    # -----------------------------
+    # ----- CONVENIENCE FUNCS -----
+    # -----------------------------
+
+    def num_to_name(self, *, which: Literal["required", "available"] = "required"
+                    ) -> dict[str, str]:
+        """Return a mapping between node numbers and (IQQM) names. 
+
+        Purely here for convenience in cross-referencing nodes."""
+        src: dict[str, dict[str, str]] = {}
+        match which:
+            case "required":
+                src = self.required
+
+            case "available":
+                src = self.available
+
+            case _:
+                raise ValueError("Invalid `which` argument to IqqmOutReader.num_to_name()")
+
+        d: dict[str, str] = {}
+        for node_info in src.values():
+            d[node_info["node"]] = node_info["node_name"]
+        return d
 
     # -----------------------------
     # --- NATIVE PYTHON READER ----
