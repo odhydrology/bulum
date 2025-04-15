@@ -1,5 +1,5 @@
 """
-Read .OUT files by calling on `lqmgui`.
+Read .OUT files with an associated .IQN file.
 """
 
 from math import floor
@@ -15,8 +15,6 @@ from bulum import utils
 
 class IqqmOutReader:
     """
-    Requires the external program `iqmgui` to be on the PATH.
-
     Examples
     --------
     .. code-block:: python
@@ -95,7 +93,7 @@ class IqqmOutReader:
     def read(self, remove_temp_files=True, read_all_availabe=False, *,
              engine: Literal["iqqmgui", "python"] = "iqqmgui", iqqmgui_path=None) -> pd.DataFrame:
         """
-        Read data.
+        Invoke the class to read the associated data.
 
         Parameters
         ----------

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Sphinx documentation, using autodoc; the `.rst` files are under `sphinx-docs/`.
 - Optional argument to ``bulum.io.read_iqqm_lqn_output`` to specify data start line.
-- Native Python reader for ``bulum.io.iqqm_out_reader.IqqmOutReader``, i.e. no reliance on iqqmgui external program.
+- Native Python reader/engine for ``bulum.io.iqqm_out_reader.IqqmOutReader``, i.e. no reliance on iqqmgui external program.
 
 ### Fixes
 
