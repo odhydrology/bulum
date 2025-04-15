@@ -18,10 +18,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated docstrings to numpy format and for compatibility with Sphinx documentation (ongoing effort).
+- Native IDX reader header byte skipping changed - only skips 4 bytes instead of the whole first row, and this time based off file size instead of reading the data and changing it post-hoc.
 
 ### Deprecated
 
-- ``bulum.plots.exceedence_plot()`` deprecated in favour of ``bulum.plots.exceedance_plot()`` (spelling fix)
-- Marked ``bulum.utils.interp()`` as deprecated, as it should not be used over ``np.interp()``.
-- ``bulum.io.iqqm_out_reader`` deprecated in favour of ``bulum.io.IqqmOutReader`` (pythonic naming).
+- ``bulum.plots.exceedence_plot()``: use ``bulum.plots.exceedance_plot()`` (spelling fix)
+- ``bulum.utils.interp()``: use ``np.interp()``
+- ``bulum.io.iqqm_out_reader``: use ``bulum.io.IqqmOutReader`` (pythonic naming)
 

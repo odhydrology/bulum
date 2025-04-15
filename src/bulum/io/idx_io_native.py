@@ -10,22 +10,20 @@ import pandas as pd
 from bulum import utils
 
 
-def _detect_header_bytes(b_data: np.ndarray) -> bool:
+def _detect_header_bytes(filename, b_types) -> bool:
     """
     Helper function for :func:`read_idx`. Detects whether the .OUT file was
     written with a version of IQQM with an old compiler with metadata/junk data
     as a header. Fails if the run was undertaken with only one source of data,
     i.e. the .idx file has only one entry.
 
-    Parameters
-    ----------
-    b_data : np.ndarray
-        2d array of binary data filled with float32 data
+    Returns
+    -------
+        True if there are exactly 4 bytes of header.
     """
-    b_data_slice: tuple[np.float32] = b_data[0]
-    first_non_zero = b_data_slice[0] != 0.0
-    rest_zeroes = not np.any(list(b_data_slice)[1:])
-    return first_non_zero and rest_zeroes
+    file_size = os.path.getsize(filename)  # bytes
+    num_cols = len(b_types)
+    return (file_size % num_cols) == 4
 
 
 def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.TimeseriesDataframe:
@@ -48,33 +46,39 @@ def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.Timese
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File does not exist: {filename}")
     # Read ".idx" file
-    with open(filename, 'r') as f:
+    with open(filename, 'r', encoding="UTF-8") as file:
         # Skip line
-        stmp = f.readline()
+        stmp = file.readline()
         # Start date, end date, date interval
-        stmp = f.readline().split()
+        stmp = file.readline().split()
         date_start = utils.standardize_datestring_format([stmp[0]])[0]
         date_end = utils.standardize_datestring_format([stmp[1]])[0]
         date_flag = int(stmp[2])
         snames = []
-        for n, line in enumerate(f):
+        for n, line in enumerate(file):
             sfile = line[0:13].strip()
             sdesc = line[13:54].strip()
             sname = f"{n + 1}>{sfile}>{sdesc}"
             snames.append(sname)
+
     # Read ".out" file
     out_filename = filename.lower().replace('.idx', '.out')
     if not os.path.exists(out_filename):
         raise FileNotFoundError(f"File does not exist: {out_filename}")
     # 4-byte reals
     b_types = [(s, 'f4') for s in snames]
-    # Read all data in, drop header bytes (first row) if necessary
-    b_data = np.fromfile(out_filename, dtype=np.dtype(b_types))
-    # Detection of header bytes
+
+    # Read all data in, drop header bytes if necessary
     if skip_header_bytes is None:
-        skip_header_bytes = _detect_header_bytes(b_data)
+        skip_header_bytes = _detect_header_bytes(filename, b_types)
+
+    # By inspection, there may be 4 bytes at the start of the file that has
+    # metadata, or junk data. Skip these bytes.
     if skip_header_bytes:
-        b_data = b_data[1:]  # skip header bytes
+        b_data = np.fromfile(out_filename, dtype=np.dtype(b_types), offset=4)
+    else:
+        b_data = np.fromfile(out_filename, dtype=np.dtype(b_types))
+
     # Read data
     if date_flag == 0:
         daily_date_values = utils.datetime_functions.get_dates(
@@ -84,7 +88,7 @@ def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.Timese
         df.index.name = "Date"
         # Check data types. If not 'float64' or 'int64', convert to 'float64'
         x = df.select_dtypes(exclude=['int64', 'float64']).columns
-        if x.__len__() > 0:
+        if len(x) > 0:
             df = df.astype({i: 'float64' for i in x})
     elif date_flag == 1:
         raise NotImplementedError("Monthly data not yet supported")

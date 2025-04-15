@@ -384,7 +384,7 @@ def pyblo(dflist: list[pd.Series], sites: list, series: list, wy_month=1, site_o
 
 def exceedence_plot(*args, **kwargs):
     """ 
-    .. deprecated:: v0.2.10 misspelt historically, see ``exceedance_plot()``.
+    .. deprecated:: v0.3.0 misspelt historically, see ``exceedance_plot()``.
     """
     return exceedance_plot(*args, **kwargs)
 
