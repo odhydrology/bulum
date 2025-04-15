@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Sphinx documentation, using autodoc; the `.rst` files are under `sphinx-docs/`.
+- Optional argument to ``bulum.io.read_iqqm_lqn_output`` to specify data start line.
 
 ### Fixes
 
