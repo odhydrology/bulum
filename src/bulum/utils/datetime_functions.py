@@ -27,11 +27,19 @@ def standardize_datestring_format(values):
 
 
 def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d'):
+    """Convert a list of date strings to numpy datetimes64d. 
+
+    .. warning::
+        Assumes the dates are consecutive!
+
+    """
     start_date = datetime.strptime(values[0], date_fmt)
     end_date = datetime.strptime(values[-1], date_fmt) + timedelta(days=1)
-    np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')  # Assumes the dates are consecutive!
-    if (len(np_dates) != len(values)):
-        raise Exception(f"ERROR: Expected {len(np_dates)} dates between {start_date} and {end_date} but found {len(values)}.")
+    np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')
+    # ^^^ Assumes the dates are consecutive!
+    if len(np_dates) != len(values):
+        raise ValueError(f"ERROR: Expected {len(np_dates)} dates between " +
+                         f"{start_date} and {end_date} but found {len(values)}.")
     return np_dates
 
 
