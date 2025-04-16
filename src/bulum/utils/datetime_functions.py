@@ -35,7 +35,7 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d'):
     return np_dates
 
 
-def get_wy(dates: list[str | np.datetime64], wy_month=7,
+def get_wy(dates: pd.Index | list[str | np.datetime64], wy_month=7,
            using_end_year=False) -> list[int]:
     """
     Returns water years for a given array of dates. Use this to add water year
@@ -60,7 +60,7 @@ def get_wy(dates: list[str | np.datetime64], wy_month=7,
     Examples
     --------
     Modified excerpt from :mod:`bulum.stats.aggregate_stats`
-    
+
     >>> df.groupby(get_wy(df.index, wy_month)).sum().median()
 
     """
