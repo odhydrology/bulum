@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optional argument to ``bulum.io.read_iqqm_lqn_output`` to specify data start line.
 - Native Python reader/engine for ``bulum.io.IqqmOutReader``, i.e. no reliance on iqqmgui external program.
 - New fn: ``bulum.stats.annual_sum``
+- Negflo implementation (was previously a "beta" implementation, so to speak.)
 
 ### Fixes
 
