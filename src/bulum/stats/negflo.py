@@ -1,10 +1,13 @@
 """
 Bulum implementation of Negflo and supporting classes.
 
-Experimental implementation of NEGFLO. Should be mostly ok to use, but not
-guaranteed to have a stable API at present, especially regarding
-configuration files, pending confirmation of expected outputs etc.
+.. warning::
+    Experimental implementation of NEGFLO. Should be mostly ok to use, but not
+    guaranteed to have a stable API at present, especially regarding
+    configuration files, pending confirmation of expected outputs etc.
 
+See Also
+--------
 Spec obtained from: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 """
 
@@ -24,7 +27,11 @@ logger = logging.getLogger(__name__)
 
 
 class Negflo:
-    """Bulum implementation of NEGFLO."""
+    """Bulum implementation of NEGFLO.
+
+    When there are negative overflows from the smoothing algorithm, they will be
+    noted in `self.neg_overflows`.
+    """
 
     def __init__(self,
                  df_residual: pd.DataFrame | TimeseriesDataframe,
@@ -50,22 +57,22 @@ class Negflo:
 
         self._analysis_type = helpers.NegfloAnalysisType.RAW
 
-        self.sm6_num_segments = num_segments
-        self.sm6_segment_boundaries: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
+        self._sm6_num_segments = num_segments
+        self._sm6_segment_boundaries: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
 
     @classmethod
-    def from_config_file(cls, filepath, *, execute=False):
+    def _from_config_file(cls, filepath, *, execute=False):
         """Construct a Negflo analysis from a config file. 
-        
-        .. warning::
-            This function is incomplete.
 
-        Args
-        ----
-            filepath : path-like 
-                Relative or absolute filepath to the input file
-            execute : bool, default=False
-                Flag to execute all possible analyses and save to file.
+        .. warning::
+            This function is incomplete. It has been marked as private until otherwise.
+
+        Parameters
+        ----------
+        filepath : path-like 
+            Relative or absolute filepath to the input file
+        execute : bool, default=False
+            Flag to execute all possible analyses and save to file.
 
         Returns
         -------
@@ -172,9 +179,10 @@ class Negflo:
 
         Returns
         -------
-        A couple containing:
-        - the remaining negative flows (number)
-        - the smoothed sequence
+        number
+            The remaining negative flows
+        sequence
+            The input sequence smoothed (copy).
         """
         pos_flow_period_l = list(pos_flow_period_l)
         pos_flow_above_lim_l = list(map(lambda x: x - self.flow_limit,
@@ -308,6 +316,7 @@ class Negflo:
                     right_tracker.add(residual_idx, residual_val)
                 elif residual_val < 0:
                     neg_acc += residual_val
+
             if ((is_final_value or (residual_val < self.flow_limit
                                     and right_tracker.is_member_of_block(residual_idx)))
                     and self._has_neg_flow_to_redistribute(neg_acc)
@@ -337,21 +346,13 @@ class Negflo:
 
         The negative flows are set to zero and the excess positive flows have
         been adjusted by a factor of::
-        
+
             1 - abs(Total of the negative flows)/(Total of the positive flows)
 
-        If this is less than zero then...
-
-        .. error::
-            To be updated.
-            
-        This will preserve the variability of the flows and maintain the mean
-        annual flow at the downstream gauge. This method is most useful for
-        preserving storage behaviour if the reach empties into a dam.
-
-        Return
-        ------
-        None. The results are written to `self.df_residual`.
+        Returns
+        -------
+        None
+            The results are written to `self.df_residual`.
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_ALL
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
@@ -361,33 +362,26 @@ class Negflo:
         """Redistribute negative flows into future positive flow events, with
         carry-over.
 
-        =====
+        Accumulated negative flows are factored into positive flow events
+        (defined as periods above the flow limit) using the formula from before,
+        namely::
 
-        .. error::
-            docs to be written 
+            1 - abs(Total of the accumulated negative flows)/(Total of the positive flow period)
 
-        This method breaks the raw residual flows into periods. The period
-        starts when the flow exceeds the specified flow limit. It accumulates
-        the negative flow and the positive flow when the flow exceeds the flow
-        limit. It then factors the flows exceeding the flow limit according to
-        the formula above using the total of the negative flows from the period
-        preceding the period of positive flows. This method is similar to
-        NEGFLO3, except that it will not reduce the flow below the specified
-        flow limit.
 
-        This method accumulates the negative flows, so that if the positive
-        flows above the flow limit in a period are not enough to balance all the
-        preceding negative flows, the remaining negative flow is loaded into the
-        next period.
+        Note that this will not reduce flows below the specified flow limit
+        (`self.flow_limit`).
 
-        If the flow limit is set to zero flow, the flows will give modelled
-        flows with a mean that is close to the mean of the measure flows.
-        However, it can eliminate small flow peaks if there are a lot of
-        negative flows.
+        This method accumulates negative flows such that if the first
+        encountered positive flow period is not sufficiently large, it will load
+        the remaining balance into the next positive flow period.
 
-        Setting the flow limit to a high flow preserves these peaks, but can
-        severely reduce the high flows. It can give a ranked flow plot with a
-        notch at the flow limit.
+        As before, if the flow limit is set to zero flow, the flows will give
+        modelled flows with a mean that is close to the mean of the measure
+        flows. However, it can eliminate small flow peaks if there are a lot of
+        negative flows. Setting the flow limit to a high flow preserves these
+        peaks, but can severely reduce the high flows. It can give a ranked flow
+        plot with a notch at the flow limit.
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
@@ -395,37 +389,31 @@ class Negflo:
 
     def sm3(self) -> None:
         """Redistribute negative flows into future positive flow events, without
-        carry-over. Refer to SM2.
+        carry-over. 
+        
+        See Also
+        --------
+        * :method:`sm2`
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self.df_residual = self.df_residual.apply(self._sm_forward_series, carry_negative=False)
 
     def sm4(self) -> None:
-        """
-        .. error::
-            Docs to be written.
-        
-        This method is similar to the method used to produce residual.sm2
-        except that the negatives are spread over the preceding positive flows
-        that exceed the flow limit. The first method is particularly useful if
-        the negative flows mainly occur on the rising limb of the hydrograph.
-        This method is more useful if the negative flows are generated on the
-        falling limb of the hydrograph.
-
-        If the difference between the positive flows and the flow limit does not
-        exceed the sum of the negative flows, the remaining negative flow is
-        carried over to the next period of positive flows exceeding the flow
-        limit."""
+        """Redistribute negative flows into past positive flow events, carrying
+        forward negative flow into the future. Refer to :method:`sm2`."""
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self.df_residual = self.df_residual.apply(self._sm_backward_series)
 
     def sm5(self) -> None:
-        """
-        This method is the same as that described above where the negative flows
-        are spread over the preceding positive flows that exceed the flow limit.
-        However, excess negative flows are not carried over to the next period.
+        """Redistribute negative flows into past positive flow events, without
+        carrying negative flows into the future. 
+        
+        See Also
+        --------
+        * :method:`sm2`
+        * :method:`sm4`
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
@@ -461,12 +449,16 @@ class Negflo:
 
         Returns
         -------
-        Writes the result to `self.df_residual`.
+        None
+            Writes the result to `self.df_residual`.
 
+        See Also
+        --------
+        * :method:`sm1`
         """
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
         # pre-processing to determine segments if non-existent
-        if use_predefined_segments and self.sm6_segment_boundaries is not None:
+        if use_predefined_segments and self._sm6_segment_boundaries is not None:
             pass
         else:
             if sampling_start_date is None:
@@ -478,14 +470,14 @@ class Negflo:
                 sampling_frequency = pd.DateOffset(years=1)
             one_day = pd.DateOffset(days=1)
 
-            self.sm6_segment_boundaries = []
+            self._sm6_segment_boundaries = []
             while date < end:
                 last_date = date
                 date = date + sampling_frequency
-                self.sm6_segment_boundaries.append((last_date, date-one_day))
+                self._sm6_segment_boundaries.append((last_date, date-one_day))
 
         # main logic
-        for start, end in self.sm6_segment_boundaries:
+        for start, end in self._sm6_segment_boundaries:
             start = pd.to_datetime(start)
             end = pd.to_datetime(end)
             mask = (self.df_residual.index >= start) & (self.df_residual.index <= end)
@@ -499,19 +491,14 @@ class Negflo:
     def sm7(self) -> None:
         """Smooths negative flows over the largest adjacent positive flow event.
 
-        .. error::
-            This documentation has been updated for this implementation of NEGFLO.
+        Note
+        ----
+        Unlike the reference document, this program does not require the flow
+        limit be negative.
 
-        The program checks the positive flows either side of the negative flows
-        and distributes the negative flows over the larger positive flow.
-
-        If the flow_limit is less than zero, the program uses the negative flows
-        to determine the periods for spreading the negatives.  If the flow_limit is -0.5,
-        the program will use a flow_limit of zero, but work from the negative
-        flows. The smoothed residual flows are saved in a file called
-        residual.SM7. The segment option does not work for a negative flow
-        limit.
-
+        See Also
+        --------
+        * :method:`sm2`
         """
         # TODO edit this documentation; this is not how this particular
         #      implementation of NEGFLO works, and instead we expect a

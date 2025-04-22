@@ -1,4 +1,4 @@
-"""Bulum, negflo supporting classes."""
+"""Negflo supporting code."""
 
 import logging
 from enum import Enum
@@ -31,7 +31,7 @@ class NegfloAnalysisType(Enum):
     SMOOTHED_NEG_LIM = 7  # sm7
 
     def to_file_extension(self) -> str:
-        """Gives the corresponding file extension for """
+        """Gives the corresponding file extension for the analysis type."""
         match self:
             case NegfloAnalysisType.RAW:
                 return ".rw1"
@@ -119,7 +119,7 @@ class ContiguousIndexTracker:
 
         Note
         ----
-        If start_idx is not null then it is required that last_idx is also not
+        If start_idx is not `None` then it is required that last_idx is also not
         null."""
         return self.start_idx is not None
 
@@ -140,9 +140,9 @@ def dec_sm_helpers_log_neg_rem(func):
     execution. Internal use only.
 
     Short for "decorate smoothing helpers: log negative remaining flow"
-    
+
     :meta private:
-    
+
     """
     @functools.wraps(func)
     def _impl(self, residual: pd.Series, *args, **kwargs):
