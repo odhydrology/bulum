@@ -8,11 +8,16 @@ class StorageLevelAssessment:
         
     def __init__(self, df: pd.Series, triggers: list, wy_month=7, allow_part_years=False) -> None:
         """
-        Args:
-            df (pd.Series): Daily timeseries of storage data with date as index.
-            triggers (list): List of trigger thresholds to be assessed.
-            wy_month (int, optional): Water year start month. Defaults to 7.
-            allow_part_years (bool, optional): Allow part water years or only complete water years. Defaults to False.
+        Parameters
+        ----------
+        df : pd.Series
+            Daily timeseries of storage data with date as index.
+        triggers : list
+            List of trigger thresholds to be assessed.
+        wy_month : int, optional
+            Water year start month. Defaults to 7.
+        allow_part_years : bool, optional
+            Allow part water years or only complete water years. Defaults to False.
         """
 
         if type(df) != pd.Series:
@@ -43,8 +48,10 @@ class StorageLevelAssessment:
     def AnnualDaysBelow(self):
         """Returns the total days at or below trigger threshold by WY.
 
-        Returns:
-            dict: Dictionary of annual timeseries grouped by trigger threshold.
+        Returns
+        -------
+        dict
+            Dictionary of annual timeseries grouped by trigger threshold.
         """
 
         dailytrigger = {trigger:pd.Series(np.where(self.df<=trigger,1,0),index=self.df.index) for trigger in self.triggers}
@@ -54,12 +61,19 @@ class StorageLevelAssessment:
     def AnnualDaysBelowSummary(self,trigger=None,annualdaysbelow=None):
         """Returns summary of total days at or below trigger threshold by WY.
 
-        Args:
-            trigger (any, optional): Optionally provide single trigger threshold to be assessed. Defaults to None.
-            annualdaysbelow (dict, optional): Optionally provide output from AnnualDaysBelow, otherwise recalculate. Defaults to None.
+        Parameters
+        ----------
+        trigger : optional
+            Optionally provide single trigger threshold to be assessed. Defaults
+            to None.
+        annualdaysbelow : dict, optional
+            Optionally provide output from AnnualDaysBelow, otherwise
+            recalculate. Defaults to None.
 
-        Returns:
-            df: DataFrame of total days at or below threshold by WY, grouped by trigger threshold.
+        Returns
+        -------
+        DataFrame
+            Dataframe of total days at or below threshold by WY, grouped by trigger threshold.
         """
 
         # If not provided, calculate AnnualDaysBelow
@@ -77,11 +91,14 @@ class StorageLevelAssessment:
     def NumberWaterYearsBelow(self,annualdaysbelow=None):
         """Returns total WYs with at least one day at or below trigger threshold.
 
-        Args:
-            annualdaysbelow (dict, optional): Optionally provide output from AnnualDaysBelow, otherwise recalculate. Defaults to None.
+        Parameters
+        ----------
+        annualdaysbelow (dict, optional): Optionally provide output from AnnualDaysBelow, otherwise recalculate. Defaults to None.
 
-        Returns:
-            dict: Dictionary of total years grouped by trigger threshold.
+        Returns
+        -------
+        dict
+            Dictionary of total years grouped by trigger threshold.
         """
 
         # If not provided, calculate AnnualDaysBelow        
@@ -94,11 +111,16 @@ class StorageLevelAssessment:
     def PercentWaterYearsBelow(self,numberyears=None):
         """Returns percent of WYs with at least one day at or below trigger threshold.
 
-        Args:
-            numberyears (dict, optional): Optionally provide output from NumberWaterYearsBelow, otherwise recalculate. Defaults to None.
+        Parameters
+        ----------
+        numberyears : dict, optional
+            Optionally provide output from NumberWaterYearsBelow, otherwise
+            recalculate. Defaults to None.
 
-        Returns:
-            dict: Dictionary of percent years grouped by trigger threshold.
+        Returns
+        -------
+        dict
+            Dictionary of percent years grouped by trigger threshold.
         """
 
         # If not provided, calculate NumberWaterYearsBelow
@@ -111,11 +133,15 @@ class StorageLevelAssessment:
     def EventsBelowTriggerAlgorithm(self,trigger):
         """Returns array of event lengths.
 
-        Args:
-            trigger (any): Trigger threshold against which daily data input is assessed.
+        Parameters
+        ----------
+        trigger
+            Trigger threshold against which daily data input is assessed.
 
-        Returns:
-            list: Array where each item represents the length of a single continuous event.
+        Returns
+        -------
+        list
+            Array where each item represents the length of a single continuous event.
         """
 
         previous_ended=True

@@ -1,10 +1,19 @@
-import pandas as pd
+""" 
+General use IO functions.
+"""
+import re
+
 import bulum.io as bio
 from bulum import utils
-import re
 
 
 def read(filename: str, **kwargs) -> utils.TimeseriesDataframe:
+    """
+    Read the input file.
+
+    It will attempt to determine the filetype and dispatch to the appropriate
+    function in `bulum.io`.
+    """
     filename_lower = filename.lower()
     df = None
     if filename_lower.endswith(".res.csv"):

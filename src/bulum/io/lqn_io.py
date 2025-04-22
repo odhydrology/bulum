@@ -1,20 +1,36 @@
+"""
+IO functions for IQQM listquan. 
+"""
 import os
+
 import numpy as np
 import pandas as pd
+
 from bulum import utils
 
 
-def read_iqqm_lqn_output(filename, col_name=None, df=None) -> utils.TimeseriesDataframe:
+def read_iqqm_lqn_output(filename, col_name=None, df=None, 
+                         *, data_start_row=7) -> utils.TimeseriesDataframe:
     """
-    Reads the output of IQQM listquan. This is a space-separated is format with two columns (date, value) and data 
-    starting on line 7.
+    Reads the output of IQQM listquan. This is a space-separated is format with
+    two columns (date, value) and data starting on line 7.
 
-    Args:
-        filename (_type_): _description_
-        df (_type_, optional): _description_. Defaults to None.
+    Parameters
+    ----------
+    filename 
+        Path to the file to be read.
+    col_name : optional
+        If supplied, sets the name for the resulting output column, otherwise
+        uses the filename.
+    df : DataFrame, optional
+        If supplied, joins the output to `df`.
+    data_start_row : int, optional
+        Optionally specify the start row; may be useful for reading other IQQM
+        TEXT outputs.
 
-    Returns:
-        pd.DataFrame: _description_
+    Returns
+    -------
+    utils.TimeseriesDataframe
     """
     # If no df was supplied, instantiate a new one
     if df is None:
@@ -23,7 +39,6 @@ def read_iqqm_lqn_output(filename, col_name=None, df=None) -> utils.TimeseriesDa
     if col_name is None:
         col_name = os.path.basename(filename)
     # Read the data
-    data_start_row = 7
     temp = pd.read_csv(filename, skiprows=(data_start_row-2),
                        sep=r'\s+', names=["Date", col_name], header=None)
     # temp = utils.set_index_dt(temp, format='%d/%m/%Y')

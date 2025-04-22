@@ -1,35 +1,56 @@
-import pandas as pd
+"""
+Statistical analyses of `DataframeEnsemble`
+"""
 import altair as alt
+import pandas as pd
+
 from bulum import utils
 
-def ensemble_probability_plot(input: utils.DataframeEnsemble | list , variable: str, parameters: list, stat_function, labels=None, width=800, height=400):
-    """Returns a plot of typical probabilistic outputs from DataframeEnsemble inputs. Available statistics: [stats.ensemble_stats.cumulative_risk, stats.ensemble_stats.incremental_risk, stats.ensemble_stats.annual_incremental_risk, stats.ensemble_stats.percentile_envelope]
 
-    Args
-    --------
-        input (utils.DataframeEnsemble | list): A (likely) filtered ODH DataframeEnsemble (or list of DataframeEnsembles).
-        variable (str): Timeseries column of interest from the ensembled DataFrames e.g. 'Storage Volume'.
-        parameters (list): List of parameters to test (relevant to function type).
-        stat_function (function): Function from ODH ensemble stats.
-        labels (_type_, optional): Optional list of label strings. Defaults to None.
-        width (int, optional): Optional plot width. Defaults to 800.
-        height (int, optional): Optional plot height. Defaults to 400.
+def ensemble_probability_plot(input: utils.DataframeEnsemble | list,
+                              variable: str, parameters: list,
+                              stat_function, labels=None,
+                              width=800, height=400):
+    """Returns a plot of typical probabilistic outputs from DataframeEnsemble
+    inputs. 
+
+    Parameters
+    ----------
+    input : DataframeEnsemble | list of DataframeEnsemble
+        A (likely) filtered DataframeEnsemble (or list of DataframeEnsembles).
+    variable : str
+        Timeseries column of interest from the ensembled DataFrames e.g.
+        'Storage Volume'. 
+    parameters : list
+        List of parameters to test (relevant to function type). 
+    stat_function : function 
+        Function from the `bulum.stats.ensemble_stats` module, namely from the
+        following list:
+        - `cumulative_risk`
+        - `incremental_risk`
+        - `annual_incremental_risk`
+        - `percentile_envelope`
+    labels : list of str, optional
+        List of label strings.
+    width : int, optional
+        Plot width. Defaults to 800. 
+    height : int, optional
+        Plot height. Defaults to 400.
 
     Returns
-    --------
-        altair.Chart: Returns an Altair chart object.
+    -------
+    altair.Chart
+        Returns an Altair chart object.
 
     Examples
     --------
-    Constructing cumulative risk plot, looking at storage volumes [100000,50000,20000].
+    Constructing cumulative risk plot, looking at storage volumes
+    [100000,50000,20000].
 
     >>> ensemble_probability_plot(input=[DataframeEnsemble.filter_tag("Scen1"), DataframeEnsemble.filter_tag("Scen2")], variable="Dam Storage Volume", parameters=[100000,50000,20000], stat_function=stats.cumulative_risk)
 
-    Constructing incremental risk plot, looking at storage volumes [100000,50000,20000].
-
-    >>> ensemble_probability_plot(input=[DataframeEnsemble.filter_tag("Scen1"), DataframeEnsemble.filter_tag("Scen2")], variable="Dam Storage Volume", parameters=[100000,50000,20000], stat_function=stats.incremental_risk)
-
-    Constructing annual incremental risk plot, looking at storage volumes [100000,50000,20000]. Custom labels.
+    Constructing annual incremental risk plot, looking at storage volumes
+    [100000,50000,20000]. Custom labels.
 
     >>> ensemble_probability_plot(input=[DataframeEnsemble.filter_tag("Scen1"), DataframeEnsemble.filter_tag("Scen2")], variable="Dam Storage Volume", parameters=[100000,50000,20000], stat_function=stats.annual_incremental_risk, labels=["Existing Dam", "Raised Dam"])
 
@@ -68,20 +89,14 @@ def ensemble_probability_plot(input: utils.DataframeEnsemble | list , variable: 
         scale_domain="unaggregated"
         y_units="Units"
 
-    chart = alt.Chart(input_concat.reset_index()).mark_line(
-    ).transform_fold(
-        label,
-        as_=['column','value']
-    ).transform_calculate(
-        value='round(datum.value * 10)/10'
-    ).encode(
-            x=alt.X('Date:T'),
-            y=alt.Y('value:Q', scale=alt.Scale(domain=scale_domain), title=y_units),
-            color=alt.Color('column:N', legend=alt.Legend(title="Parameter"), sort=None),
-            strokeDash=alt.StrokeDash('Series:N', sort=None)
-    ).properties(
-        width=width,
-        height=height
-    )
+    chart = (alt.Chart(input_concat.reset_index())
+             .mark_line()
+             .transform_fold(label, as_=['column', 'value'])
+             .transform_calculate(value='round(datum.value * 10)/10')
+             .encode(x=alt.X('Date:T'), 
+                     y=alt.Y('value:Q', scale=alt.Scale(domain=scale_domain), title=y_units),
+                     color=alt.Color('column:N', legend=alt.Legend(title="Parameter"), sort=None),
+                     strokeDash=alt.StrokeDash('Series:N', sort=None))
+             .properties(width=width, height=height))
 
     return chart

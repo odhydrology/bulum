@@ -42,7 +42,7 @@ class Tests(unittest.TestCase):
         df["c"] = [random.normalvariate(60,5) for _ in range(3650)]
         df.index = utils.get_dates(start_dt, days=3650,str_format=r'%Y-%m-%d')
         df.index.name = "Date"
-        plots.exceedence_plot(df)
+        plots.exceedance_plot(df)
 
     def test_daily_plot(self):
         start_dt=datetime(1889, 1, 1)
