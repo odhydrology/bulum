@@ -1,22 +1,32 @@
+""" 
+IO functions for reading and writing .res.csv files.
+"""
+
 from datetime import datetime
+from typing import Optional
+
 import numpy as np
 import pandas as pd
+
 from bulum import utils
-from typing import Optional
 
 
 def read_res_csv(filename, custom_na_values=None,
                  df=None, colprefix=None,
                  allow_nonnumeric=False, use_field_name=False,
-                 **kwargs) -> Optional[utils.TimeseriesDataframe]:
+                 **kwargs) -> utils.TimeseriesDataframe:
     """Reads a res csv data file into a DataFrame, and sets the index to the Date.
 
-    Args:
-        filename (_type_): _description_
-        custom_na_values (_type_): A list of values to override the automatically-determined missing values. If None, the missing values will include any defined in the .res.csv file as well as ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan'].
+    Parameters
+    ----------
+    filename
+    custom_na_values : list of str
+        : A list of values to override the automatically-determined missing
+        values. If None, the missing values will include any defined in the
+        .res.csv file as well as:: 
 
-    Returns:
-        _type_: _description_
+            ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan'].
+
     """
     # Handle custom na values
     if custom_na_values is None:
@@ -99,13 +109,15 @@ def read_res_csv(filename, custom_na_values=None,
 def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, missing_data_value="", project_name="", source_version="5.30.0.12728", datetime_format=r"%d/%m/%y") -> None:
     """Writes a dataframe to a res csv.
 
-    Args:
-        df (pd.Dataframe): Dataframe to write to res csv. 
-        filepath (str): Path to output file including extension.
-        missing_data_value (str): Identifier for missing data values. Defaults to empty string. Check compatibility with reader. 
+    Parameters
+    ----------
+    df : Dataframe 
+        Dataframe to write to res csv. 
+    filepath
+        Path to output file including extension.
+    missing_data_value : str
+        Identifier for missing data values. Defaults to empty string. 
     """
-    # Keep this here in case there is a need to manually specify these
-    #   units = "", run_name = "", scenario_name = "", scenario_input_set_name = "", name = "", site = "", element_name = "", water_feature_type = "", element_type = "", structure = "", custom = "",
     # Get metadata
     now = datetime.now().strftime(r"%d/%m/%Y %H:%M")
     num_fields = len(df.columns)

@@ -8,11 +8,3 @@ Submodules
    :maxdepth: 4
 
    bulum.trans.transformers
-
-Module contents
----------------
-
-.. automodule:: bulum.trans
-   :members:
-   :show-inheritance:
-   :undoc-members:

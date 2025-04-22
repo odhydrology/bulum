@@ -19,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="bulum.io.res_csv_io module" href="bulum.io.res_csv_io.html" />
+    <link rel="next" title="bulum.maps package" href="bulum.maps.html" />
     <link rel="prev" title="bulum.io.iqqm_out_reader module" href="bulum.io.iqqm_out_reader.html" /> 
 </head>
 
@@ -91,23 +91,25 @@
              
   <section id="module-bulum.io.lqn_io">
 <span id="bulum-io-lqn-io-module"></span><h1>bulum.io.lqn_io module<a class="headerlink" href="#module-bulum.io.lqn_io" title="Link to this heading"></a></h1>
+<p>IO functions for IQQM listquan.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.io.lqn_io.read_iqqm_lqn_output">
-<span class="sig-name descname"><span class="pre">read_iqqm_lqn_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.lqn_io.read_iqqm_lqn_output" title="Link to this definition"></a></dt>
-<dd><p>Reads the output of IQQM listquan. This is a space-separated is format with two columns (date, value) and data
-starting on line 7.</p>
+<span class="sig-name descname"><span class="pre">read_iqqm_lqn_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_start_row</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.lqn_io.read_iqqm_lqn_output" title="Link to this definition"></a></dt>
+<dd><p>Reads the output of IQQM listquan. This is a space-separated is format with
+two columns (date, value) and data starting on line 7.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>_type_</em>) – _description_</p></li>
-<li><p><strong>df</strong> (<em>_type_</em><em>, </em><em>optional</em>) – _description_. Defaults to None.</p></li>
+<li><p><strong>filename</strong> – Path to the file to be read.</p></li>
+<li><p><strong>col_name</strong> (<em>optional</em>) – If supplied, sets the name for the resulting output column, otherwise
+uses the filename.</p></li>
+<li><p><strong>df</strong> (<em>DataFrame</em><em>, </em><em>optional</em>) – If supplied, joins the output to <cite>df</cite>.</p></li>
+<li><p><strong>data_start_row</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Optionally specify the start row; may be useful for reading other IQQM
+TEXT outputs.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>_description_</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>utils.TimeseriesDataframe</p>
 </dd>
 </dl>
 </dd></dl>
@@ -119,7 +121,7 @@ starting on line 7.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="bulum.io.iqqm_out_reader.html" class="btn btn-neutral float-left" title="bulum.io.iqqm_out_reader module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="bulum.io.res_csv_io.html" class="btn btn-neutral float-right" title="bulum.io.res_csv_io module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="bulum.maps.html" class="btn btn-neutral float-right" title="bulum.maps package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -19,8 +19,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="bulum.io.general_io module" href="bulum.io.general_io.html" />
-    <link rel="prev" title="bulum.io package" href="bulum.io.html" /> 
+    <link rel="next" title="bulum.io.res_csv_io module" href="bulum.io.res_csv_io.html" />
+    <link rel="prev" title="bulum.io.general_io module" href="bulum.io.general_io.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -91,43 +91,32 @@
              
   <section id="module-bulum.io.csv_io">
 <span id="bulum-io-csv-io-module"></span><h1>bulum.io.csv_io module<a class="headerlink" href="#module-bulum.io.csv_io" title="Link to this heading"></a></h1>
+<p>Functions for reading CSVs, particularly time-series CSVs.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.io.csv_io.read_ts_csv">
-<span class="sig-name descname"><span class="pre">read_ts_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colprefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nonnumeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assert_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.csv_io.read_ts_csv" title="Link to this definition"></a></dt>
-<dd><p>Reads a daily timeseries csv into a DataFrame, and sets the index to string dates in the “%Y-%m-%d” format.
-The method assumes the first column are dates.</p>
+<span class="sig-name descname"><span class="pre">read_ts_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.13)"><span class="pre">PathLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colprefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nonnumeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assert_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.csv_io.read_ts_csv" title="Link to this definition"></a></dt>
+<dd><p>Reads a daily timeseries csv into a DataFrame, and sets the index to string
+dates in the “%Y-%m-%d” format. The method assumes the first column are
+dates.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<em>_type_</em>) – _description_</p></li>
-<li><p><strong>date_format</strong> (<em>str</em><em>, </em><em>optional</em>) – defaults to “%d/%m/%Y” as per Fors. Other common formats include “%Y-%m-%d”, “%Y/%m/%d”.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>PathLike</em>)</p></li>
+<li><p><strong>date_format</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – defaults to “%d/%m/%Y” as per Fors. Other common formats include “%Y-%m-%d”, “%Y/%m/%d”.</p></li>
 <li><p><strong>df</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – If provided, the reader will append columns to this dataframe. Defaults to None.</p></li>
-<li><p><strong>colprefix</strong> (<em>str</em><em>, </em><em>optional</em>) – If provided, the reader will append this prefix to the start of each column name. Defaults to None.</p></li>
-<li><p><strong>allow_nonnumeric</strong> (<em>bool</em><em>, </em><em>optional</em>) – If false, the method will assert that all columns are numerical. Defaults to False.</p></li>
-<li><p><strong>assert_date</strong> (<em>bool</em><em>, </em><em>optional</em>) – If true, the method will assert that date index meets “%Y-%m-%d” format. Defaults to True.</p></li>
+<li><p><strong>colprefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – If provided, the reader will append this prefix to the start of each column name. Defaults to None.</p></li>
+<li><p><strong>allow_nonnumeric</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If false, the method will assert that all columns are numerical. Defaults to False.</p></li>
+<li><p><strong>assert_date</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – If true, the method will assert that date index meets “%Y-%m-%d” format. Defaults to True.</p></li>
+<li><p><strong>Returns</strong> – pd.DataFrame: Dataframe containing the data from the csv file.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe containing the data from the csv file.</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.io.csv_io.write_ts_csv">
-<span class="sig-name descname"><span class="pre">write_ts_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.io.csv_io.write_ts_csv" title="Link to this definition"></a></dt>
-<dd><p>_summary_</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – _description_</p></li>
-<li><p><strong>filename</strong> (<em>str</em>) – _description_</p></li>
-</ul>
-</dd>
-</dl>
+<span class="sig-name descname"><span class="pre">write_ts_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.io.csv_io.write_ts_csv" title="Link to this definition"></a></dt>
+<dd><p>Wrapper around <code class="docutils literal notranslate"><span class="pre">pandas.DataFrame.to_csv()</span></code>.</p>
 </dd></dl>
 
 </section>
@@ -136,8 +125,8 @@ The method assumes the first column are dates.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="bulum.io.html" class="btn btn-neutral float-left" title="bulum.io package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="bulum.io.general_io.html" class="btn btn-neutral float-right" title="bulum.io.general_io module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="bulum.io.general_io.html" class="btn btn-neutral float-left" title="bulum.io.general_io module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.io.res_csv_io.html" class="btn btn-neutral float-right" title="bulum.io.res_csv_io module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

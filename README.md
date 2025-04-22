@@ -28,6 +28,8 @@ bulum.__version__
 bulum.hello_world()
 ```
 
+API documentation is available at [odhydrology.github.io/bulum](https://odhydrology.github.io/bulum/).
+
 ## Build and Upload to PyPi
 
 First build a distribution from an anaconda prompt in the root of your project, and then upload the dist to PyPi using Twine.
@@ -40,7 +42,7 @@ python setup.py sdist
 twine upload dist\bulum-0.0.32.tar.gz
 ```
 
-As of Nov 2023, PyPi uses an API token instead of a conventional password. You can still use Twine, but the username is "__token__", and password is the API token which is very long string starting with "pypi-". 
+As of Nov 2023, PyPi uses an API token instead of a conventional password. You can still use Twine, but the username is "\_\_token__", and password is the API token which is very long string starting with "pypi-". 
 
 ``` bash
 username = __token__
@@ -53,7 +55,7 @@ How do I make a new API token? Go to your PyPi account settings, and click on "A
 
 ## Unit Tests
 
-WARNING: Run unit tests from an anaconda environment with compatable dependencies!
+WARNING: Run unit tests from an anaconda environment with compatible dependencies!
 
 Install the nose2 test-runner framework. 
 
@@ -61,7 +63,7 @@ Install the nose2 test-runner framework.
 pip install nose2
 ```
 
-Then from the root project folder run the nose2 module. You can do this as a python modules, or just direcly from the anaconda prompt (both examples given below). This will automatically find and run tests in any modules named "test_*".
+Then from the root project folder run the nose2 module. You can do this as a python modules, or just directly from the anaconda prompt (both examples given below). This will automatically find and run tests in any modules named "test_*".
 
 ```bash
 python -m nose2

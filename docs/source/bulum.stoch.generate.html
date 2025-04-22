@@ -53,7 +53,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.stoch.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.stoch.html#module-bulum.stoch">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
@@ -92,43 +91,61 @@
              
   <section id="module-bulum.stoch.generate">
 <span id="bulum-stoch-generate-module"></span><h1>bulum.stoch.generate module<a class="headerlink" href="#module-bulum.stoch.generate" title="Link to this heading"></a></h1>
+<p>Generate stochastic data.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.stoch.generate.from_pattern">
-<span class="sig-name descname"><span class="pre">from_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daily_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monthly_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annual_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stoch.generate.from_pattern" title="Link to this definition"></a></dt>
-<dd><p>Generates a list of daily values from either a daily, montly, or annual pattern.
-The behaviour depends on what type of pattern is supplied.
-Annual pattern =&gt; annual totals are disaggregated to daily by dividing by 365 or 366 as appropriate.
-Monthly pattern =&gt;</p>
+<span class="sig-name descname"><span class="pre">from_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.13)"><span class="pre">datetime</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daily_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monthly_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annual_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stoch.generate.from_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate a list of daily values from either a daily, monthly, or annual pattern.</p>
+<p>The behaviour depends on what type of pattern is supplied.
+- Annual pattern =&gt;</p>
 <blockquote>
-<div><p>if 1 value is provided, it is used for every month and disaggregated to daily by dividing by the days in the month;
-if 12 values are provided, each month has its own total and which is disaggregated to daily by dividing by the days in the month.</p>
+<div><ul class="simple">
+<li><p>annual totals are disaggregated to daily by dividing by 365 or 366 as
+appropriate.</p></li>
+</ul>
 </div></blockquote>
-<dl class="simple">
-<dt>Daily pattern =&gt;</dt><dd><p>if 1 value is provided, it is used for every day;
-if 7 values are provided, they are taken to represent a week and are repeated accordingly;
-if 366 values are provided, they will be taken to represent days in the calendar year and the last value ignored in non-leap-years.</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Monthly pattern =&gt;</dt><dd><ul>
+<li><p>if 1 value is provided, it is used for every month and disaggregated
+to daily by dividing by the days in the month;</p></li>
+<li><p>if 12 values are provided, each month has its own total and which is
+disaggregated to daily by dividing by the days in the month.</p></li>
+</ul>
 </dd>
 </dl>
+</li>
+<li><dl class="simple">
+<dt>Daily pattern =&gt;</dt><dd><ul>
+<li><p>if 1 value is provided, it is used for every day;</p></li>
+<li><p>if 7 values are provided, they are taken to represent a week and are
+repeated accordingly;</p></li>
+<li><p>if 366 values are provided, they will be taken to represent days in
+the calendar year and the last value ignored in non-leap-years.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Annual patterns are preferred to monthly are preferred to daily.
+Default behaviour is to fill with <cite>1</cite>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dates</strong> (<em>_type_</em>) – _description_</p></li>
-<li><p><strong>daily_pattern</strong> (<em>list</em><em>, </em><em>optional</em>) – _description_. Defaults to [1].</p></li>
-<li><p><strong>monthly_pattern</strong> (<em>list</em><em>, </em><em>optional</em>) – _description_. Defaults to [].</p></li>
-<li><p><strong>annual_pattern</strong> (<em>list</em><em>, </em><em>optional</em>) – _description_. Defaults to [].</p></li>
+<li><p><strong>dates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><em>datetime</em>)</p></li>
+<li><p><strong>daily_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [1].</p></li>
+<li><p><strong>monthly_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [].</p></li>
+<li><p><strong>annual_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [].</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>Exception</strong> – _description_</p></li>
-<li><p><strong>Exception</strong> – _description_</p></li>
-</ul>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – Invalid number of arguments provided for pattern</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>_description_</p>
+<dd class="field-odd"><p>Disaggregated pattern as daily values.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>_type_</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
 </dd>
 </dl>
 </dd></dl>

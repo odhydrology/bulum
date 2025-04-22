@@ -53,7 +53,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.stats.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#module-bulum.stats">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
@@ -95,19 +94,19 @@
 <span id="bulum-stats-stochastic-data-check-module"></span><h1>bulum.stats.stochastic_data_check module<a class="headerlink" href="#module-bulum.stats.stochastic_data_check" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.stats.stochastic_data_check.StochasticDataComparison">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StochasticDataComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.stochastic_data_check.StochasticDataComparison" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StochasticDataComparison</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.stochastic_data_check.StochasticDataComparison" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Set of outputs for comparison of baseline dataset with additional dataset(s).</p>
 <p>Internal attributes provide raw outputs and charts for comparison of timeseries cross-correlations, distribution and general summary statistics.
 Can be applied to stochastically generated data e.g. some subset (mean, percentile) of climate data replicates or climate factor adjusted datasets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dfs_dict</strong> (<em>dict</em><em> of </em><em>pd.DataFrames</em>) – Dict containing name (key) and reference to (value) of input dataframe(s).
+<li><p><strong>dfs_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em> of </em><em>pd.DataFrames</em>) – Dict containing name (key) and reference to (value) of input dataframe(s).
 Outputs are calculated for each of the columns in the first DataFrame (first entry in dict).
 Assumes that subsequent DataFrames contain at least the subset of columns from first DataFrame. Column headers must be identical.</p></li>
-<li><p><strong>wy_month</strong> (<em>int</em><em>, </em><em>default 7</em>) – Water Year start month for annual aggregation.</p></li>
-<li><p><strong>allow_part_years</strong> (<em>bool</em><em>, </em><em>default False</em>) – Allow part water years or only complete water years.</p></li>
+<li><p><strong>wy_month</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>default 7</em>) – Water Year start month for annual aggregation.</p></li>
+<li><p><strong>allow_part_years</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – Allow part water years or only complete water years.</p></li>
 </ul>
 </dd>
 </dl>

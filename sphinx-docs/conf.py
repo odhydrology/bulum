@@ -20,7 +20,8 @@ extensions = [
     "sphinx.ext.githubpages",
     # "sphinx.ext.apidoc",
     'sphinx.ext.napoleon',
-    "myst_parser"
+    "myst_parser",
+    "sphinx.ext.intersphinx",
 ]
 
 templates_path = ['_templates']
@@ -29,6 +30,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # io.read() vs io.general_csv.read()
 add_module_names = False
+
+# -- Extension configuration -------------------------------------------------
 
 apidoc_modules = [
     {
@@ -49,9 +52,15 @@ apidoc_modules = [
     },
 ]
 
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
+    'pandas': ('https://pandas.pydata.org/docs/', None),
+}
+
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['static']
+html_static_path = ['_static']

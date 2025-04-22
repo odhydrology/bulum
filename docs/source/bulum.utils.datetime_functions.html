@@ -19,7 +19,6 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="bulum.utils.interpolation module" href="bulum.utils.interpolation.html" />
     <link rel="prev" title="bulum.utils.dataframe_functions module" href="bulum.utils.dataframe_functions.html" /> 
 </head>
 
@@ -55,7 +54,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.utils.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.utils.html#module-bulum.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -94,13 +92,13 @@
 <span id="bulum-utils-datetime-functions-module"></span><h1>bulum.utils.datetime_functions module<a class="headerlink" href="#module-bulum.utils.datetime_functions" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_date_format">
-<span class="sig-name descname"><span class="pre">get_date_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_date_format" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_date_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">date_str</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_date_format" title="Link to this definition"></a></dt>
 <dd><p>Trial and error approach to determining the date format of a date string.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_dates">
-<span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">datetime</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_dates" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.13)"><span class="pre">datetime</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">days</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_end_date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_dates" title="Link to this definition"></a></dt>
 <dd><p>Generates a list of daily datetime values from a given start date. The length
 may be defined by an end_date, or a number of days, or a number of years. This
 function may be useful for working with daily datasets and models.</p>
@@ -129,26 +127,48 @@ function may be useful for working with daily datasets and models.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy">
-<span class="sig-name descname"><span class="pre">get_wy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_end_year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy" title="Link to this definition"></a></dt>
-<dd><p>Returns water years, as a list of ints, for a given array of dates. Use this to
-add water year info into a pandas DataFrame.</p>
-<p>The default (using_end_year=False) aligns water years with the primary water
-allocation at the start of the water year. The alternative (using_end_year==True)
-follows the convention used for fiscal years whereby water years are labelled
-based on their end dates. Using the fiscal convention, the 2022 water year is
-from 2021-07-01 to 2022-06-30 inclusive.</p>
+<span class="sig-name descname"><span class="pre">get_wy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Index.html#pandas.Index" title="(in pandas v2.2.3)"><span class="pre">Index</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://numpy.org/doc/stable/reference/arrays.scalars.html#numpy.datetime64" title="(in NumPy v2.2)"><span class="pre">datetime64</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">using_end_year</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy" title="Link to this definition"></a></dt>
+<dd><p>Returns water years for a given array of dates. Use this to add water year
+info into a pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wy_month</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>default 7</em>)</p></li>
+<li><p><strong>using_end_year</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default False</em>) – <ul>
+<li><p><cite>False</cite> aligns water years with the primary water allocation at the
+start of the water year.</p></li>
+<li><p><cite>True</cite> follows the convention used for fiscal years whereby water
+years are labelled based on their end dates. Using the fiscal
+convention, the 2022 water year is from 2021-07-01 to 2022-06-30
+inclusive.</p></li>
+</ul>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The water years corresponding to the given dates.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)">int</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Modified excerpt from <a class="reference internal" href="bulum.stats.aggregate_stats.html#module-bulum.stats.aggregate_stats" title="bulum.stats.aggregate_stats"><code class="xref py py-mod docutils literal notranslate"><span class="pre">bulum.stats.aggregate_stats</span></code></a></p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">get_wy</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">wy_month</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy_end_date">
-<span class="sig-name descname"><span class="pre">get_wy_end_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_end_date" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_wy_end_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_end_date" title="Link to this definition"></a></dt>
 <dd><p>Returns an appropriate water year end date based on data frame dates and the
 water year start month.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe with date as index</p></li>
-<li><p><strong>wy_month</strong> (<em>int</em><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
+<li><p><strong>wy_month</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -162,14 +182,14 @@ water year start month.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.get_wy_start_date">
-<span class="sig-name descname"><span class="pre">get_wy_start_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_start_date" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_wy_start_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.get_wy_start_date" title="Link to this definition"></a></dt>
 <dd><p>Returns an appropriate water year start date based on data frame dates and the
 water year start month.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe with date as index</p></li>
-<li><p><strong>wy_month</strong> (<em>int</em><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
+<li><p><strong>wy_month</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Water year start month. Defaults to 7.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -198,7 +218,12 @@ Tested over the range 0001-01-01 to 9999-12-31.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.datetime_functions.to_np_datetimes64d">
 <span class="sig-name descname"><span class="pre">to_np_datetimes64d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date_fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y-%m-%d'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.datetime_functions.to_np_datetimes64d" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Convert a list of date strings to numpy datetimes64d.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Assumes the dates are consecutive!</p>
+</div>
+</dd></dl>
 
 </section>
 
@@ -207,7 +232,6 @@ Tested over the range 0001-01-01 to 9999-12-31.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="bulum.utils.dataframe_functions.html" class="btn btn-neutral float-left" title="bulum.utils.dataframe_functions module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="bulum.utils.interpolation.html" class="btn btn-neutral float-right" title="bulum.utils.interpolation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

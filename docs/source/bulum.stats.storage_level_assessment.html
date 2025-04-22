@@ -53,7 +53,6 @@
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#subpackages">Subpackages</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.stats.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.stats.html#module-bulum.stats">Module contents</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
@@ -95,8 +94,8 @@
 <span id="bulum-stats-storage-level-assessment-module"></span><h1>bulum.stats.storage_level_assessment module<a class="headerlink" href="#module-bulum.stats.storage_level_assessment" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StorageLevelAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StorageLevelAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow">
 <span class="sig-name descname"><span class="pre">AnnualDaysBelow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow" title="Link to this definition"></a></dt>
@@ -106,7 +105,7 @@
 <dd class="field-odd"><p>Dictionary of annual timeseries grouped by trigger threshold.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -118,15 +117,17 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trigger</strong> (<em>any</em><em>, </em><em>optional</em>) – Optionally provide single trigger threshold to be assessed. Defaults to None.</p></li>
-<li><p><strong>annualdaysbelow</strong> (<em>dict</em><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise recalculate. Defaults to None.</p></li>
+<li><p><strong>trigger</strong> (<em>optional</em>) – Optionally provide single trigger threshold to be assessed. Defaults
+to None.</p></li>
+<li><p><strong>annualdaysbelow</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise
+recalculate. Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataFrame of total days at or below threshold by WY, grouped by trigger threshold.</p>
+<dd class="field-even"><p>Dataframe of total days at or below threshold by WY, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df</p>
+<dd class="field-odd"><p>DataFrame</p>
 </dd>
 </dl>
 </dd></dl>
@@ -137,13 +138,13 @@
 <dd><p>Returns event length array for each trigger threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional minimum event length to return. Defaults to 1.</p>
+<dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Optional minimum event length to return. Defaults to 1.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary of event length arrays, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -154,13 +155,13 @@
 <dd><p>Returns array of event lengths.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trigger</strong> (<em>any</em>) – Trigger threshold against which daily data input is assessed.</p>
+<dd class="field-odd"><p><strong>trigger</strong> – Trigger threshold against which daily data input is assessed.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Array where each item represents the length of a single continuous event.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>list</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -171,13 +172,13 @@
 <dd><p>Returns count of events for each trigger threshold</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – Optional minimum event length to count. Defaults to 1.</p>
+<dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Optional minimum event length to count. Defaults to 1.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary of event counts, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -191,7 +192,7 @@
 <dd class="field-odd"><p>Dictionary of event counts, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -202,13 +203,16 @@
 <dd><p>Returns total WYs with at least one day at or below trigger threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>annualdaysbelow</strong> (<em>dict</em><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise recalculate. Defaults to None.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>(</strong><strong>dict</strong> (<em>annualdaysbelow</em>)</p></li>
+<li><p><strong>optional</strong><strong>)</strong> (<em>Optionally provide output from AnnualDaysBelow</em><em>, </em><em>otherwise recalculate. Defaults to None.</em>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary of total years grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -219,13 +223,14 @@
 <dd><p>Returns percent of WYs with at least one day at or below trigger threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>numberyears</strong> (<em>dict</em><em>, </em><em>optional</em>) – Optionally provide output from NumberWaterYearsBelow, otherwise recalculate. Defaults to None.</p>
+<dd class="field-odd"><p><strong>numberyears</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from NumberWaterYearsBelow, otherwise
+recalculate. Defaults to None.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Dictionary of percent years grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>dict</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>

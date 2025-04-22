@@ -55,7 +55,6 @@
 <li class="toctree-l3"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="bulum.utils.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="bulum.utils.html#module-bulum.utils">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -92,18 +91,16 @@
              
   <section id="module-bulum.utils.dataframe_extensions">
 <span id="bulum-utils-dataframe-extensions-module"></span><h1>bulum.utils.dataframe_extensions module<a class="headerlink" href="#module-bulum.utils.dataframe_extensions" title="Link to this heading"></a></h1>
-<p>TimeseriesDataframes and DataframeEnsembles.</p>
-<p>TODO —DESCRIBE—
-TimeseriesDataframes (TSDF) are a wrapper around pandas
-dataframes, with extra fields (tags, name, source, …) and methods that
-facilitate working with these fields.</p>
+<p>Provides extensions to dataframes which facilitates tracking and bulk analysis.</p>
+<p>TimeseriesDataframes (TSDF) are a wrapper around pandas dataframes, with extra
+fields (tags, name, source, …) and methods that facilitate working with these
+fields.</p>
 <p>DataframeEnsembles are a way to organise multiple TSDFs, with methods that work
 (at present) primarily with the tags associated with TSDFs.</p>
-<p>TODO —API—</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataframeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataframeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.13)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>A DataframeEnsemble is an collection of bulum-style timeseries
 dataframes, which might represent collected results from a set of model
 runs. Each timeseries dataframe is stored in an internal object, with a
@@ -116,8 +113,8 @@ have the same index, and the same columns.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.add_tag">
-<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.add_tag" title="Link to this definition"></a></dt>
-<dd><p>Add a tag to all dataframes.</p>
+<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.add_tag" title="Link to this definition"></a></dt>
+<dd><p>Add a tag to all member dataframes.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -128,24 +125,24 @@ have the same index, and the same columns.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.df_shape_matches_ensemble">
-<span class="sig-name descname"><span class="pre">df_shape_matches_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.df_shape_matches_ensemble" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">df_shape_matches_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_df</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.df_shape_matches_ensemble" title="Link to this definition"></a></dt>
 <dd><p>Internal function to verify new dfs.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.filter_tag">
-<span class="sig-name descname"><span class="pre">filter_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.filter_tag" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">filter_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.filter_tag" title="Link to this definition"></a></dt>
 <dd><p>Return a new ensemble containing dataframes filtered by tag.</p>
 <p>By default, it will include all dataframes whose tags partially match
 the provided tag.</p>
-<p>This function delegates to TSDF.has_tag(), refer to that function for
+<p>This function delegates to <cite>TSDF.has_tag()</cite>, refer to that function for
 keyword arguments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>tag</strong> – The tag to match. String, regex pattern, or compiled regex pattern.
-(Regex requires regex argument to be set)</p></li>
-<li><p><strong>exclude</strong> – If True, it will filter <em>out</em> all dataframes which match the tag.</p></li>
+(Regex requires regex argument to be set, c.f. <cite>TSDF.has_tag()</cite>)</p></li>
+<li><p><strong>exclude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – If True, it will <em>filter out</em> all dataframes which match the tag.</p></li>
 </ul>
 </dd>
 </dl>
@@ -168,7 +165,7 @@ the dataframe at the given key.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg">
 <em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Specifies the type of argument supplied to filtering functions in TSDF and</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg.OBJECT">
@@ -184,36 +181,31 @@ the dataframe at the given key.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeseriesDataframe</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="Link to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">TimeseriesDataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
 <p>A TimeseriesDataframe is thinly extended pd.Dataframe. Abbreviated casually
 as TSDF throughout the documentation. It adds the following fields:</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>name (str)</p></li>
 <li><p>source (str)</p></li>
 <li><p>description (str)</p></li>
 <li><p>a string of tags (str)</p></li>
 </ul>
-</div></blockquote>
-<p>—API—
-TODO</p>
-<p>init()</p>
-<p>copy_from_dataframe(df)</p>
-<p>…</p>
-<p>has_tag():</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.TAG_DELIMITER">
 <span class="sig-name descname"><span class="pre">TAG_DELIMITER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">','</span></em><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.TAG_DELIMITER" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<dd><p>Used to consistently separate tags.
+Kept as a variable for semantic purposes.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.add_tag">
-<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_membership</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.add_tag" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_membership</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.add_tag" title="Link to this definition"></a></dt>
 <dd><p>Add a tag to the TimeseriesDataframe.</p>
 <p>This is the canonical way to add tags to a TimeseriesDataframe. It can
 add multiple tags separated by the designated tag delimiter (by default,
 a comma ,).</p>
+<p class="rubric">Examples</p>
 <p>The <cite>check_membership</cite> flag will ensure that <cite>tag</cite> does not match with
 existing tags, but will not (at present) check the other way around. For
 example, the following will not raise an error:
@@ -235,30 +227,26 @@ example, the following will not raise an error:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe">
-<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.has_tag">
-<span class="sig-name descname"><span class="pre">has_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Pattern</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bulum.utils.dataframe_extensions.RegexArg" title="bulum.utils.dataframe_extensions.RegexArg"><span class="pre">RegexArg</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.has_tag" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">has_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/re.html#re.Pattern" title="(in Python v3.13)"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bulum.utils.dataframe_extensions.RegexArg" title="bulum.utils.dataframe_extensions.RegexArg"><span class="pre">RegexArg</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.has_tag" title="Link to this definition"></a></dt>
 <dd><p>Check if the provided tag matches any of the dataframe’s tags.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>pattern</strong> – string pattern, regex pattern, or compiled regex object</p></li>
-<li><p><strong>regex</strong> – <p>Optional[RegexArg (enum)]; keyword-only
-None    Uses python <cite>in</cite> operation to check for membership;</p>
-<blockquote>
-<div><p>expects a string to be supplied to pattern</p>
-</div></blockquote>
-<p>PATTERN non-compiled regex pattern
-OBJECT  compiled regex pattern</p>
+<li><p><strong>pattern</strong> (<a class="reference internal" href="#bulum.utils.dataframe_extensions.RegexArg" title="bulum.utils.dataframe_extensions.RegexArg"><em>RegexArg</em></a><em>, </em><em>optional</em><em>, </em><em>keyword-only</em><em>)</em>) – <ul>
+<li><p>None: Uses python <cite>in</cite> operation to check for membership; expects
+a string to be supplied to pattern.</p></li>
+<li><p><cite>RegexArg</cite>: Uses the regex engine to search for the tag.</p></li>
+</ul>
 </p></li>
-<li><p><strong>exact</strong> – bool
-Whether we require an exact match of the tag to return True.
+<li><p><strong>exact</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>) – Whether we require an exact match of the tag.
 This argument is superceded by a non-None <cite>regex</cite> argument, and
 may be accomplished (depending on the particulars) via regex by
-<cite>bregexb</cite>.</p></li>
+<code class="docutils literal notranslate"><span class="pre">\b&lt;regex&gt;\b</span></code>.</p></li>
 </ul>
 </dd>
 </dl>

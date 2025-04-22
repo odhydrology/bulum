@@ -21,11 +21,3 @@ Submodules
    bulum.stats.reliability_stats_class
    bulum.stats.stochastic_data_check
    bulum.stats.storage_level_assessment
-
-Module contents
----------------
-
-.. automodule:: bulum.stats
-   :members:
-   :show-inheritance:
-   :undoc-members:

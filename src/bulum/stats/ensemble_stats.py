@@ -1,18 +1,31 @@
+"""
+Statistical analyses of `DataframeEnsemble`
+"""
 import pandas as pd
 import numpy as np
 from bulum import utils
-from datetime import datetime, timedelta
 
 def cumulative_risk(input: utils.DataframeEnsemble, variable: str, parameters: list):
-    """Returns a timeseries of cumulative risk for each parameter i.e. probability (as a proportion of ensemble DataFrames) of variable having been below a certain parameter at least once by a given date in the timeseries.
+    """Returns a timeseries of cumulative risk for each parameter i.e.
+    probability (as a proportion of ensemble DataFrames) of variable having been
+    below a certain parameter at least once by a given date in the timeseries.
 
-    Args:
-        input (utils.DataframeEnsemble): A (likely) filtered ODH DataframeEnsemble.
-        variable (str): Timeseries column of interest from the ensembled DataFrames e.g. 'Storage Volume'.
-        parameters (list): List of parameters to test.
+    Parameters
+    ----------
+    input : DataframeEnsemble
+        A (likely filtered) bulum DataframeEnsemble.
+    variable : str
+        Timeseries column of interest from the ensembled DataFrames e.g.
+        'Storage Volume'.
+    parameters : list
+        List of parameters to test.
 
-    Returns:
-        dict: Dictionary with keys = 'parameters' and values = cumulative risk timeseries output.
+    Returns
+    -------
+    dict
+        Dictionary with keys = 'parameters' and values = cumulative risk
+        timeseries output.
+    
     """    
     if not isinstance(parameters, list):
         parameters=[parameters]     
@@ -34,15 +47,24 @@ def cumulative_risk(input: utils.DataframeEnsemble, variable: str, parameters: l
     return cumu_dict
 
 def percentile_envelope(input: utils.DataframeEnsemble, variable: str, parameters: list):
-    """Returns a timeseries of percentile outcomes for a given variable across ensemble DataFrames for a given date in the timeseries.
+    """Returns a timeseries of percentile outcomes for a given variable across
+    ensemble DataFrames for a given date in the timeseries.
 
-    Args:
-        input (utils.DataframeEnsemble): A (likely) filtered ODH DataframeEnsemble.
-        variable (str): Timeseries column of interest from the ensembled DataFrames e.g. 'Storage Volume'.
-        parameters (list): List of percentiles (0 - 100) to test.
+    Parameters
+    ----------
+    input : utils.DataframeEnsemble
+        A (likely) filtered bulum DataframeEnsemble.
+    variable : str
+        Timeseries column of interest from the ensembled DataFrames e.g.
+        'Storage Volume'.
+    parameters : list
+        List of percentiles (0 - 100) to test.
 
-    Returns:
-        dict: Dictionary with keys = 'parameters' and values = percentile envelope timeseries output.
+    Returns
+    -------
+    dict
+        Dictionary with keys = 'parameters' and values = percentile envelope
+        timeseries output.
     """   
     if not isinstance(parameters, list):
         parameters=[parameters]     
@@ -53,15 +75,26 @@ def percentile_envelope(input: utils.DataframeEnsemble, variable: str, parameter
     return env_dict
 
 def incremental_risk(input: utils.DataframeEnsemble, variable: str, parameters: list):
-    """Returns a timeseries of incremental risk for each parameter i.e. probability (as a proportion of ensemble DataFrames) of variable having been below a certain parameter for a given date in the timeseries.
+    """Returns a timeseries of incremental risk for each parameter i.e.
+    probability (as a proportion of ensemble DataFrames) of variable having been
+    below a certain parameter for a given date in the timeseries.
 
-    Args:
-        input (utils.DataframeEnsemble): A (likely) filtered ODH DataframeEnsemble.
-        variable (str): Timeseries column of interest from the ensembled DataFrames e.g. 'Storage Volume'.
-        parameters (list): List of parameters to test.
+    Parameters
+    ----------
+    input : DataframeEnsemble
+        A (likely) filtered bulum DataframeEnsemble.
+    variable : str
+        Timeseries column of interest from the ensembled DataFrames e.g.
+        'Storage Volume'.
+    parameters : list
+        List of parameters to test.
 
-    Returns:
-        dict: Dictionary with keys = 'parameters' and values = incremental risk timeseries output.
+    Returns
+    -------
+    dict
+        Dictionary with keys = 'parameters' and values = incremental risk
+        timeseries output.
+
     """   
     if not isinstance(parameters, list):
         parameters=[parameters]    
@@ -73,16 +106,28 @@ def incremental_risk(input: utils.DataframeEnsemble, variable: str, parameters: 
     return inc_dict
 
 def annual_incremental_risk(input: utils.DataframeEnsemble, variable: str, parameters: list, min_count=7):
-    """Returns an annual timeseries of incremental risk for each parameter i.e. probability (as a proportion of ensemble DataFrames) of variable having been below a certain parameter for a given water year in the timeseries, with a minimum event count threshold.
+    """Returns an annual timeseries of incremental risk for each parameter i.e.
+    probability (as a proportion of ensemble DataFrames) of variable having been
+    below a certain parameter for a given water year in the timeseries, with a
+    minimum event count threshold.
 
-    Args:
-        input (utils.DataframeEnsemble): A (likely) filtered ODH DataframeEnsemble.
-        variable (str): Timeseries column of interest from the ensembled DataFrames e.g. 'Storage Volume'.
-        parameters (list): List of parameters to test.
-        min_count (int, optional): Minimum number of days in year to count as event. Defaults to 7.
+    Parameters
+    ----------
+    input : DataframeEnsemble
+        A (likely) filtered bulum DataframeEnsemble.
+    variable : str
+        Timeseries column of interest from the ensembled DataFrames e.g.
+        'Storage Volume'.
+    parameters : list
+        List of parameters to test.
+    min_count : int, optional
+        Minimum number of days in year to count as event. Defaults to 7.
 
-    Returns:
-        dict: Dictionary with keys = 'parameters' and values = annual incremental risk timeseries output.
+    Returns
+    -------
+    dict 
+        Dictionary with keys = 'parameters' and values = annual incremental risk
+        timeseries output.
     """   
     if not isinstance(parameters, list):
         parameters=[parameters] 
