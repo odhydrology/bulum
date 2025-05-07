@@ -6,6 +6,7 @@ from typing import Optional
 
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
 from bulum import utils
 
@@ -28,7 +29,7 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
     return first_non_zero and rest_zeroes
 
 
-def read_idx(filename, skip_header_bytes: bool | None = None) -> utils.TimeseriesDataframe:
+def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> utils.TimeseriesDataframe:
     """
     Read IDX file.
 
@@ -45,12 +46,14 @@ def read_idx(filename, skip_header_bytes: bool | None = None) -> utils.Timeserie
     -------
     utils.TimeseriesDataframe
     """
-    if not os.path.exists(filename):
+    if not isinstance(filename, Path):
+        filename = Path(filename)
+    if not (filename.exists() and filename.is_file()):
         raise FileNotFoundError(f"File does not exist: {filename}")
     # Read ".idx" file
-    with open(filename) as f:
+    with open(filename, 'r') as f:
         # Skip line
-        stmp = f.readline()
+        _ = f.readline()
         # Start date, end date, date interval
         stmp = f.readline().split()
         date_start = utils.standardize_datestring_format([stmp[0]])[0]
@@ -63,7 +66,7 @@ def read_idx(filename, skip_header_bytes: bool | None = None) -> utils.Timeserie
             sname = f"{n + 1}>{sfile}>{sdesc}"
             snames.append(sname)
     # Read ".out" file
-    out_filename = filename.lower().replace('.idx', '.out')
+    out_filename = filename.with_suffix(".out")
     if not os.path.exists(out_filename):
         raise FileNotFoundError(f"File does not exist: {out_filename}")
     # 4-byte reals
@@ -80,11 +83,11 @@ def read_idx(filename, skip_header_bytes: bool | None = None) -> utils.Timeserie
         daily_date_values = utils.datetime_functions.get_dates(
             date_start, end_date=date_end, include_end_date=True)
         df = pd.DataFrame.from_records(b_data, index=daily_date_values)
-        df.columns = snames
+        df.columns = snames  # type: ignore
         df.index.name = "Date"
         # Check data types. If not 'float64' or 'int64', convert to 'float64'
         x = df.select_dtypes(exclude=['int64', 'float64']).columns
-        if x.__len__() > 0:
+        if len(x) > 0:
             df = df.astype({i: 'float64' for i in x})
     elif date_flag == 1:
         raise NotImplementedError("Monthly data not yet supported")

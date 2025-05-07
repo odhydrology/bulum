@@ -1,5 +1,7 @@
 """Read .OUT files with an associated .IQN file."""
 
+# TODO: convert this to use pathlib
+
 import os
 import subprocess
 from math import floor
@@ -138,6 +140,10 @@ class IqqmOutReader:
         """
         with open(self.iqqm_out_filepath, encoding="UTF-8") as file:
             ss = file.readlines()
+        # HACK: removes comment lines after line 2
+        # TODO: change hardcoded values to make this method more robust
+        while ss[2].strip().startswith('/'):
+            ss.pop(2)
         # Read the recorder-flag matrix
         ss2 = ss[2].split()  # line 3 in the file
         n_node_types = int(ss2[0])
@@ -160,7 +166,7 @@ class IqqmOutReader:
                 break
             node_number: str = f"{int(node_line[0:3]):0>3}"  # 053
             node_name = str.strip(node_line[3:20])  # 'Unallocated Irr'
-            node_type = float(node_line[20:])  # 8.3
+            node_type = float(node_line[20:].split()[0].strip())  # 8.3
             node_supertype = floor(node_type)  # 8
             for j in range(n_output_types):
                 if recorder_flags[node_supertype][j] == "0":

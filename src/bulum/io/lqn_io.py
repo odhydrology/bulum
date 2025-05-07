@@ -4,12 +4,13 @@ IO functions for IQQM listquan output files.
 This module provides functionality to read IQQM listquan output files,
 which are space-separated text files containing time series data.
 """
+
 import os
+from pathlib import Path
 from typing import Union
 
 import numpy as np
 import pandas as pd
-
 from bulum import utils
 
 
@@ -23,7 +24,9 @@ def read_iqqm_lqn_output(filename: str | os.PathLike, col_name: str | None = Non
     Parameters
     ----------
     filename : str or :class:`os.PathLike`
-        Path to the file to be read.
+        Path to the file to be read. A str may be passed in for
+        backwards-compatibility purposes, in which case it will be converted to
+        a Path.
     col_name : str, optional
         If supplied, sets the name for the resulting output column, otherwise
         uses the filename. Default is None.
@@ -42,12 +45,17 @@ def read_iqqm_lqn_output(filename: str | os.PathLike, col_name: str | None = Non
         A time series dataframe containing the parsed data with standardized
         date index and the specified column name.
     """
+    if not isinstance(filename, Path):
+        filename = Path(filename)
+    if not filename.exists():
+        raise FileNotFoundError(f"File does not exist: {filename}")
+
     # If no df was supplied, instantiate a new one
     if df is None:
         df = pd.DataFrame()
     # If no column name was specified, we use the base name of the file
     if col_name is None:
-        col_name = os.path.basename(filename)
+        col_name = filename.name
     # Read the data
     temp = pd.read_csv(filename, skiprows=(data_start_row-2),
                        sep=r'\s+', names=["Date", col_name], header=None)

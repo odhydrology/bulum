@@ -3,16 +3,17 @@ IO functions for reading and writing .res.csv files.
 """
 
 from datetime import datetime
-from typing import Optional
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
+import os
+from typing import Optional
 from bulum import utils
 
 
-def read_res_csv(filename, custom_na_values=None,
-                 df=None, colprefix=None,
+def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
+                 df: Optional[pd.DataFrame] = None, colprefix=None,
                  allow_nonnumeric=False, use_field_name=False,
                  **kwargs) -> utils.TimeseriesDataframe:
     """Reads a res csv data file into a DataFrame, and sets the index to the Date.
@@ -21,7 +22,7 @@ def read_res_csv(filename, custom_na_values=None,
     ----------
     filename
     custom_na_values : list of str
-        : A list of values to override the automatically-determined missing
+        A list of values to override the automatically-determined missing
         values. If None, the missing values will include any defined in the
         .res.csv file as well as:: 
 
@@ -40,7 +41,7 @@ def read_res_csv(filename, custom_na_values=None,
     # Scrape through the header
     metadata_lines = []
     eoh_found = False
-    with open(filename) as f:
+    with open(filename, encoding='UTF-8') as f:
         line = ""
         for line in f:
             metadata_lines.append(line)
@@ -65,8 +66,8 @@ def read_res_csv(filename, custom_na_values=None,
     # Check values
     if not allow_nonnumeric:
         for col in temp.columns:
-            if not np.issubdtype(temp[col].dtype, np.number):
-                raise Exception(f"ERROR: Column '{col}' is not numeric!")
+            if not np.issubdtype(temp[col].dtype, np.number):  # type: ignore
+                raise ValueError(f"ERROR: Column '{col}' is not numeric!")
     # Replace column names with field name if required
     if use_field_name:
         field_count = -2                                         #i'm using this -2 value to mean do nothing
@@ -133,7 +134,7 @@ def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, miss
     first_date: datetime = df.index[0]
     last_date: datetime = df.index[-1]
 
-    with open(filepath, 'w') as f:
+    with open(filepath, 'w', encoding="UTF-8") as f:
         f.write(f"File version,{file_version}\n")
         f.write(f"Missing data value,{missing_data_value}\n")
         f.write("EOM\n")
@@ -141,7 +142,7 @@ def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, miss
         f.write(f"Source version,{source_version}\n")
         f.write(f"Latest result run time,{now}\n")
         f.write(f"Simulation time,{first_date} - {last_date}\n")
-        f.write("Field,Units,RunName,ScenarioName,ScenarioInputSetName,Name,Site,ElementName,WaterFeatureType,ElementType,Structure,Custom" + '\n')
+        f.write("Field,Units,RunName,ScenarioName,ScenarioInputSetName,Name,Site,ElementName,WaterFeatureType,ElementType,Structure,Custom\n")
         f.write("EOC\n")
         f.write(f"{num_fields}\n")
         for idx, column_name in enumerate(df.columns):
