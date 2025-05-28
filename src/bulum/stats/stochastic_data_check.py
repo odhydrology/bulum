@@ -13,6 +13,8 @@ class StochasticDataComparison:
     Internal attributes provide raw outputs and charts for comparison of timeseries cross-correlations, distribution and general summary statistics. 
     Can be applied to stochastically generated data e.g. some subset (mean, percentile) of climate data replicates or climate factor adjusted datasets.
 
+    Legend in most charts is selectable to reduce the number of displayed datasets.
+
     Parameters
     ----------
     dfs_dict : dict of pd.DataFrames
@@ -25,13 +27,16 @@ class StochasticDataComparison:
         
     allow_part_years : bool, default False
         Allow part water years or only complete water years.
+    
+    show_bands: bool, default False
+        Whether to show value ranges as grey band in statistic charts 
 
     Attributes
     --------
     StochasticDataComparison.Correlations : {outputs, chts, heatmaps}
-        outputs: Multi-index df with Lag-0 and Lag-1 cross correlations grouped by - Period (annual vs. months), Lag-type, Timeseries, Dataset
-        chts: Multi-level dictionary with charts stored by - Period (annual vs. months), Lag-type, Timeseries
-        heatmaps: Multi-level dictionary with charts stored by - Period (annual vs. months), Lag-type, Dataset
+        outputs: Multi-index df with Lag-0 and Lag-1 cross correlations grouped by - Period (annual vs. months vs. daily), Lag-type, Timeseries, Dataset
+        chts: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Timeseries
+        heatmaps: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Dataset
         
     StochasticDataComparison.Distributions : {outputs, chts}
         outputs: Multi-index df with distribution of each timeseries grouped by - Period (annual vs. months), Timeseries, Dataset
@@ -39,7 +44,7 @@ class StochasticDataComparison:
         
     StochasticDataComparison.Stats : {outputs, chts}
         outputs: Multi-index df with stats grouped by - Period (annual vs. months), Statistic, Dataset, Timeseries
-        chts: Multi-level dictionary with charts stored by - Period (annual vs. months), Statistic
+        chts: Multi-level dictionary with charts stored by - Period (annual vs. months vs. monthly), Statistic, Timeseries (if monthly)
 
     Examples
     --------
@@ -97,10 +102,11 @@ class StochasticDataComparison:
 
     """
 
-    def __init__(self, dfs_dict: dict, wy_month=7, allow_part_years=False) -> None:
+    def __init__(self, dfs_dict: dict, wy_month=7, allow_part_years=False, show_bands=False) -> None:
                    
         self.wy_month = wy_month
         self.allow_part_years = allow_part_years
+        self.show_bands = show_bands
 
         self.dfs = dfs_dict.copy()
         self.datasets=[]
@@ -119,9 +125,9 @@ class StochasticDataComparison:
         # Calculate whether to include full WYs only
         if not allow_part_years:
             for keys,values in self.dfs.items():
-                self.dfs[keys] = utils.crop_to_wy(values, wy_month)  
+                self.dfs[keys] = utils.crop_to_wy(values, self.wy_month)  
 
-        self.cropped_df_ann={keys: values.groupby(utils.get_wy(values.index)).sum() for keys, values in self.dfs.items()}
+        self.cropped_df_ann={keys: values.groupby(utils.get_wy(values.index, self.wy_month)).sum() for keys, values in self.dfs.items()}
         self.cropped_df_mon={keys: values.groupby(utils.get_year_and_month(values.index)).sum() for keys, values in self.dfs.items()}
 
         self.Stats={}
@@ -148,7 +154,7 @@ class StochasticDataComparison:
             - Period (annual vs. months), 
             - Timeseries, 
             - Dataset 
-        """
+        """    
         distr={}
 
         months=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
@@ -196,6 +202,7 @@ class StochasticDataComparison:
         """        
 
         charts={}
+        selection = alt.selection_point(fields=['key'], bind='legend')
 
         for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
 
@@ -214,7 +221,8 @@ class StochasticDataComparison:
                         ).encode(
                             alt.X('index', title='Z'),
                             alt.Y('value:Q', title=y),
-                            color=alt.Color('key:N', title='Dataset'))
+                            color=alt.Color('key:N', title='Dataset', sort=self.datasets),
+                            opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0)))
                         )
                     else:
                         chart_list.append(alt.Chart(subset.reset_index()).mark_line(
@@ -224,11 +232,14 @@ class StochasticDataComparison:
                         ).encode(
                             alt.X('index', title='Z'),
                             alt.Y('value:Q', title=y),
-                            color=alt.Color('key:N', title='Dataset'))
+                            color=alt.Color('key:N', title='Dataset', sort=self.datasets),
+                            opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0)))
                         )
                     count=count+1
                 
-                charts[y][i]=alt.layer(*chart_list[::-1]).properties(title=i)
+                charts[y][i]=alt.layer(*chart_list[::-1]).add_params(
+                       selection
+                    ).properties(title=i)
         
         return charts
     
@@ -236,7 +247,7 @@ class StochasticDataComparison:
         """Internal function to calculate Lag-0 and Lag-1 cross correlation for each timeseries.
 
         Returns:
-            pd.DataFrame: Multi-index df with correlations grouped by - Period (annual vs. months), Lag-type, Timeseries, Dataset
+            pd.DataFrame: Multi-index df with correlations grouped by - Period (annual vs. months vs. daily), Lag-type, Timeseries, Dataset
         """        
                     
         corrs={}
@@ -261,7 +272,14 @@ class StochasticDataComparison:
                 corrs[ds][months[i]]['lag0']=pd.DataFrame.from_dict({x: subset.shift(-0).corrwith(subset[x]) for x in subset.columns})
                 corrs[ds][months[i]]['lag1']=pd.DataFrame.from_dict({x: subset.shift(-1).corrwith(subset[x]) for x in subset.columns})
 
-        iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'], ["lag0", "lag1"], self.colnames, self.datasets]
+            #Daily Calcs
+            corrs[ds]['daily']={}
+            subset=self.dfs[ds]
+
+            corrs[ds]['daily']['lag0']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(0)) for x in subset.columns})
+            corrs[ds]['daily']['lag1']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(1)) for x in subset.columns})                
+
+        iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily'], ["lag0", "lag1"], self.colnames, self.datasets]
         mindex=pd.MultiIndex.from_product(iterables, names=["season", "stat", "timeseries", "dataset"])
 
         correlations=pd.DataFrame({x: corrs[x[3]][x[0]][x[1]][x[2]] for x in mindex})
@@ -272,14 +290,19 @@ class StochasticDataComparison:
         """Internal function to generate Altair charts from Lag-0 and Lag-1 cross correlations. Compares each timeseries individually against all other timeseries.
 
         Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months), Lag-type, Timeseries
+            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Timeseries
         """        
+
+        corrs_colors=["#f58518","#e45756","#72b7b2","#54a24b","#eeca3b","#b279a2","#ff9da6","#9d755d","#bab0ac","#4c78a8"]
 
         charts={}  
         rule=alt.Chart().mark_rule(color='blue').encode(y=alt.datum(-1),y2=alt.datum(1),x=alt.datum(-1),x2=alt.datum(1))
         rule2=alt.Chart().mark_rule(strokeDash=[10,10]).encode(y=alt.datum(0))
         rule3=alt.Chart().mark_rule(strokeDash=[10,10]).encode(x=alt.datum(0))
-        for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
+
+        selection = alt.selection_point(fields=['key'], bind='legend')
+
+        for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily']:
             charts[y]={}
             for x in ["lag0", "lag1"]:
                 charts[y][x]={}
@@ -295,11 +318,14 @@ class StochasticDataComparison:
                     ).encode(
                         x=alt.X(f'{self.datasets[0]}:Q', sort=None, scale=alt.Scale(domain=[-1,1]), title=f'{self.datasets[0]} {y} correlation ({x})'), 
                         y=alt.Y('value:Q', sort=None, title=f'Comparative {y} correlation ({x})', scale=alt.Scale(domain=[-1,1])),
-                        color=alt.Color('key:N', title="Comparative dataset"),
-                        shape=alt.Shape('index:N', title="Timeseries", legend=None)
+                        color=alt.Color('key:N', title="Comparative dataset", sort=self.datasets, scale=alt.Scale(range=corrs_colors)),
+                        shape=alt.Shape('index:N', title="Timeseries", legend=None),
+                        opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0))
                     )
                     
-                    charts[y][x][i]=(base+rule+rule2+rule3).properties(title=i)
+                    charts[y][x][i]=(base+rule+rule2+rule3).add_params(
+                       selection
+                    ).properties(title=i)
         
         return charts  
 
@@ -307,11 +333,11 @@ class StochasticDataComparison:
         """Internal function to generate Altair heatmap charts from Lag-0 and Lag-1 cross correlations. Compares each dataset individually.
 
         Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months), Lag-type, Dataset
+            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Dataset
         """        
 
         charts={}  
-        for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
+        for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily']:
             charts[y]={}
             for x in ["lag0", "lag1"]:
                 charts[y][x]={}
@@ -390,10 +416,11 @@ class StochasticDataComparison:
         """Internal function to generate Altair charts from summary stats. Compares each statistic individually.
 
         Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months), Statistic
+            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Statistic, Timeseries (if monthly)
         """        
 
         charts={}
+        selection = alt.selection_point(fields=['key'], bind='legend')
 
         for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
 
@@ -401,14 +428,80 @@ class StochasticDataComparison:
 
             for i in ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"]:
 
-                charts[y][i]=alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_point(
+                base=alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_point(
                     tooltip=True
                 ).transform_fold(
                     self.datasets
                 ).encode(
                     alt.X('index', title=None, sort=None),
                     alt.Y('value:Q', title=f'{i} ({y})'),
-                    color=alt.Color('key:N', title='Dataset')
-                ).properties(title=f'{y} {i}')
+                    color=alt.Color('key:N', title='Dataset', sort=self.datasets),
+                    opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0))
+                )
+
+                if self.show_bands:
+                    bands=alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_area(
+                        opacity=0.3,
+                        color='grey'
+                    ).transform_fold(
+                        self.datasets
+                    ).encode(
+                        alt.X('index:N', title=None, sort=None),
+                        alt.Y('min(value):Q', title=f'{i} ({y})'),
+                        alt.Y2('max(value):Q'),
+                    ).transform_filter(
+                        selection
+                    ) 
+
+                    charts[y][i]=(base+bands).add_params(
+                       selection
+                    ).properties(title=f'{y} {i}')
+
+                else:
+                    charts[y][i]=(base).add_params(
+                       selection
+                    ).properties(title=f'{y} {i}')
+
+        charts['monthly']={}
+
+        idx = pd.IndexSlice
+        selection = alt.selection_point(fields=['level_2'], bind='legend')
+
+        for i in ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"]:
+            charts['monthly'][i]={}
+            for j in self.colnames:
+                base=alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_point(
+                    tooltip=True
+                ).transform_filter(
+                    alt.datum.level_0 != 'annual'
+                ).encode(
+                    x=alt.X('level_0:N', title='Month'),
+                    y=alt.Y(f'{j}:Q', title=f'{i}'),
+                    color=alt.Color('level_2:N', title="Dataset", sort=self.datasets),
+                    opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0))
+                )
+                
+                if self.show_bands:
+                    bands=alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_area(
+                        opacity=0.3,
+                        color='grey'
+                    ).transform_filter(
+                        alt.datum.level_0 != 'annual'
+                    ).encode(
+                        alt.X('level_0:N', title='Month'),
+                        alt.Y(f'min({j}):Q'),
+                        alt.Y2(f'max({j}):Q'),
+                    ).transform_filter(
+                        selection
+                    )
+
+                    charts['monthly'][i][j]=(base+bands).add_params(
+                       selection
+                    ).properties(title=f'{j}', width=300, height=250)
+                    
+                else:
+                    charts['monthly'][i][j]=(base).add_params(
+                       selection
+                    ).properties(title=f'{j}', width=300, height=250)
                             
-        return charts
+        return charts 

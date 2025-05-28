@@ -221,8 +221,10 @@ class Tests(unittest.TestCase):
 
         ## Testing charts
         sdc.Stats["chts"]["annual"]["skew"]
+        sdc.Stats["chts"]["monthly"]["skew"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
         sdc.Correlations["chts"]["annual"]["lag1"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
         sdc.Correlations["heatmaps"]["annual"]["lag0"]["Historical"]
+        sdc.Correlations["chts"]["daily"]["lag0"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
         sdc.Distributions["chts"]["annual"]["7>PPT502Ba.q13>GS130502B Brown River at Brown Lake Part"]
 
     def test_cumulative_risk(self):
