@@ -1,10 +1,13 @@
-import pandas as pd
-import numpy as np
-from bulum import utils
-from bulum import trans
 import statistics
+
 import altair as alt
+import numpy as np
+import pandas as pd
+
+from bulum import trans, utils
+
 alt.data_transformers.enable("vegafusion")
+
 
 class StochasticDataComparison:
     """
@@ -24,10 +27,10 @@ class StochasticDataComparison:
 
     wy_month : int, default 7
         Water Year start month for annual aggregation.
-        
+
     allow_part_years : bool, default False
         Allow part water years or only complete water years.
-    
+
     show_bands: bool, default False
         Whether to show value ranges as grey band in statistic charts 
 
@@ -37,11 +40,11 @@ class StochasticDataComparison:
         outputs: Multi-index df with Lag-0 and Lag-1 cross correlations grouped by - Period (annual vs. months vs. daily), Lag-type, Timeseries, Dataset
         chts: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Timeseries
         heatmaps: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Dataset
-        
+
     StochasticDataComparison.Distributions : {outputs, chts}
         outputs: Multi-index df with distribution of each timeseries grouped by - Period (annual vs. months), Timeseries, Dataset
         chts: Multi-level dictionary with charts stored by - Period (annual vs. months), Timeseries
-        
+
     StochasticDataComparison.Stats : {outputs, chts}
         outputs: Multi-index df with stats grouped by - Period (annual vs. months), Statistic, Dataset, Timeseries
         chts: Multi-level dictionary with charts stored by - Period (annual vs. months vs. monthly), Statistic, Timeseries (if monthly)
@@ -57,13 +60,13 @@ class StochasticDataComparison:
     >>> Comparison.Distributions["outputs"]["annual"]
 
     Output July (month 7) distribution comparison for given timeseries ("col1").
-    
+
     >>> Comparison.Distributions["outputs"]["07"]["col1"]
 
     Output July (month 7) distribution chart for given timeseries ("col1").
-    
+
     >>> Comparison.Distributions["chts"]["07"]["col1"]
-    
+
     Output annual Lag-0 and Lag-1 cross correlations for all timeseries and datasets.
 
     >>> Comparison.Correlations["outputs"]["annual"]
@@ -89,61 +92,62 @@ class StochasticDataComparison:
     >>> Comparison.Stats["chts"]["07"]["mean"]    
 
     Output July (month 7) distribution chart for all timeseries.
-    
+
     >>> alt.vconcat(*Comparison.Distributions["chts"]["07"].values())
 
     Output July (month 7) distribution chart for all timeseries and adjust properties.
-    
+
     >>> alt.vconcat(*[x.properties(width=800).interactive() for x in Comparison.Distributions["chts"]["07"].values()])    
 
     Output annual distribution chart for given timeseries ("col1"), convert to log-scale.
-    
+
     >>> Comparison.Distributions["chts"]["annual"]["col1"].layer[0].encoding.y.scale = {'type': 'log'}    
 
     """
+    # pylint: disable=C0103
 
     def __init__(self, dfs_dict: dict, wy_month=7, allow_part_years=False, show_bands=False) -> None:
-                   
+
         self.wy_month = wy_month
         self.allow_part_years = allow_part_years
         self.show_bands = show_bands
 
         self.dfs = dfs_dict.copy()
-        self.datasets=[]
-        colnames_check=[]
-        for keys,values in self.dfs.items():
+        self.datasets = []
+        colnames_check = []
+        for keys, values in self.dfs.items():
             colnames_check.append(values.columns)
             self.datasets.append(keys)
 
-        #self.colnames=self.dfs[self.datasets[0]].columns
-        self.colnames=colnames_check[0]
+        # self.colnames=self.dfs[self.datasets[0]].columns
+        self.colnames = colnames_check[0]
 
-        for i,x in enumerate(colnames_check[1:]):
-            if set(self.colnames).issubset(x)==False:
-                raise Exception(f"ERROR: Dataset '{self.datasets[i+1]}' does not contain all columns from '{self.datasets[0]}'.")
+        for i, x in enumerate(colnames_check[1:]):
+            if set(self.colnames).issubset(x) is False:
+                raise ValueError(f"ERROR: Dataset '{self.datasets[i+1]}' does not contain all columns from '{self.datasets[0]}'.")
 
         # Calculate whether to include full WYs only
         if not allow_part_years:
-            for keys,values in self.dfs.items():
-                self.dfs[keys] = utils.crop_to_wy(values, self.wy_month)  
+            for keys, values in self.dfs.items():
+                self.dfs[keys] = utils.crop_to_wy(values, self.wy_month)
 
-        self.cropped_df_ann={keys: values.groupby(utils.get_wy(values.index, self.wy_month)).sum() for keys, values in self.dfs.items()}
-        self.cropped_df_mon={keys: values.groupby(utils.get_year_and_month(values.index)).sum() for keys, values in self.dfs.items()}
+        self.cropped_df_ann = {keys: values.groupby(utils.get_wy(values.index, self.wy_month)).sum() for keys, values in self.dfs.items()}
+        self.cropped_df_mon = {keys: values.groupby(utils.get_year_and_month(values.index)).sum() for keys, values in self.dfs.items()}
 
-        self.Stats={}
-        self.Distributions={}
-        self.Correlations={}
+        self.Stats = {}
+        self.Distributions = {}
+        self.Correlations = {}
 
-        self.Distributions["outputs"]=self.__CalcDistributions()
-        self.Distributions["chts"]=self.__DistributionCharts()
+        self.Distributions["outputs"] = self.__CalcDistributions()
+        self.Distributions["chts"] = self.__DistributionCharts()
 
-        self.Stats["outputs"]=self.__CalcSummaryStats()
-        self.Stats["chts"]=self.__StatsCharts()
+        self.Stats["outputs"] = self.__CalcSummaryStats()
+        self.Stats["chts"] = self.__StatsCharts()
 
-        self.Correlations["outputs"]=self.__CalcCorrelations()
-        self.Correlations["chts"]=self.__CorrelationCharts()
-        self.Correlations["heatmaps"]=self.__HeatmapCharts()
-        
+        self.Correlations["outputs"] = self.__CalcCorrelations()
+        self.Correlations["chts"] = self.__CorrelationCharts()
+        self.Correlations["heatmaps"] = self.__HeatmapCharts()
+
     def __CalcDistributions(self):
         """Internal function to calculate timeseries distribution.
 
@@ -154,71 +158,75 @@ class StochasticDataComparison:
             - Period (annual vs. months), 
             - Timeseries, 
             - Dataset 
-        """    
-        distr={}
+        """
+        distr = {}
 
-        months=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+        months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
         for ds in self.datasets:
-            distr[ds]={}
+            distr[ds] = {}
 
+            distr[ds]['annual'] = {}
 
-            distr[ds]['annual']={}
+            subset = self.cropped_df_ann[ds]
 
-            subset=self.cropped_df_ann[ds]
+            # Annual Calcs
+            p = trans.get_exceedence_plotting_position(len(subset))
+            p = [x/100 for x in p]
+            z = [statistics.NormalDist().inv_cdf(x) for x in p]
 
-            #Annual Calcs
-            p=trans.get_exceedence_plotting_position(len(subset))
-            p=[x/100 for x in p]
-            z=[statistics.NormalDist().inv_cdf(x) for x in p]
+            distr[ds]['annual'] = subset.transform(np.sort)
+            distr[ds]['annual'].index = z
 
-            distr[ds]['annual']=subset.transform(np.sort)
-            distr[ds]['annual'].index=z
-
-            #Monthly Calcs
+            # Monthly Calcs
             for i in range(12):
-                distr[ds][months[i]]={}
-                subset=self.cropped_df_mon[ds][[x[5:]==str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
-                
-                p=trans.get_exceedence_plotting_position(len(subset))
-                p=[x/100 for x in p]
-                z=[statistics.NormalDist().inv_cdf(x) for x in p]
+                distr[ds][months[i]] = {}
+                subset = self.cropped_df_mon[ds][[x[5:] == str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
 
-                distr[ds][months[i]]=subset.transform(np.sort)
-                distr[ds][months[i]].index=z
+                p = trans.get_exceedence_plotting_position(len(subset))
+                p = [x/100 for x in p]
+                z = [statistics.NormalDist().inv_cdf(x) for x in p]
+
+                distr[ds][months[i]] = subset.transform(np.sort)
+                distr[ds][months[i]].index = z
 
         iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'], self.colnames, self.datasets]
-        mindex=pd.MultiIndex.from_product(iterables, names=["season", "timeseries", "dataset"])
+        mindex = pd.MultiIndex.from_product(iterables, names=["season", "timeseries", "dataset"])
 
-        distributions=pd.DataFrame({x: distr[x[2]][x[0]][x[1]] for x in mindex})
+        distributions = pd.DataFrame({x: distr[x[2]][x[0]][x[1]] for x in mindex})
 
         return distributions
-    
+
     def __DistributionCharts(self):
-        """Internal function to generate Altair charts from timeseries distributions.
+        """
+        Internal function to generate Altair charts from timeseries
+        distributions.
 
-        Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months), Timeseries
-        """        
+        Returns
+        -------
+        dict
+            Multi-level dictionary with charts stored by - Period (annual vs.
+            months), Timeseries
+        """
 
-        charts={}
+        charts = {}
         selection = alt.selection_point(fields=['key'], bind='legend')
 
         for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
 
-            charts[y]={}
+            charts[y] = {}
 
             for i in self.colnames:
-                chart_list=[]
-                count=0
-                subset=self.Distributions["outputs"][y][i]
+                chart_list = []
+                count = 0
+                subset = self.Distributions["outputs"][y][i]
                 for j in subset:
-                    if count==0:
+                    if count == 0:
                         chart_list.append(alt.Chart(subset.reset_index()).mark_point(
                         ).transform_fold(
                             [j]
                         ).transform_filter('isValid(datum.value)'
-                        ).encode(
+                                           ).encode(
                             alt.X('index', title='Z'),
                             alt.Y('value:Q', title=y),
                             color=alt.Color('key:N', title='Dataset', sort=self.datasets),
@@ -229,206 +237,232 @@ class StochasticDataComparison:
                         ).transform_fold(
                             [j]
                         ).transform_filter('isValid(datum.value)'
-                        ).encode(
+                                           ).encode(
                             alt.X('index', title='Z'),
                             alt.Y('value:Q', title=y),
                             color=alt.Color('key:N', title='Dataset', sort=self.datasets),
                             opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0)))
                         )
-                    count=count+1
-                
-                charts[y][i]=alt.layer(*chart_list[::-1]).add_params(
-                       selection
-                    ).properties(title=i)
-        
+                    count = count+1
+
+                charts[y][i] = alt.layer(*chart_list[::-1]).add_params(
+                    selection
+                ).properties(title=i)
+
         return charts
-    
+
     def __CalcCorrelations(self):
-        """Internal function to calculate Lag-0 and Lag-1 cross correlation for each timeseries.
+        """
+        Internal function to calculate Lag-0 and Lag-1 cross correlation for
+        each timeseries.
 
-        Returns:
-            pd.DataFrame: Multi-index df with correlations grouped by - Period (annual vs. months vs. daily), Lag-type, Timeseries, Dataset
-        """        
-                    
-        corrs={}
+        Returns
+        -------
+        pd.DataFrame
+            Multi-index df with correlations grouped by - Period (annual vs.
+            months vs. daily), Lag-type, Timeseries, Dataset
+        """
 
-        months=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+        corrs = {}
+
+        months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
         for ds in self.datasets:
-            corrs[ds]={}
+            corrs[ds] = {}
 
-            #Annual Calcs
-            corrs[ds]['annual']={}
-            subset=self.cropped_df_ann[ds]
+            # Annual Calcs
+            corrs[ds]['annual'] = {}
+            subset = self.cropped_df_ann[ds]
 
-            corrs[ds]['annual']['lag0']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(0)) for x in subset.columns})
-            corrs[ds]['annual']['lag1']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(1)) for x in subset.columns})
-            
-            #Monthly Calcs
+            corrs[ds]['annual']['lag0'] = pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(0)) for x in subset.columns})
+            corrs[ds]['annual']['lag1'] = pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(1)) for x in subset.columns})
+
+            # Monthly Calcs
             for i in range(12):
-                corrs[ds][months[i]]={}
-                subset=self.cropped_df_mon[ds][[x[5:]==str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
+                corrs[ds][months[i]] = {}
+                subset = self.cropped_df_mon[ds][[x[5:] == str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
 
-                corrs[ds][months[i]]['lag0']=pd.DataFrame.from_dict({x: subset.shift(-0).corrwith(subset[x]) for x in subset.columns})
-                corrs[ds][months[i]]['lag1']=pd.DataFrame.from_dict({x: subset.shift(-1).corrwith(subset[x]) for x in subset.columns})
+                corrs[ds][months[i]]['lag0'] = pd.DataFrame.from_dict({x: subset.shift(-0).corrwith(subset[x]) for x in subset.columns})
+                corrs[ds][months[i]]['lag1'] = pd.DataFrame.from_dict({x: subset.shift(-1).corrwith(subset[x]) for x in subset.columns})
 
-            #Daily Calcs
-            corrs[ds]['daily']={}
-            subset=self.dfs[ds]
+            # Daily Calcs
+            corrs[ds]['daily'] = {}
+            subset = self.dfs[ds]
 
-            corrs[ds]['daily']['lag0']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(0)) for x in subset.columns})
-            corrs[ds]['daily']['lag1']=pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(1)) for x in subset.columns})                
+            corrs[ds]['daily']['lag0'] = pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(0)) for x in subset.columns})
+            corrs[ds]['daily']['lag1'] = pd.DataFrame.from_dict({x: subset.corrwith(subset[x].shift(1)) for x in subset.columns})
 
         iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily'], ["lag0", "lag1"], self.colnames, self.datasets]
-        mindex=pd.MultiIndex.from_product(iterables, names=["season", "stat", "timeseries", "dataset"])
+        mindex = pd.MultiIndex.from_product(iterables, names=["season", "stat", "timeseries", "dataset"])
 
-        correlations=pd.DataFrame({x: corrs[x[3]][x[0]][x[1]][x[2]] for x in mindex})
+        correlations = pd.DataFrame({x: corrs[x[3]][x[0]][x[1]][x[2]] for x in mindex})
 
-        return correlations 
-    
+        return correlations
+
     def __CorrelationCharts(self):
-        """Internal function to generate Altair charts from Lag-0 and Lag-1 cross correlations. Compares each timeseries individually against all other timeseries.
+        """
+        Internal function to generate Altair charts from Lag-0 and Lag-1 cross
+        correlations. Compares each timeseries individually against all other
+        timeseries.
 
-        Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Timeseries
-        """        
+        Returns
+        -------
+        dict
+            Multi-level dictionary with charts stored by - Period (annual vs.
+            months vs. daily), Lag-type, Timeseries
+        """
 
-        corrs_colors=["#f58518","#e45756","#72b7b2","#54a24b","#eeca3b","#b279a2","#ff9da6","#9d755d","#bab0ac","#4c78a8"]
+        corrs_colors = ["#f58518", "#e45756", "#72b7b2", "#54a24b", "#eeca3b", "#b279a2", "#ff9da6", "#9d755d", "#bab0ac", "#4c78a8"]
 
-        charts={}  
-        rule=alt.Chart().mark_rule(color='blue').encode(y=alt.datum(-1),y2=alt.datum(1),x=alt.datum(-1),x2=alt.datum(1))
-        rule2=alt.Chart().mark_rule(strokeDash=[10,10]).encode(y=alt.datum(0))
-        rule3=alt.Chart().mark_rule(strokeDash=[10,10]).encode(x=alt.datum(0))
+        charts = {}
+        rule = alt.Chart().mark_rule(color='blue').encode(y=alt.datum(-1), y2=alt.datum(1), x=alt.datum(-1), x2=alt.datum(1))
+        rule2 = alt.Chart().mark_rule(strokeDash=[10, 10]).encode(y=alt.datum(0))
+        rule3 = alt.Chart().mark_rule(strokeDash=[10, 10]).encode(x=alt.datum(0))
 
         selection = alt.selection_point(fields=['key'], bind='legend')
 
-        for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily']:
-            charts[y]={}
-            for x in ["lag0", "lag1"]:
-                charts[y][x]={}
-                for i in self.colnames:
+        for timeframe in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily']:
+            charts[timeframe] = {}
+            for lag in ["lag0", "lag1"]:
+                charts[timeframe][lag] = {}
+                for colname in self.colnames:
+                    subset = self.Correlations["outputs"][timeframe][lag][colname]
+                    base = (alt.Chart(subset.reset_index()).mark_point(tooltip=True)
+                            .transform_fold(self.datasets[1:])
+                            .encode(x=alt.X(f'{self.datasets[0]}:Q',
+                                            sort=None,
+                                            scale=alt.Scale(domain=[-1, 1]),
+                                            title=f'{self.datasets[0]} {timeframe} correlation ({lag})'),
+                                    y=alt.Y('value:Q',
+                                            sort=None,
+                                            title=f'Comparative {timeframe} correlation ({lag})',
+                                            scale=alt.Scale(domain=[-1, 1])),
+                                    color=alt.Color('key:N',
+                                                    title="Comparative dataset",
+                                                    sort=self.datasets,
+                                                    scale=alt.Scale(range=corrs_colors)),
+                                    shape=alt.Shape('index:N',
+                                                    title="Timeseries",
+                                                    legend=None),
+                                    opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0)))
+                            )
+                    charts[timeframe][lag][colname] = (base+rule+rule2+rule3).add_params(
+                        selection
+                    ).properties(title=colname)
 
-                    subset=self.Correlations["outputs"][y][x][i]
-
-                    # actual chart
-                    
-                    base=alt.Chart(subset.reset_index()).mark_point(tooltip=True)\
-                    .transform_fold(
-                        self.datasets[1:]
-                    ).encode(
-                        x=alt.X(f'{self.datasets[0]}:Q', sort=None, scale=alt.Scale(domain=[-1,1]), title=f'{self.datasets[0]} {y} correlation ({x})'), 
-                        y=alt.Y('value:Q', sort=None, title=f'Comparative {y} correlation ({x})', scale=alt.Scale(domain=[-1,1])),
-                        color=alt.Color('key:N', title="Comparative dataset", sort=self.datasets, scale=alt.Scale(range=corrs_colors)),
-                        shape=alt.Shape('index:N', title="Timeseries", legend=None),
-                        opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0))
-                    )
-                    
-                    charts[y][x][i]=(base+rule+rule2+rule3).add_params(
-                       selection
-                    ).properties(title=i)
-        
-        return charts  
+        return charts
 
     def __HeatmapCharts(self):
         """Internal function to generate Altair heatmap charts from Lag-0 and Lag-1 cross correlations. Compares each dataset individually.
 
-        Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Dataset
-        """        
+        Returns
+        -------
+        dict
+            Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Lag-type, Dataset
+        """
 
-        charts={}  
+        charts = {}
         for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', 'daily']:
-            charts[y]={}
+            charts[y] = {}
             for x in ["lag0", "lag1"]:
-                charts[y][x]={}
+                charts[y][x] = {}
                 for ds in self.datasets:
 
-                    subset=self.Correlations["outputs"][y][x][:][ds]
+                    subset = self.Correlations["outputs"][y][x][:][ds]
 
                     # data preparation
                     pivot_cols = list(subset.index)
-                    subset=subset.set_axis(subset.index, axis=1)
+                    subset = subset.set_axis(subset.index, axis=1)
                     subset['timeseries'] = subset.index
 
                     # actual chart
-                    charts[y][x][ds]=alt.Chart(subset).mark_rect(tooltip=True)\
-                    .transform_fold(pivot_cols,
-                                    as_=["lagged_timeseries","value"])\
-                    .encode(
-                        x=alt.X("timeseries:N", sort=None), 
-                        y=alt.Y('lagged_timeseries:N', sort=None), 
-                        color=alt.Color("value:Q", scale=alt.Scale(scheme="spectral", domain=[-1,1]), title=f"{y} correlation ({x})")
+                    charts[y][x][ds] = alt.Chart(subset).mark_rect(tooltip=True)\
+                        .transform_fold(pivot_cols,
+                                        as_=["lagged_timeseries", "value"])\
+                        .encode(
+                        x=alt.X("timeseries:N", sort=None),
+                        y=alt.Y('lagged_timeseries:N', sort=None),
+                        color=alt.Color("value:Q", scale=alt.Scale(scheme="spectral", domain=[-1, 1]), title=f"{y} correlation ({x})")
                     ).properties(title=ds)
-        
-        return charts  
+
+        return charts
 
     def __CalcSummaryStats(self):
         """Internal function to calculate summary stats for each timeseries. Functions
 
-        Returns:
-            pd.DataFrame: Multi-index df with stats grouped by - Period (annual vs. months), Statistic, Dataset, Timeseries
-        """        
+        Returns
+        -------
+        pd.DataFrame
+            Multi-index df with stats grouped by - Period (annual vs. months), Statistic, Dataset, Timeseries
+        """
 
-        stats={}
+        stats = {}
 
-        months=['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
+        months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
         for ds in self.datasets:
-            stats[ds]={}
+            stats[ds] = {}
 
-            #Annual Calcs
-            stats[ds]['annual']={}
-            subset=self.cropped_df_ann[ds]
-            
-            stats[ds]['annual']['mean']=subset.mean()
-            stats[ds]['annual']['stddev']=subset.apply(lambda x: np.std(x))
-            stats[ds]['annual']['skew']=subset.skew()
-            stats[ds]['annual']['coeffofvar']=subset.apply(lambda x: np.std(x)/np.mean(x))
-            stats[ds]['annual']['min']=subset.min()
-            stats[ds]['annual']['max']=subset.max()
-            stats[ds]['annual']['25thP']=subset.apply(lambda x: np.percentile(x,25))
-            stats[ds]['annual']['median']=subset.apply(lambda x: np.percentile(x,50))
-            stats[ds]['annual']['75thP']=subset.apply(lambda x: np.percentile(x,75))
+            # Annual Calcs
+            stats[ds]['annual'] = {}
+            subset = self.cropped_df_ann[ds]
 
-            #Monthly Calcs
+            stats[ds]['annual']['mean'] = subset.mean()
+            stats[ds]['annual']['stddev'] = subset.apply(lambda x: np.std)
+            stats[ds]['annual']['skew'] = subset.skew()
+            stats[ds]['annual']['coeffofvar'] = subset.apply(lambda x: np.std(x)/np.mean(x))
+            stats[ds]['annual']['min'] = subset.min()
+            stats[ds]['annual']['max'] = subset.max()
+            stats[ds]['annual']['25thP'] = subset.apply(lambda x: np.percentile(x, 25))
+            stats[ds]['annual']['median'] = subset.apply(lambda x: np.percentile(x, 50))
+            stats[ds]['annual']['75thP'] = subset.apply(lambda x: np.percentile(x, 75))
+
+            # Monthly Calcs
             for i in range(12):
-                stats[ds][months[i]]={}
-                subset=self.cropped_df_mon[ds][[x[5:]==str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
+                stats[ds][months[i]] = {}
+                subset = self.cropped_df_mon[ds][[x[5:] == str(f'{i+1:02}') for x in self.cropped_df_mon[ds].index]]
 
-                stats[ds][months[i]]['mean']=subset.mean()
-                stats[ds][months[i]]['stddev']=subset.apply(lambda x: np.std(x))
-                stats[ds][months[i]]['skew']=subset.skew()
-                stats[ds][months[i]]['coeffofvar']=subset.apply(lambda x: np.std(x)/np.mean(x))
-                stats[ds][months[i]]['min']=subset.min()
-                stats[ds][months[i]]['max']=subset.max()
-                stats[ds][months[i]]['25thP']=subset.apply(lambda x: np.percentile(x,25))
-                stats[ds][months[i]]['median']=subset.apply(lambda x: np.percentile(x,50))
-                stats[ds][months[i]]['75thP']=subset.apply(lambda x: np.percentile(x,75))
+                stats[ds][months[i]]['mean'] = subset.mean()
+                stats[ds][months[i]]['stddev'] = subset.apply(lambda x: np.std(x))
+                stats[ds][months[i]]['skew'] = subset.skew()
+                stats[ds][months[i]]['coeffofvar'] = subset.apply(lambda x: np.std(x)/np.mean(x))
+                stats[ds][months[i]]['min'] = subset.min()
+                stats[ds][months[i]]['max'] = subset.max()
+                stats[ds][months[i]]['25thP'] = subset.apply(lambda x: np.percentile(x, 25))
+                stats[ds][months[i]]['median'] = subset.apply(lambda x: np.percentile(x, 50))
+                stats[ds][months[i]]['75thP'] = subset.apply(lambda x: np.percentile(x, 75))
 
-        iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'], ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"], self.datasets]
-        mindex=pd.MultiIndex.from_product(iterables, names=["season", "stat", "dataset"])
+        iterables = [['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'],
+                     ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"],
+                     self.datasets]
+        mindex = pd.MultiIndex.from_product(iterables, names=["season", "stat", "dataset"])
 
-        summary=pd.DataFrame({x: stats[x[2]][x[0]][x[1]] for x in mindex})
-        
+        summary = pd.DataFrame({x: stats[x[2]][x[0]][x[1]] for x in mindex})
+
         return summary
-    
+
     def __StatsCharts(self):
-        """Internal function to generate Altair charts from summary stats. Compares each statistic individually.
+        """
+        Internal function to generate Altair charts from summary stats. Compares
+        each statistic individually.
 
-        Returns:
-            dict: Multi-level dictionary with charts stored by - Period (annual vs. months vs. daily), Statistic, Timeseries (if monthly)
-        """        
+        Returns
+        -------
+        dict
+            Multi-level dictionary with charts stored by - Period (annual vs.
+            months vs. daily), Statistic, Timeseries (if monthly)
+        """
 
-        charts={}
+        charts = {}
         selection = alt.selection_point(fields=['key'], bind='legend')
 
         for y in ['annual', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']:
 
-            charts[y]={}
+            charts[y] = {}
 
             for i in ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"]:
 
-                base=alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_point(
+                base = alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_point(
                     tooltip=True
                 ).transform_fold(
                     self.datasets
@@ -440,7 +474,7 @@ class StochasticDataComparison:
                 )
 
                 if self.show_bands:
-                    bands=alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_area(
+                    bands = alt.Chart(self.Stats["outputs"][y][i].reset_index()).mark_area(
                         opacity=0.3,
                         color='grey'
                     ).transform_fold(
@@ -451,26 +485,26 @@ class StochasticDataComparison:
                         alt.Y2('max(value):Q'),
                     ).transform_filter(
                         selection
-                    ) 
+                    )
 
-                    charts[y][i]=(base+bands).add_params(
-                       selection
+                    charts[y][i] = (base+bands).add_params(
+                        selection
                     ).properties(title=f'{y} {i}')
 
                 else:
-                    charts[y][i]=(base).add_params(
-                       selection
+                    charts[y][i] = (base).add_params(
+                        selection
                     ).properties(title=f'{y} {i}')
 
-        charts['monthly']={}
+        charts['monthly'] = {}
 
         idx = pd.IndexSlice
         selection = alt.selection_point(fields=['level_2'], bind='legend')
 
         for i in ["mean", "stddev", "skew", "coeffofvar", "min", "max", "25thP", "median", "75thP"]:
-            charts['monthly'][i]={}
+            charts['monthly'][i] = {}
             for j in self.colnames:
-                base=alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_point(
+                base = alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_point(
                     tooltip=True
                 ).transform_filter(
                     alt.datum.level_0 != 'annual'
@@ -480,9 +514,9 @@ class StochasticDataComparison:
                     color=alt.Color('level_2:N', title="Dataset", sort=self.datasets),
                     opacity=alt.when(selection).then(alt.value(1)).otherwise(alt.value(0.0))
                 )
-                
+
                 if self.show_bands:
-                    bands=alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_area(
+                    bands = alt.Chart(self.Stats["outputs"].loc[j, idx[:, i, :]].reset_index()).mark_area(
                         opacity=0.3,
                         color='grey'
                     ).transform_filter(
@@ -495,13 +529,13 @@ class StochasticDataComparison:
                         selection
                     )
 
-                    charts['monthly'][i][j]=(base+bands).add_params(
-                       selection
+                    charts['monthly'][i][j] = (base+bands).add_params(
+                        selection
                     ).properties(title=f'{j}', width=300, height=250)
-                    
+
                 else:
-                    charts['monthly'][i][j]=(base).add_params(
-                       selection
+                    charts['monthly'][i][j] = (base).add_params(
+                        selection
                     ).properties(title=f'{j}', width=300, height=250)
-                            
-        return charts 
+
+        return charts
