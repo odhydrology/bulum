@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime, timedelta
 from typing import Iterable, cast, overload, Optional
 
@@ -32,7 +33,7 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.dat
     """Convert a list of date strings to numpy datetimes64d. 
 
     .. warning::
-        Assumes the dates are consecutive!
+        Assumes the dates are consecutive.
 
     """
     start_date = datetime.strptime(values[0], date_fmt)
@@ -103,13 +104,13 @@ def get_prev_month_end(stringdate: str) -> str:
     day_str = "31"  # default which covers most months
     #
     # Go to previous month
-    month_int = (int(month_str) - 1)
-    if (month_int == 0):
+    month_int = int(month_str) - 1
+    if month_int == 0:
         month_str = "12"
         year_str = f"{(int(year_str) - 1):04d}"
     else:
         month_str = f"{month_int:02d}"
-    #
+
     # Set the day
     if month_str in ["04", "06", "09", "11"]:
         day_str = "30"
@@ -266,14 +267,17 @@ def get_dates(start_date: datetime | str,
     return date_list
 
 
-def get_wy_start_date(df: pd.DataFrame, wy_month=7):
+def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
     """
     Returns an appropriate water year start date based on data frame dates and the
     water year start month.
 
-    Args:
-        df (pd.DataFrame): Dataframe with date as index
-        wy_month (int, optional): Water year start month. Defaults to 7.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with date as index
+    wy_month : int, optional
+        Water year start month. Defaults to 7.
 
     Returns:
         datetime: Water year start date.
