@@ -127,15 +127,16 @@ class StorageLevelAssessment:
         else:
             return out_df[trigger]
 
-    def NumberWaterYearsBelow(self, annualdaysbelow: dict | None = None):
+    def NumberWaterYearsBelow(self, annualdaysbelow: dict | None = None, *, min_event_length=0):
         """
         Calculate total water years with at least one day at or below trigger threshold.
 
         Parameters
         ----------
         annualdaysbelow : dict, optional
-            Optionally provide output from AnnualDaysBelow, otherwise recalculate.
-            Default is None.
+            Optionally provide output from AnnualDaysBelow, otherwise recalculate. Default is None.
+        min_event_length : int, optional
+            Minimum event length in a WY before counting it. This may be used to ignore single day events, for instance.
 
         Returns
         -------
@@ -147,10 +148,7 @@ class StorageLevelAssessment:
         if annualdaysbelow is None:
             annualdaysbelow = self.AnnualDaysBelow()
 
-        numberyears = {
-            trigger: sum(1 if x > 0 else 0 for x in v)
-            for trigger, v in annualdaysbelow.items()
-        }
+        numberyears = {trigger: sum(1 if x > 0 else 0 for x in v) for trigger, v in annualdaysbelow.items()}
         return numberyears
 
     def PercentWaterYearsBelow(self, numberyears: dict | None = None):
