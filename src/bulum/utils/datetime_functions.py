@@ -37,9 +37,18 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.dat
 
     """
     start_date = datetime.strptime(values[0], date_fmt)
-    end_date = datetime.strptime(values[-1], date_fmt) + timedelta(days=1)
-    np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')
-    # ^^^ Assumes the dates are consecutive!
+    end_date = datetime.strptime(values[-1], date_fmt)
+    try:
+        np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
+    except OverflowError:
+        # handle final value
+        np_dates = np.empty(len(values))
+        for i, x in enumerate(np.arange(start_date, end_date,
+                                        dtype='datetime64[D]')):
+            np_dates[i] = x
+        n = len(np_dates)
+        np_dates[n-1] = np.datetime64(end_date)
+
     if len(np_dates) != len(values):
         raise ValueError(f"ERROR: Expected {len(np_dates)} dates between " +
                          f"{start_date} and {end_date} but found {len(values)}.")
@@ -283,11 +292,13 @@ def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
         first_day = int(first_date[8:10])  # 0123-56-89
         first_month = int(first_date[5:7])
         first_year = int(first_date[0:4])
-    else:
-        # Assume the index is datetime
+    elif isinstance(first_date, datetime):
         first_day = first_date.day
         first_month = first_date.month
         first_year = first_date.year
+    else:
+        raise ValueError("Index for df must be a date string of format `YYYY-mm-dd`, "
+                         "or a datetime object")
 
     if first_month < wy_month:
         # If month is less than wy_month we can start wy this year
