@@ -101,8 +101,7 @@ def get_prev_month_end(stringdate: str) -> str:
     """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
-    day_str = "31"  # default which covers most months
-    #
+
     # Go to previous month
     month_int = int(month_str) - 1
     if month_int == 0:
@@ -116,15 +115,13 @@ def get_prev_month_end(stringdate: str) -> str:
         day_str = "30"
     elif month_str == "02":
         year = int(year_str)
-        if year % 4 != 0:
-            day_str = "28"
-        elif year % 100 != 0:
+        if calendar.isleap(year):
             day_str = "29"
-        elif year % 400 != 0:
-            day_str = "28"
         else:
-            day_str = "29"
-    # Return
+            day_str = "28"
+    else:
+        day_str = "31"
+
     return f"{year_str}-{month_str}-{day_str}"
 
 
@@ -137,14 +134,12 @@ def get_this_month_end(stringdate: str) -> str:
         day_str = "30"
     elif month_str == "02":
         year = int(year_str)
-        if year % 4 != 0:
-            day_str = "28"
-        elif year % 100 != 0:
+        if calendar.isleap(year):
             day_str = "29"
-        elif year % 400 != 0:
-            day_str = "28"
         else:
-            day_str = "29"
+            day_str = "28"
+    else:
+        day_str = "31"
     return f"{year_str}-{month_str}-{day_str}"
 
 
