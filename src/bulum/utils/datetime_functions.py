@@ -188,16 +188,16 @@ def get_dates(start_date: datetime | str, end_date=None, days=0, years=1, includ
     """
     # Check if the start_date is a string and convert to datetime
     if isinstance(start_date, str):
-        if (str_format == None):
+        if str_format is None:
             str_format = get_date_format(start_date)
         start_date = datetime.strptime(start_date, str_format)
-        if ((end_date != None) and isinstance(end_date, str)):
+        if end_date is not None and isinstance(end_date, str):
             end_date = datetime.strptime(end_date, str_format)
     # Work out how many days we need to generate
-    if (days > 0):
+    if days > 0:
         # great, the user has specified the number of days
         pass
-    elif (end_date != None):
+    elif end_date is not None:
         # use end_date
         days = (end_date - start_date).days
         days = days + 1 if include_end_date else days
@@ -209,7 +209,7 @@ def get_dates(start_date: datetime | str, end_date=None, days=0, years=1, includ
     # Generate the list of dates
     date_list = [start_date + timedelta(days=x) for x in range(days)]
     # Convert to string format if required
-    if (str_format != None):
+    if str_format is not None:
         date_list = [d.strftime(str_format) for d in date_list]
     return date_list
 

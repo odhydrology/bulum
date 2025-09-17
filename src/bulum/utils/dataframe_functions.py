@@ -121,9 +121,9 @@ def set_index_dt(df: pd.DataFrame, dt_values=None, start_dt=None, **kwargs) -> p
     # If start_dt or dt_values was provided, then we go ahead and use those.
     # This could potentially override an existing "Date" column, but I assume
     # thats what the user wants if used in that way.
-    if start_dt != None:
+    if start_dt is not None:
         df["Date"] = utils.get_dates(start_dt, days=n_days)
-    elif dt_values != None:
+    elif dt_values is not None:
         if len(dt_values) < n_days:
             raise ValueError("dt_values is shorter than the dataframe.")
         df["Date"] = dt_values[:n_days]
@@ -189,7 +189,7 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
     if (n_days == 0) or (is_datetime(df.index)):
         # Nothing needed to be done
         pass
-    elif (type(df.index[0]) is str):
+    elif isinstance(df.index[0], str):
         # Try to convert strings to datetimes.
         # df.index = pd.to_datetime(df.index, **kwargs)
         df.index = strings_to_datetimes(df.index, **kwargs)
