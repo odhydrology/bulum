@@ -219,7 +219,9 @@ def get_month(dates: Iterable) -> list[int]:
     return answer
 
 
-def get_dates(start_date: datetime | str, end_date=None, days=0, years=1, include_end_date=False, str_format=None):
+def get_dates(start_date: datetime | str,
+              end_date=None, days=0, years=1, include_end_date=False,
+              str_format: Optional[str] = None):
     """
     Generates a list of daily datetime values from a given start date. The length 
     may be defined by an end_date, or a number of days, or a number of years. This 
