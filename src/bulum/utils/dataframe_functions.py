@@ -167,8 +167,47 @@ def datetimes_to_strings(v: Iterable[datetime | pd.Timestamp],
     return [d.strftime(str_format) for d in v]
 
 
-def strings_to_datetimes(v: list[str], **kwargs):
-    return pd.to_datetime(v, **kwargs)
+@overload
+def strings_to_datetimes(v: list[str],
+                         engine: Literal["pandas"],
+                         date_format: str,
+                         **kwargs) -> pd.DatetimeIndex:
+    ...
+
+
+@overload
+def strings_to_datetimes(v: list[str],
+                         engine: Literal["numpy", "np"],
+                         date_format: str,
+                         **kwargs) -> np.typing.NDArray[np.datetime64]:
+    ...
+
+
+def strings_to_datetimes(v: list[str],
+                         engine="pandas",
+                         date_format: str = r'%Y-%m-%d',
+                         **kwargs):
+    """
+    Converts a list of strings to datetimes.
+
+    Pandas uses nanosecond precision timestamps and is not suitable for
+    stochastic data. It is the default engine for backwards compatibility.
+
+    Parameters
+    ----------
+    target : Literal[pandas, numpy, np]
+        Specifies whether to output
+    """
+    if engine == "pandas":
+        try:
+            return pd.to_datetime(v, format=date_format, **kwargs)
+        except pd.errors.OutOfBoundsDatetime as e:
+            e.add_note("Error likely due to nanosecond precision.")
+            e.add_note("Try passing `engine=numpy` to `bulum.utils.strings_to_datetime`.")
+            raise
+    if engine in {"numpy", "np"}:
+        return utils.to_np_datetimes64d(v, date_fmt=date_format)
+    raise ValueError(f"Invalid {engine=}")
 
 
 def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
