@@ -1,6 +1,8 @@
+import itertools
 from datetime import datetime
-from typing import Iterable, Optional
+from typing import Iterable, Literal, Optional, overload
 
+import numpy as np
 import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
@@ -48,9 +50,10 @@ def crop_to_wy(df: pd.DataFrame, wy_month=7):
     return df.loc[(df.index >= start_date) & (df.index <= end_date)]
 
 
-def check_df_format_standards(df: pd.DataFrame):
+def check_df_format_standards(df: pd.DataFrame) -> list[str]:
+    # TODO: return optional str instead
     """
-    Checks if a given dataframe meets standards generally requried by 
+    Checks if a given dataframe meets standards generally requried by
     bulum functions. These standards include:
     - Dataframe is not `None`
     - Dateframe is not empty
@@ -92,14 +95,14 @@ def check_df_format_standards(df: pd.DataFrame):
 def set_index_dt(df: pd.DataFrame, dt_values=None, start_dt=None, **kwargs) -> pd.DataFrame:
     """
     Returns a dataframe with datetime index. Useful for converting bulum
-    dataframes to datetime as needed. 
+    dataframes to datetime as needed.
 
     .. warning::
         The returned dataframe will be inconsistent with bulum standards which uses string dates.
 
-    If no optional arguments are provided, the function will look for a column named "date" (not 
+    If no optional arguments are provided, the function will look for a column named "date" (not
     case-sensitive) within the input dataframe. Otherwise `dt_values` or `start_dt` (assumes daily)
-    may be provided. 
+    may be provided.
 
     Parameters
     ----------
@@ -191,21 +194,26 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
     # Force the index name to be "Date"
     df.index.name = "Date"
 
+    # TODO: handle datetime as in the `from datetime import datetime` kind - I hate name collision.
+
     if (n_days == 0) or (is_datetime(df.index)):
         # Nothing needed to be done
         pass
     elif isinstance(df.index[0], str):
         # Try to convert strings to datetimes.
         # df.index = pd.to_datetime(df.index, **kwargs)
+        # TODO 
         df.index = strings_to_datetimes(df.index, **kwargs)
     else:
-        raise Exception("The index is not strings or datetimes.")
+        raise TypeError("The index is not strings or datetimes. "
+                        f"{type(df.index[0])=}")
     return df
 
 
 def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
     """
-    Converts the index of `df` to strings. Accepts a dataframe with a index as datetime or strings.
+    Converts the index of `df` to strings. Accepts a dataframe with a index as
+    datetime or strings.
     """
     if (df is None) or (len(df.columns) == 0):
         raise ValueError("The dataframe is None, or has no columns.")
@@ -217,20 +225,21 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
     elif is_datetime(df.index):
         # Try to convert datetimes to strings.
         new_index_values = [d.strftime(str_format) for d in df.index]
-        df.index = new_index_values
+        df.index = new_index_values  # type: ignore
     else:
         raise ValueError("The index is not strings or datetimes.")
 
     # Force the index name to be "Date"
-    df.index.name = "Date"
+    df.index.name = "Date"  # type: ignore
     return df
 
 
-def check_data_equivalence(df1: pd.DataFrame, df2: pd.DataFrame, 
-                           check_col_order=True, threshold=1e-6, 
+def check_data_equivalence(df1: pd.DataFrame, df2: pd.DataFrame,
+                           check_col_order=True, threshold=1e-6,
                            details: Optional[dict] = None) -> bool:
-    """Checks if two numeric dataframes are the same. It checks the names & order of the columns, 
-    the values of the index, and summary stats on all the data columns.
+    """Checks if two numeric dataframes are the same. It checks the names &
+    order of the columns, the values of the index, and summary stats on all the
+    data columns.
 
     Parameters
     ----------

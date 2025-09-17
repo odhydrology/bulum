@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Optional
 import pandas as pd
 import numpy as np
 
@@ -26,7 +27,7 @@ def standardize_datestring_format(values):
     return [str(t) for t in np_dates]
 
 
-def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d'):
+def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetimes64d. 
 
     .. warning::
@@ -180,7 +181,9 @@ def get_month(dates):
     return answer
 
 
-def get_dates(start_date: datetime | str, end_date=None, days=0, years=1, include_end_date=False, str_format=None):
+def get_dates(start_date: datetime | str,
+              end_date=None, days=0, years=1, include_end_date=False,
+              str_format: Optional[str] = None):
     """
     Generates a list of daily datetime values from a given start date. The length 
     may be defined by an end_date, or a number of days, or a number of years. This 
