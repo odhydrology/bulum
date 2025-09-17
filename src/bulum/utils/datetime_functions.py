@@ -132,7 +132,8 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
     return answer
 
 
-def get_prev_month_end(stringdate):
+def get_prev_month_end(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
 
@@ -159,7 +160,8 @@ def get_prev_month_end(stringdate):
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_this_month_end(stringdate):
+def get_this_month_end(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "31"  # default which covers most months
@@ -176,7 +178,8 @@ def get_this_month_end(stringdate):
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_next_month_start(stringdate):
+def get_next_month_start(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "01"
@@ -219,9 +222,26 @@ def get_month(dates: Iterable) -> list[int]:
     return answer
 
 
+@overload
+def get_dates(start_date: str,
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format=None) -> list[str]:
+    ...
+
+
+@overload
+def get_dates(start_date: datetime,
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format: Optional[str] = None) -> list[str] | list[datetime]:
+    ...
+
+
 def get_dates(start_date: datetime | str,
-              end_date=None, days=0, years=1, include_end_date=False,
-              str_format: Optional[str] = None):
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format: Optional[str] = None) -> list[str] | list[datetime]:
     """
     Generates a list of daily datetime values from a given start date. The length 
     may be defined by an end_date, or a number of days, or a number of years. This 
