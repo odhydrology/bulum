@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
-from typing import Optional
-import pandas as pd
+from typing import Iterable, cast, overload, Optional
+
 import numpy as np
+import pandas as pd
 
 
 def get_date_format(date_str: str):
@@ -10,7 +11,7 @@ def get_date_format(date_str: str):
     """
     for date_fmt in [r'%Y-%m-%d', r'%d/%m/%Y', r'%d/%m/%Y %H:%M', r'%d/%m/%Y %H:%M:%s']:
         try:
-            dt = datetime.strptime(date_str, date_fmt)
+            _ = datetime.strptime(date_str, date_fmt)
             return date_fmt
         except ValueError:
             pass
@@ -44,7 +45,7 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.dat
     return np_dates
 
 
-def get_wy(dates: pd.Index | list[str | np.datetime64], wy_month=7,
+def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
            using_end_year=False) -> list[int]:
     """
     Returns water years for a given array of dates. Use this to add water year
@@ -83,15 +84,20 @@ def get_wy(dates: pd.Index | list[str | np.datetime64], wy_month=7,
     # d.astype('datetime64[M]').astype(int) % 12 + 1   #<---- this gives the month
     # TODO: the below implementation was originally written for pd.Timestamp, not np.datetime64d. It may be possible to simplify it.
     if using_end_year:
-        answer = [(d.astype('datetime64[Y]').astype(int) + 1970) if (d.astype('datetime64[M]').astype(int) %
-                                                                     12 + 1) < wy_month else (d.astype('datetime64[Y]').astype(int) + 1970) + 1 for d in np_dates]
+        answer = [(d.astype('datetime64[Y]').astype(int) + 1970)
+                  if (d.astype('datetime64[M]').astype(int) % 12 + 1) < wy_month
+                  else (d.astype('datetime64[Y]').astype(int) + 1970) + 1
+                  for d in np_dates]
     else:
-        answer = [(d.astype('datetime64[Y]').astype(int) + 1970) - 1 if (d.astype('datetime64[M]').astype(int) %
-                                                                         12 + 1) < wy_month else (d.astype('datetime64[Y]').astype(int) + 1970) for d in np_dates]
+        answer = [(d.astype('datetime64[Y]').astype(int) + 1970) - 1
+                  if (d.astype('datetime64[M]').astype(int) % 12 + 1) < wy_month
+                  else (d.astype('datetime64[Y]').astype(int) + 1970)
+                  for d in np_dates]
     return answer
 
 
-def get_prev_month_end(stringdate):
+def get_prev_month_end(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "31"  # default which covers most months
@@ -121,7 +127,8 @@ def get_prev_month_end(stringdate):
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_this_month_end(stringdate):
+def get_this_month_end(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "31"  # default which covers most months
@@ -140,7 +147,8 @@ def get_this_month_end(stringdate):
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_next_month_start(stringdate):
+def get_next_month_start(stringdate: str) -> str:
+    """YYYY-MM-DD"""
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "01"
@@ -152,9 +160,9 @@ def get_next_month_start(stringdate):
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_year_and_month(v):
+def get_year_and_month(v: list[str] | list[datetime]) -> list[str]:
     """
-    Returns year and month string e.g. "2022_01", as a list for a given array of dates.
+    Returns year and month string e.g. "2022-01", as a list for a given array of dates.
     Use this to aggregate by month.
     """
     # Guard against empty dates
@@ -164,15 +172,17 @@ def get_year_and_month(v):
     # Check if date values are pandas datetimes
     year_month = None
     if np.issubdtype(type(v[0]), str):
+        cast(list[str], v)
         # pull out the YYYY-MM part of the date string
-        year_month = [x[:7] for x in v]
+        year_month = [x[:7] for x in v]  # type: ignore
     else:
+        cast(list[datetime], v)
         # assume dates are datetime
-        year_month = [d.strftime(r"%Y-%m") for d in v]
+        year_month = [d.strftime(r"%Y-%m") for d in v]  # type: ignore
     return year_month
 
 
-def get_month(dates):
+def get_month(dates: Iterable) -> list[int]:
     """
     Returns month, as a list of ints, for a given array of dates.
     """
@@ -181,20 +191,54 @@ def get_month(dates):
     return answer
 
 
+@overload
+def get_dates(start_date: str,
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format=None) -> list[str]:
+    ...
+
+
+@overload
+def get_dates(start_date: datetime,
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format: Optional[str] =None) -> list[str] | list[datetime]:
+    ...
+
+
 def get_dates(start_date: datetime | str,
-              end_date=None, days=0, years=1, include_end_date=False,
-              str_format: Optional[str] = None):
+              end_date=None, days=0, years=1,
+              include_end_date=False,
+              str_format: Optional[str] =None) -> list[str] | list[datetime]:
     """
     Generates a list of daily datetime values from a given start date. The length 
     may be defined by an end_date, or a number of days, or a number of years. This 
     function may be useful for working with daily datasets and models.
+
+    Defaults to 1 year after start_date if end_date, days, and years is not specified.
+
+    Parameters
+    ----------
+    start_date 
+        _summary_
+    end_date
+        _summary_
+    include_end_date : bool 
+        _summary_
+    str_format 
+        _summary_
+
+    Returns
+    -------
+    A list of datetime objects between 
     """
     # Check if the start_date is a string and convert to datetime
     if isinstance(start_date, str):
         if str_format is None:
             str_format = get_date_format(start_date)
         start_date = datetime.strptime(start_date, str_format)
-        if end_date is not None and isinstance(end_date, str):
+        if (end_date is not None and isinstance(end_date, str)):
             end_date = datetime.strptime(end_date, str_format)
     # Work out how many days we need to generate
     if days > 0:
@@ -206,14 +250,19 @@ def get_dates(start_date: datetime | str,
         days = days + 1 if include_end_date else days
     else:
         # use years
+        if years <= 0:
+            raise ValueError("This function does not support going back in time - "
+                             f"expected years > 0 but got {years}")
+        # TODO: dateutil relativedelta ?
         end_date = datetime(start_date.year + years, start_date.month, start_date.day,
-                            start_date.hour, start_date.minute, start_date.second, start_date.microsecond)
+                            start_date.hour, start_date.minute,
+                            start_date.second, start_date.microsecond)
         days = (end_date - start_date).days
     # Generate the list of dates
     date_list = [start_date + timedelta(days=x) for x in range(days)]
     # Convert to string format if required
     if str_format is not None:
-        date_list = [d.strftime(str_format) for d in date_list]
+        date_list = [d.strftime(str_format) for d in date_list]  # type: ignore
     return date_list
 
 
@@ -231,7 +280,7 @@ def get_wy_start_date(df: pd.DataFrame, wy_month=7):
     """
     # Check if the index is string
     first_date = df.index[0]
-    if (isinstance(first_date, str)):
+    if isinstance(first_date, str):
         first_day = int(first_date[8:10])  # 0123-56-89
         first_month = int(first_date[5:7])
         first_year = int(first_date[0:4])
@@ -241,14 +290,14 @@ def get_wy_start_date(df: pd.DataFrame, wy_month=7):
         first_month = first_date.month
         first_year = first_date.year
 
-    if (first_month < wy_month):
+    if first_month < wy_month:
         # If month is less than wy_month we can start wy this year
         start_month = wy_month
         start_day = 1
         start_year = first_year
-    elif (first_month == wy_month):
+    elif first_month == wy_month:
         # If month equal to wy_month check that data starts on first day of month and set year accordingly
-        if (first_day > 1):
+        if first_day > 1:
             start_month = wy_month
             start_day = 1
             start_year = first_year+1
@@ -279,7 +328,7 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
     """
     # Check if the index is string
     last_date = df.index[(len(df) - 1)]
-    if (isinstance(last_date, str)):
+    if isinstance(last_date, str):
         last_day = int(last_date[8:10])  # 0123-56-89
         last_month = int(last_date[5:7])
         last_year = int(last_date[0:4])
@@ -289,7 +338,7 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
         last_month = last_date.month
         last_year = last_date.year
 
-    if (wy_month == 1):
+    if wy_month == 1:
         wy_month_end = 12
     else:
         wy_month_end = wy_month-1
@@ -302,14 +351,14 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
         # Setting number of days in Feb to 28 - handle leap years at the end of this function
         wy_day_end = 28
 
-    if (last_month > wy_month_end):
+    if last_month > wy_month_end:
         # If month is greater than wy_month_end we can start wy this year
         end_month = wy_month_end
         end_day = wy_day_end
         end_year = last_year
-    elif (last_month == wy_month_end):
+    elif last_month == wy_month_end:
         # If month equal to wy_month_end check that data ends on last day of month and set year accordingly
-        if (last_day < wy_day_end):
+        if last_day < wy_day_end:
             end_month = wy_month_end
             end_day = wy_day_end
             end_year = last_year-1
@@ -324,7 +373,7 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
         end_year = last_year-1
 
     # This handles the February's that have 29 days
-    if (end_month == 2):
+    if end_month == 2:
         end_day = (datetime(end_year, end_month+1, 1) - timedelta(days=1)).day
 
     return datetime(end_year, end_month, end_day)
