@@ -147,7 +147,7 @@ class Reliability:
             # Overwrite demand_ts with respective total month demand disaggregated to daily.
             if self.state == "monthly_total_list":
                 year_month = utils.get_year_and_month(demand_ts.index)
-                if self.ignore_leap_years == False:
+                if not self.ignore_leap_years:
                     demand_ts[:] = [self.demand[int(x[5:7])-1]/calendar.monthrange(int(x[0:4]), int(x[5:7]))[1]
                                     for x in year_month]  # If using leap years, divide by 28 or 29 Feb days depending on year
                 else:
@@ -157,7 +157,7 @@ class Reliability:
             # Overwrite demand_ts with total month demand disaggregated to daily.
             if self.state == "monthly_total":
                 year_month = utils.get_year_and_month(demand_ts.index)
-                if self.ignore_leap_years == False:
+                if not self.ignore_leap_years:
                     demand_ts[:] = [self.demand/calendar.monthrange(int(x[0:4]), int(x[5:7]))[1] for x in year_month]  # If using leap years, divide by 28 or 29 Feb days depending on year
                 else:
                     demand_ts[:] = [self.demand/calendar.monthrange(2002, int(x[5:7]))[1] for x in year_month]  # If not using leap years, only divide by 28 Feb days
@@ -165,7 +165,7 @@ class Reliability:
 
             # Overwrite demand_ts with total annual demand disaggregated to daily.
             if self.state == "yearly_total":
-                if self.ignore_leap_years == False:
+                if not self.ignore_leap_years:
                     wy = utils.get_wy(demand_ts.index, wy_month, using_end_year=False)
                     if wy_month > 2:
                         # If using leap years, divide by 365 or 366 days depending on year. If wy_month > 2, leap day will occur in the next calendar year
