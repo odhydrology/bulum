@@ -8,8 +8,10 @@ from bulum import utils
 
 
 class Reliability:
-    """ 
-    Reliability of water supply statistics generator.
+    """Reliability of water supply statistics generator.
+
+    This class provides methods to calculate reliability statistics comparing
+    water supply against demand for different timescales (monthly, annual).
     """
 
     def __init__(self, demand: Union[pd.Series, list, float, int], supply: pd.Series,
@@ -23,11 +25,11 @@ class Reliability:
 
         Parameters
         ----------
-        demand : Union[pd.Series,list,float,int]
+        demand : :class:`pandas.Series` or list or float or int
             Demand timeseries with date string as index. Alternatively, a list
             of monthly values or single demand which will be disaggregated
             according to other input parameters.
-        supply : pd.Series
+        supply : :class:`pandas.Series`
             Daily supply timeseries with date as index.
         demand_timescale : Literal["daily","monthly","yearly"], optional
             If a float or int demand is provided, which timescale does it apply
@@ -41,6 +43,17 @@ class Reliability:
             disaggregation. When True, calculations will always be based on 28
             days in Feb, and value for the 29th Feb will be equal to the 28th of
             Feb value. Defaults to False.
+
+        Raises
+        ------
+        TypeError
+            If demand is not one of :class:`pandas.Series`, list, float, or int.
+            If supply is not a :class:`pandas.Series`.
+            If ignore_leap_years is not a boolean.
+        ValueError
+            If demand_type is not "total" or "daily_constant".
+            If demand_timescale is not "daily", "monthly", or "yearly".
+            If demand list has fewer than 12 elements.
 
         """
 
@@ -114,12 +127,18 @@ class Reliability:
         self.state = state
 
     def ReliabilityTS(self, wy_month: int) -> pd.Series:
-        """Returns demand as a timeseries for input to reliability statistics.
+        """Return demand as a timeseries for input to reliability statistics.
+
         Matches date range of supply timeseries input.
+
+        Parameters
+        ----------
+        wy_month : int
+            Water year start month
 
         Returns
         -------
-        pd.Series
+        :class:`pandas.Series`
             Demand timeseries for input to reliability stats
         """
         # If provided demand is a timeseries, just return timeseries.
@@ -178,7 +197,7 @@ class Reliability:
                 return demand_ts
 
     def MonthlyReliability(self, tol: float = 1, allow_part_months: bool = False, wy_month: int = 7) -> float:
-        """Returns the monthly reliability statistic for a daily timeseries of demand and supply.
+        """Calculate the monthly reliability statistic for daily timeseries of demand and supply.
 
         Parameters
         ----------
@@ -225,7 +244,7 @@ class Reliability:
         return rel
 
     def AnnualReliability(self, tol: float = 1, wy_month: int = 7, allow_part_years: bool = False) -> float:
-        """Returns the annual reliability statistic for a daily timeseries of demand and supply.
+        """Calculate the annual reliability statistic for daily timeseries of demand and supply.
 
         Parameters
         ----------
