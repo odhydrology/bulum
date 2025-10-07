@@ -48,17 +48,17 @@ class Reliability:
             if not quiet:
                 print(string)
 
-        if type(demand) not in [pd.Series, list, float, int]:
+        if not isinstance(demand, (pd.Series, list, float, int)):
             raise Exception("Demand must be one of timeseries, monthly list or single demand.")
 
-        if type(supply) != pd.Series:
+        if not isinstance(supply, pd.Series):
             raise Exception("Supply must be a single column of a date-indexed dataframe (pd.Series).")
 
-        if type(demand) == pd.Series:
+        if isinstance(demand, pd.Series):
             maybe_print("Comparing provided demand timeseries with supply timeseries.")
             state = "ts"
 
-        if type(demand) != pd.Series:
+        if not isinstance(demand, pd.Series):
             if demand_type not in ["total", "daily_constant"]:
                 raise Exception("demand_type must be one of \"total\" or \"daily_constant\".")
 
@@ -70,7 +70,7 @@ class Reliability:
 
         lookup_leap = {True: 28, False: 29}
 
-        if type(demand) is list:
+        if isinstance(demand, list):
             if len(demand) < 12:
                 raise Exception("Monthly demand list must have a length of 12.")
 
@@ -85,7 +85,7 @@ class Reliability:
                 maybe_print(f"Leap years will be disaggregated assuming {lookup_leap[ignore_leap_years]} days in February.")
                 state = "monthly_total_list"
 
-        if type(demand) in [float, int]:
+        if isinstance(demand, (float, int)):
             if not quiet:
                 maybe_print("Comparing provided demand with supply timeseries.")
             if (demand_timescale == "daily") or (demand_type == "daily_constant"):
