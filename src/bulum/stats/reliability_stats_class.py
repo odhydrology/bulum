@@ -17,7 +17,7 @@ class Reliability:
                  demand_type: Literal["total", "daily_constant"] = "total",
                  ignore_leap_years=False, quiet=False) -> None:
         """Initialise Reliability class. Functions available are
-        - `Reliability.DemandTS`, 
+        - `Reliability.ReliabilityTS`,
         - `Reliability.MonthlyReliability`, and
         - `Reliability.AnnualReliability`.
 
@@ -113,7 +113,7 @@ class Reliability:
         self.ignore_leap_years = ignore_leap_years
         self.state = state
 
-    def ReliabilityTS(self, wy_month):
+    def ReliabilityTS(self, wy_month: int) -> pd.Series:
         """Returns demand as a timeseries for input to reliability statistics.
         Matches date range of supply timeseries input.
 
@@ -177,7 +177,7 @@ class Reliability:
                     demand_ts[:] = self.demand/365  # If not using leap years, only ever divide by 365
                 return demand_ts
 
-    def MonthlyReliability(self, tol=1, allow_part_months=False, wy_month=7):
+    def MonthlyReliability(self, tol: float = 1, allow_part_months: bool = False, wy_month: int = 7) -> float:
         """Returns the monthly reliability statistic for a daily timeseries of demand and supply.
 
         Parameters
@@ -224,7 +224,7 @@ class Reliability:
 
         return rel
 
-    def AnnualReliability(self, tol=1, wy_month=7, allow_part_years=False):
+    def AnnualReliability(self, tol: float = 1, wy_month: int = 7, allow_part_years: bool = False) -> float:
         """Returns the annual reliability statistic for a daily timeseries of demand and supply.
 
         Parameters
