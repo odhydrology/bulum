@@ -150,7 +150,7 @@ class Reliability:
 
         else:
             # Copy date range of supply TS
-            demand_ts = self.supply.copy(deep=True)
+            demand_ts = self.supply.copy(deep=True).astype(float)
 
             #  Overwrite demand_ts with constant daily demand.
             if self.state == "daily_constant":
