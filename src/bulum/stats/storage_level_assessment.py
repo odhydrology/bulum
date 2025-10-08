@@ -7,8 +7,9 @@ and statistical summaries by water year.
 """
 # As this class was originally written with Pascal style naming for methods:
 # pylint: disable=C0103
-from typing import Callable
+from typing import Callable, Literal, Optional
 
+import altair as alt
 import numpy as np
 import pandas as pd
 
@@ -346,3 +347,174 @@ class StorageLevelAssessment:
             return out_df
         else:
             return out_df.loc[trigger]
+
+    # Additional arguments for plot functions are there for convenience and to
+    # simplify otherwise-tedious manipulation.
+    # pylint: disable=too-many-arguments
+    def plot_events_ranked(self, trigger: float, *,
+                           width=600, height=400,
+                           xmax: Optional[int] = None,
+                           interactive=False,
+                           bind_y=True,
+                           mark: Literal["bar", "rect"] = "bar"
+                           ) -> alt.Chart:
+        """
+        Create an Altair chart of ranked event durations below the trigger threshold.
+
+        Parameters
+        ----------
+        trigger : float
+            Trigger level for which to plot the ranking.
+        width : int, optional
+            Plot width. Default is 600.
+        height : int, optional
+            Plot height. Default is 400.
+        xmax : int, optional
+            Controls how many data points to plot. Default is None, indicating all data.
+        interactive : bool, optional
+            Set to True to enable pan and zoom functionality. Default is False.
+        bind_y : bool, optional
+            When True (default), zooming will only be horizontal; vertical values remain fixed.
+        mark : {"bar", "rect"}, optional
+            Controls plot style. "rect" fixes gaps between data but may be harder to read.
+            Default is "bar".
+
+        Returns
+        -------
+        :class:`altair.Chart`
+            Altair chart showing ranked event durations with tooltips and interactive features.
+
+        Raises
+        ------
+        KeyError
+            Provided trigger has not been evaluated previously for this assessment.
+        ValueError
+            Invalid keyword argument supplied.
+        """
+        try:
+            arr = self.events[trigger]
+        except KeyError as e:
+            raise KeyError(f"{trigger} is not a computed trigger level") from e
+
+        df = pd.DataFrame({"data": sorted(arr, reverse=True)})
+        if xmax is None:
+            xmax = df.index.max()
+
+        if interactive:
+            clip = False
+            clamp = True
+        else:
+            clip = True
+            clamp = False
+
+        title = alt.TitleParams(f'Trigger={trigger:,} ML', anchor='middle')
+        chart = alt.Chart(df.reset_index(names="index"), title=title)  # type: ignore
+
+        if mark == "bar":
+            chart = chart.mark_bar(clip=clip, minBandSize=1)
+        elif mark == "rect":
+            chart = chart.mark_rect(clip=clip, minBandSize=1)
+        else:
+            raise ValueError(f"Keyword argument `mark` must be one of 'bar' or 'rect'. Received '{mark}'")
+
+        chart = (chart
+                 .encode(x=alt.X('index', title="Event number (ranked)",
+                                 scale=alt.Scale(domain=[0, xmax],
+                                                 clamp=clamp,
+                                                 padding=0.1,
+                                                 ),
+                                 axis=alt.Axis(tickMinStep=1),
+                                 ),
+                         y=alt.Y('data:Q', title="Event length (days)",
+                                 scale=alt.Scale(clamp=clamp)),
+                         tooltip=[alt.Tooltip("index", title="Event rank"),
+                                  alt.Tooltip("data", title="Event length (days)")],
+                         )
+                 .properties(width=width, height=height))
+        if interactive:
+            chart = chart.interactive(bind_y=bind_y)
+        return chart
+
+    def plot_event_length_frequency(self, trigger: float, *,
+                                    width=600, height=400,
+                                    xmax: Optional[int] = None,
+                                    interactive=False,
+                                    bind_y=True,
+                                    mark: Literal["bar", "rect"] = "bar"
+                                    ) -> alt.Chart:
+        """
+        Create an Altair chart showing frequency distribution of event lengths.
+
+        Parameters
+        ----------
+        trigger : float
+            Trigger level for which to plot the frequency distribution.
+        width : int, optional
+            Plot width. Default is 600.
+        height : int, optional
+            Plot height. Default is 400.
+        xmax : int, optional
+            Maximum event length to plot. Default is None, indicating all data.
+        interactive : bool, optional
+            Set to True to enable pan and zoom functionality. Default is False.
+        bind_y : bool, optional
+            When True (default), zooming will only be horizontal; vertical values remain fixed.
+        mark : {"bar", "rect"}, optional
+            Controls plot style. "rect" fixes gaps between data but may be harder to read.
+            Default is "bar".
+
+        Returns
+        -------
+        :class:`altair.Chart`
+            Altair chart showing frequency distribution of event lengths with tooltips.
+
+        Raises
+        ------
+        KeyError
+            Provided trigger has not been evaluated previously for this assessment.
+        ValueError
+            Invalid keyword argument supplied.
+        """
+        try:
+            arr = self.events[trigger]
+        except KeyError as e:
+            raise KeyError(f"{trigger} is not a computed trigger level") from e
+
+        df = pd.DataFrame({"data": sorted(arr, reverse=True)})
+        if xmax is None:
+            xmax = df["data"].max()
+
+        if interactive:
+            clip = False
+            clamp = True
+        else:
+            clip = True
+            clamp = False
+
+        title = alt.TitleParams(f'Trigger={trigger:,} ML', anchor='middle')
+        chart = alt.Chart(df.reset_index(names="index"), title=title)  # type: ignore
+
+        if mark == "bar":
+            chart = chart.mark_bar(clip=clip, minBandSize=1)
+        elif mark == "rect":
+            chart = chart.mark_rect(clip=clip, minBandSize=1)
+        else:
+            raise ValueError(f"Keyword argument `mark` must be one of 'bar' or 'rect'. Received '{mark}'")
+
+        chart = (chart
+                 .encode(x=alt.X('data', title="Event length (days)",
+                                 scale=alt.Scale(domain=[0, xmax],
+                                                 clamp=clamp,
+                                                 padding=0.1,
+                                                 ),
+                                 axis=alt.Axis(tickMinStep=1),
+                                 ),
+                         y=alt.Y('count()', title="Occurrences",
+                                 scale=alt.Scale(clamp=clamp)),
+                         tooltip=[alt.Tooltip("data", title="Event length (days)"),
+                                  alt.Tooltip("count()", title="Frequency")],
+                         )
+                 .properties(width=width, height=height))
+        if interactive:
+            chart = chart.interactive(bind_y=bind_y)
+        return chart
