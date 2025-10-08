@@ -4,6 +4,7 @@ import pandas as pd
 
 import bulum.stats as osta
 from bulum import io, utils
+from bulum.stats.reliability_stats_class import Reliability
 
 
 class Tests(unittest.TestCase):
@@ -152,6 +153,116 @@ class Tests(unittest.TestCase):
 
         answer_complete_years_annual_constant = temp_annual_constant.AnnualReliability(0.95, 7)
         self.assertAlmostEqual(answer_complete_years_annual_constant, 0.584745763)
+
+    def test_reliability_initialization_validation(self):
+        """Test Reliability class initialization with various input validation scenarios."""
+        # Test valid initialization
+        supply = pd.Series([10, 20, 30], index=['2023-01-01', '2023-01-02', '2023-01-03'])
+        demand = pd.Series([5, 15, 25], index=['2023-01-01', '2023-01-02', '2023-01-03'])
+
+        # Valid timeseries input
+        rel = Reliability(demand, supply, quiet=True)
+        self.assertEqual(rel.state, "ts")
+
+        # Valid list input
+        rel_list = Reliability([8.5] * 12, supply, demand_type="daily_constant", quiet=True)
+        self.assertEqual(rel_list.state, "monthly_constant_list")
+
+        # Valid float input
+        rel_float = Reliability(8.5, supply, quiet=True)
+        self.assertEqual(rel_float.state, "daily_constant")
+
+        # Test error cases
+        with self.assertRaises(Exception):
+            Reliability("invalid", supply, quiet=True)  # Invalid demand type
+
+        with self.assertRaises(Exception):
+            Reliability(demand, "invalid", quiet=True)  # Invalid supply type
+
+        with self.assertRaises(Exception):
+            Reliability([8.5] * 11, supply, quiet=True)  # Invalid list length
+
+    def test_reliability_ts_method(self):
+        """Test ReliabilityTS method with different demand configurations."""
+        supply = pd.Series([10, 20, 30, 40], index=['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04'])
+
+        # Test with timeseries demand
+        demand = pd.Series([5, 15, 25, 35], index=['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04'])
+        rel = Reliability(demand, supply, quiet=True)
+        demand_ts = rel.ReliabilityTS(wy_month=7)
+        self.assertIsInstance(demand_ts, pd.Series)
+        self.assertEqual(len(demand_ts), 4)
+
+        # Test with daily constant
+        rel_const = Reliability(8.5, supply, quiet=True)
+        demand_ts_const = rel_const.ReliabilityTS(wy_month=7)
+        self.assertTrue((demand_ts_const == 8.5).all())
+
+    def test_reliability_edge_cases(self):
+        """Test edge cases and boundary conditions."""
+        # Create minimal test data
+        supply = pd.Series([10, 20], index=['2023-01-01', '2023-01-02'])
+        demand = pd.Series([5, 15], index=['2023-01-01', '2023-01-02'])
+
+        # Test with tolerance edge cases
+        rel = Reliability(demand, supply, quiet=True)
+
+        # Test with 100% tolerance (tol=1)
+        monthly_rel_100 = rel.MonthlyReliability(tol=1.0, allow_part_months=True)
+        self.assertIsInstance(monthly_rel_100, (float, int))
+
+        # Test with 0% tolerance (very strict)
+        monthly_rel_0 = rel.MonthlyReliability(tol=0.0, allow_part_months=True)
+        self.assertIsInstance(monthly_rel_0, (float, int))
+
+        # Test annual reliability with edge cases
+        annual_rel = rel.AnnualReliability(tol=1.0, allow_part_years=True)
+        self.assertIsInstance(annual_rel, (float, int))
+
+    def test_reliability_return_types(self):
+        """Test that methods return correct types."""
+        supply = pd.Series([10, 20, 30], index=['2023-01-01', '2023-01-02', '2023-01-03'])
+        demand = pd.Series([5, 15, 25], index=['2023-01-01', '2023-01-02', '2023-01-03'])
+
+        rel = Reliability(demand, supply, quiet=True)
+
+        # Test ReliabilityTS returns pd.Series
+        demand_ts = rel.ReliabilityTS(wy_month=7)
+        self.assertIsInstance(demand_ts, pd.Series)
+
+        # Test MonthlyReliability returns float
+        monthly_rel = rel.MonthlyReliability(allow_part_months=True)
+        self.assertIsInstance(monthly_rel, (float, int))
+
+        # Test AnnualReliability returns float
+        annual_rel = rel.AnnualReliability(allow_part_years=True)
+        self.assertIsInstance(annual_rel, (float, int))
+
+    def test_reliability_parameter_combinations(self):
+        """Test various parameter combinations for Reliability class."""
+        supply = pd.Series([10, 20, 30, 40, 50], index=['2023-01-01', '2023-01-02', '2023-01-03', '2023-01-04', '2023-01-05'])
+
+        # Test different demand_timescale and demand_type combinations
+        test_cases = [
+            {"demand": 100, "demand_timescale": "yearly", "demand_type": "total"},
+            {"demand": 10, "demand_timescale": "monthly", "demand_type": "total"},
+            {"demand": 5, "demand_timescale": "daily", "demand_type": "daily_constant"},
+        ]
+
+        for case in test_cases:
+            rel = Reliability(
+                case["demand"],
+                supply,
+                demand_timescale=case["demand_timescale"],
+                demand_type=case["demand_type"],
+                quiet=True
+            )
+            # Verify initialization works
+            self.assertIsNotNone(rel.state)
+
+            # Test that methods work
+            demand_ts = rel.ReliabilityTS(wy_month=7)
+            self.assertIsInstance(demand_ts, pd.Series)
 
     def test_storage_level_assessment(self):
         # Checking answers against "GB_RCP45_2050_02b_StormKingDam.in" outputs in 26009
