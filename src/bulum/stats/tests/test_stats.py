@@ -173,14 +173,21 @@ class Tests(unittest.TestCase):
         self.assertEqual(rel_float.state, "daily_constant")
 
         # Test error cases
-        with self.assertRaises(Exception):
+        with self.assertRaises(TypeError):
             Reliability("invalid", supply, quiet=True)  # Invalid demand type
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(TypeError):
             Reliability(demand, "invalid", quiet=True)  # Invalid supply type
 
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             Reliability([8.5] * 11, supply, quiet=True)  # Invalid list length
+
+        # Test additional specific error cases
+        with self.assertRaises(ValueError):
+            Reliability(8.5, supply, demand_type="invalid", quiet=True)  # Invalid demand_type
+
+        with self.assertRaises(ValueError):
+            Reliability(8.5, supply, demand_timescale="invalid", quiet=True)  # Invalid demand_timescale
 
     def test_reliability_ts_method(self):
         """Test ReliabilityTS method with different demand configurations."""

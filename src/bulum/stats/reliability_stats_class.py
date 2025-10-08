@@ -47,8 +47,8 @@ class Reliability:
         Raises
         ------
         TypeError
-            If demand is not one of :class:`pandas.Series`, list, float, or int.
-            If supply is not a :class:`pandas.Series`.
+            If demand is not one of :class:`~pandas.Series`, list, float, or int.
+            If supply is not a :class:`~pandas.Series`.
             If ignore_leap_years is not a boolean.
         ValueError
             If demand_type is not "total" or "daily_constant".
@@ -62,10 +62,10 @@ class Reliability:
                 print(string)
 
         if not isinstance(demand, (pd.Series, list, float, int)):
-            raise Exception("Demand must be one of timeseries, monthly list or single demand.")
+            raise TypeError("Demand must be one of timeseries, monthly list or single demand.")
 
         if not isinstance(supply, pd.Series):
-            raise Exception("Supply must be a single column of a date-indexed dataframe (pd.Series).")
+            raise TypeError("Supply must be a single column of a date-indexed dataframe (pd.Series).")
 
         if isinstance(demand, pd.Series):
             maybe_print("Comparing provided demand timeseries with supply timeseries.")
@@ -73,19 +73,19 @@ class Reliability:
 
         if not isinstance(demand, pd.Series):
             if demand_type not in ["total", "daily_constant"]:
-                raise Exception("demand_type must be one of \"total\" or \"daily_constant\".")
+                raise ValueError("demand_type must be one of \"total\" or \"daily_constant\".")
 
             if demand_timescale not in ["daily", "monthly", "yearly"]:
-                raise Exception("demand_timescale must be one of \"daily\", \"monthly\" or \"yearly\".")
+                raise ValueError("demand_timescale must be one of \"daily\", \"monthly\" or \"yearly\".")
 
             if ignore_leap_years not in [True, False]:
-                raise Exception(f"ignore_leap_years must be one of {True} or {False}.")
+                raise TypeError(f"ignore_leap_years must be one of {True} or {False}.")
 
         lookup_leap = {True: 28, False: 29}
 
         if isinstance(demand, list):
             if len(demand) < 12:
-                raise Exception("Monthly demand list must have a length of 12.")
+                raise ValueError("Monthly demand list must have a length of 12.")
 
             maybe_print("Comparing list of monthly demands with supply timeseries. demand_timescale parameter is unused.")
 
