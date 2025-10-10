@@ -291,7 +291,24 @@ class StorageLevelAssessment:
         }
         return output
 
+    def EventsBelowTriggerAggregate(self, function: Callable) -> dict:
         """
+        Aggregate event lengths using a custom function for each trigger threshold.
+
+        Parameters
+        ----------
+        function : :class:`typing.Callable`
+            Function that acts on arrays/iterables and returns a single value (e.g., float).
+
+        Returns
+        -------
+        dict
+            Dictionary of aggregated event values, grouped by trigger threshold.
+        """
+        output = {
+            k: function(x) if len(x) > 0 else np.nan
+            for k, x in self.events.items()
+        }
         return output
 
     def Summary(self, trigger: float | None = None) -> pd.DataFrame | pd.Series:
