@@ -17,9 +17,9 @@ def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
     cols = [col for col in df.columns if string_pattern in col]
     if unique_match:
         if len(cols) < 1:
-            raise Exception(f'No column name matched "{string_pattern}".')
+            raise ValueError(f'No column name matched "{string_pattern}".')
         if len(cols) > 1:
-            raise Exception(f'More than one column name matched "{string_pattern}".')
+            raise ValueError(f'More than one column name matched "{string_pattern}".')
         return df[cols[0]]
     return df[cols]
 
@@ -27,7 +27,7 @@ def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
 def assert_df_has_one_column(df: pd.DataFrame):
     n_cols = len(df.columns)
     if not n_cols == 1:
-        raise Exception(f"The dataframe must have exactly 1 column, but {n_cols} were found.")
+        raise ValueError(f"The dataframe must have exactly 1 column, but {n_cols} were found.")
 
 
 def assert_df_format_standards(df: pd.DataFrame):
@@ -178,9 +178,14 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
     df : DataFrame
     **kwargs
         Passed to :func:`strings_to_datetimes`
+
+    Raises
+    ------
+    ValueError
+        Empty or null dataframe passed.
     """
     if (df is None) or (len(df.columns) == 0):
-        raise Exception("The dataframe is None, or has no columns.")
+        raise ValueError("The dataframe is None, or has no columns.")
     n_days = len(df)
 
     # Force the index name to be "Date"
@@ -203,7 +208,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
     Converts the index of `df` to strings. Accepts a dataframe with a index as datetime or strings.
     """
     if (df is None) or (len(df.columns) == 0):
-        raise Exception("The dataframe is None, or has no columns.")
+        raise ValueError("The dataframe is None, or has no columns.")
     n_days = len(df)
 
     if (n_days == 0) or (type(df.index[0]) is str):
@@ -214,7 +219,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
         new_index_values = [d.strftime(str_format) for d in df.index]
         df.index = new_index_values
     else:
-        raise Exception("The index is not strings or datetimes.")
+        raise ValueError("The index is not strings or datetimes.")
 
     # Force the index name to be "Date"
     df.index.name = "Date"
