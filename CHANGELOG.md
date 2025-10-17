@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixes
 
 - stats.StochasticDataComparison(): no longer ignores wy_month argument in cropping input datasets
+- utils.to_np_datetimes64d(): fixed OverflowError when end_date is 9999-12-31
 
 ### Changed
 

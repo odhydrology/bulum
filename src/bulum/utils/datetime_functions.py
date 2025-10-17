@@ -56,7 +56,7 @@ def standardize_datestring_format(values):
 
 
 def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.datetime64]:
-    """Convert a list of date strings to numpy datetimes64d. 
+    """Convert a list of date strings to numpy datetimes64d.
 
     .. warning::
         Assumes the dates are consecutive.
@@ -64,16 +64,13 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.dat
     """
     start_date = datetime.strptime(values[0], date_fmt)
     end_date = datetime.strptime(values[-1], date_fmt)
-    try:
+
+    # Handle potential OverflowError at end of representable date range.
+    if end_date == datetime(9999, 12, 31):
+        np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')
+        np_dates = np.append(np_dates, np.datetime64(end_date))
+    else:
         np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
-    except OverflowError:
-        # handle final value
-        np_dates = np.empty(len(values))
-        for i, x in enumerate(np.arange(start_date, end_date,
-                                        dtype='datetime64[D]')):
-            np_dates[i] = x
-        n = len(np_dates)
-        np_dates[n-1] = np.datetime64(end_date)
 
     if len(np_dates) != len(values):
         raise ValueError(f"ERROR: Expected {len(np_dates)} dates between " +
@@ -89,7 +86,9 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
 
     Parameters
     ----------
-    wy_month : int, default 7 
+    dates
+        Assumes consecutive dates.
+    wy_month : int, default 7 (July)
     using_end_year : bool, default False
         - `False` aligns water years with the primary water allocation at the
           start of the water year. 
