@@ -10,11 +10,29 @@ from bulum import utils
 
 
 def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
-    """Returns the columns of `df` that match `string_pattern`
-    Args:
-        df (pd.DataFrame): _description_
-        string_pattern (str): _description_
-        unique_match (bool, optional): _description_. Defaults to True.
+    """
+    Find columns in dataframe that match a string pattern.
+
+    Parameters
+    ----------
+    df : :class:`~pandas.DataFrame`
+        The dataframe to search.
+    string_pattern : str
+        The string pattern to match against column names.
+    unique_match : bool, optional
+        If True, ensures exactly one column matches the pattern.
+        If False, returns all matching columns. Defaults to True.
+
+    Returns
+    -------
+    :class:`~pandas.Series` or :class:`~pandas.DataFrame`
+        If unique_match=True, returns a Series (single column).
+        If unique_match=False, returns a DataFrame with all matching columns.
+
+    Raises
+    ------
+    ValueError
+        If unique_match=True and no columns or multiple columns match the pattern.
     """
     cols = [col for col in df.columns if string_pattern in col]
     if unique_match:
@@ -27,6 +45,19 @@ def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
 
 
 def assert_df_has_one_column(df: pd.DataFrame):
+    """
+    Assert that a dataframe has exactly one column.
+
+    Parameters
+    ----------
+    df : :class:`~pandas.DataFrame`
+        The dataframe to check.
+
+    Raises
+    ------
+    ValueError
+        If the dataframe does not have exactly one column.
+    """
     n_cols = len(df.columns)
     if not n_cols == 1:
         raise ValueError(f"The dataframe must have exactly 1 column, but {n_cols} were found.")
@@ -42,6 +73,25 @@ def assert_df_format_standards(df: pd.DataFrame):
 
 
 def crop_to_wy(df: pd.DataFrame, wy_month=7):
+    """
+    Crop dataframe to complete water years only.
+
+    This function removes partial water years from the beginning and end of the
+    dataframe, keeping only complete water years based on the specified water
+    year start month.
+
+    Parameters
+    ----------
+    df : :class:`~pandas.DataFrame`
+        Input dataframe with date index.
+    wy_month : int, optional
+        Water year start month (1=January, 7=July, etc.). Defaults to 7.
+
+    Returns
+    -------
+    :class:`~pandas.DataFrame`
+        Cropped dataframe containing only complete water years.
+    """
     start_date = utils.get_wy_start_date(df, wy_month)
     end_date = utils.get_wy_end_date(df, wy_month)
     if isinstance(start_date, datetime):  # handle datetime inputs
