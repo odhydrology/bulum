@@ -62,6 +62,20 @@ class Tests(unittest.TestCase):
         wy = utils.get_wy(dates, wy_month=1, using_end_year=True)
         self.assertEqual(wy[len(wy) - 1], 2021)  # with the above custom wy_month=1, and the fiscal conventions (using_end_year=True), the WY on the last date should be 2021
 
+    def test_stochastic_get_wy(self):
+        wy1 = utils.get_wy(["0001-01-01"])
+        self.assertEqual(wy1[0], 0)
+
+        wy2 = utils.get_wy(["0001-07-01"])
+        self.assertEqual(wy2[0], 1)
+
+        wy3 = utils.get_wy(["9999-12-30"])
+        self.assertEqual(wy3[0], 9999)
+
+        # This one is most important as there is potential edge case errors.
+        wy4 = utils.get_wy(["9999-12-31"])
+        self.assertEqual(wy4[0], 9999)
+
     def test_set_index_dt(self):
         df = pd.DataFrame()
         df["Date"] = utils.get_dates(datetime(2000, 1, 1), datetime(2000, 1, 8))
