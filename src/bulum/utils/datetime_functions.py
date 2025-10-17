@@ -1,6 +1,6 @@
 import calendar
 from datetime import datetime, timedelta
-from typing import Iterable, cast, overload, Optional
+from typing import Iterable, Optional, cast, overload
 
 import numpy as np
 import pandas as pd
@@ -8,7 +8,33 @@ import pandas as pd
 
 def get_date_format(date_str: str):
     """
-    Trial and error approach to determining the date format of a date string.
+    Determine the date format of a date string using trial and error.
+
+    This function tries several common date formats and returns the first one
+    that successfully parses the input string.
+
+    Parameters
+    ----------
+    date_str : str
+        A date string to analyze for format detection.
+
+    Returns
+    -------
+    str
+        The date format string (e.g., ``'%Y-%m-%d'``, ``'%d/%m/%Y'``) that matches
+        the input string.
+
+    Raises
+    ------
+    ValueError
+        If none of the supported date formats can parse the input string.
+
+    Examples
+    --------
+    >>> get_date_format("2023-12-25")
+    '%Y-%m-%d'
+    >>> get_date_format("25/12/2023")
+    '%d/%m/%Y'
     """
     for date_fmt in [r'%Y-%m-%d', r'%d/%m/%Y', r'%d/%m/%Y %H:%M', r'%d/%m/%Y %H:%M:%s']:
         try:
@@ -106,8 +132,7 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
     return answer
 
 
-def get_prev_month_end(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+def get_prev_month_end(stringdate):
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
 
@@ -134,8 +159,7 @@ def get_prev_month_end(stringdate: str) -> str:
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_this_month_end(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+def get_this_month_end(stringdate):
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "31"  # default which covers most months
@@ -152,8 +176,7 @@ def get_this_month_end(stringdate: str) -> str:
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_next_month_start(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+def get_next_month_start(stringdate):
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "01"
@@ -196,26 +219,7 @@ def get_month(dates: Iterable) -> list[int]:
     return answer
 
 
-@overload
-def get_dates(start_date: str,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
-              str_format=None) -> list[str]:
-    ...
-
-
-@overload
-def get_dates(start_date: datetime,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
-              str_format: Optional[str] =None) -> list[str] | list[datetime]:
-    ...
-
-
-def get_dates(start_date: datetime | str,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
-              str_format: Optional[str] =None) -> list[str] | list[datetime]:
+def get_dates(start_date: datetime | str, end_date=None, days=0, years=1, include_end_date=False, str_format=None):
     """
     Generates a list of daily datetime values from a given start date. The length 
     may be defined by an end_date, or a number of days, or a number of years. This 
