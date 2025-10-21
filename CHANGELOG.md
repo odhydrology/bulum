@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - stats.StochasticDataComparison(): added daily correlation outputs
 - stats.StochasticDataComparison(): added monthly statistic charts grouped by timeseries
 - stats.StochasticDataComparison(): added optional 'show_bands' argument to show range of outcomes as grey band on statistic charts
+- utils: added comprehensive type hints to all datetime and dataframe functions
+- utils.interpolation: added proper deprecation warnings with migration guidance
 
 ### Fixes
 
