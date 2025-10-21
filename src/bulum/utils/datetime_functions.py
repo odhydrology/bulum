@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-def get_date_format(date_str: str):
+def get_date_format(date_str: str) -> str:
     """
     Determine the date format of a date string using trial and error.
 
@@ -42,25 +42,68 @@ def get_date_format(date_str: str):
             return date_fmt
         except ValueError:
             pass
-    raise ValueError(f'Invalid date format for "{date_str}"')
+    raise ValueError(f'Invalid date format for "{date_str}". '
+                     f'Supported formats: {", ".join([r"%Y-%m-%d", r"%d/%m/%Y", r"%d/%m/%Y %H:%M", r"%d/%m/%Y %H:%M:%s"])}')
 
 
-def standardize_datestring_format(values):
+def standardize_datestring_format(values: list[str]) -> list[str]:
     """
     Converts a list of date strings into a list of date strings in the format YYYY-MM-DD.
-    Tested over the range 0001-01-01 to 9999-12-31.
+
+    This function automatically detects the input date format and converts all dates
+    to the standard ISO 8601 format (YYYY-MM-DD). Tested over the range 0001-01-01
+    to 9999-12-31.
+
+    Parameters
+    ----------
+    values : list[str]
+        List of date strings in any supported format.
+
+    Returns
+    -------
+    list[str]
+        List of date strings in YYYY-MM-DD format.
+
+    Examples
+    --------
+    >>> standardize_datestring_format(["25/12/2023", "26/12/2023"])
+    ['2023-12-25', '2023-12-26']
     """
     date_fmt = get_date_format(values[0])
     np_dates = to_np_datetimes64d(values, date_fmt=date_fmt)
     return [str(t) for t in np_dates]
 
 
-def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.datetime64]:
-    """Convert a list of date strings to numpy datetimes64d.
+def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d') -> np.typing.NDArray[np.datetime64]:
+    """Convert a list of date strings to numpy datetime64[D] array.
 
-    .. warning::
-        Assumes the dates are consecutive.
+    This function efficiently converts consecutive date strings to numpy datetime64
+    arrays with day precision. It handles edge cases at the end of the representable
+    date range (9999-12-31).
 
+    Parameters
+    ----------
+    values : list[str]
+        List of consecutive date strings to convert.
+    date_fmt : str, default '%Y-%m-%d'
+        The date format string for parsing the input dates.
+
+    Returns
+    -------
+    np.typing.NDArray[np.datetime64]
+        Numpy array of datetime64[D] values.
+
+    Raises
+    ------
+    ValueError
+        If the number of generated dates doesn't match the input length,
+        indicating non-consecutive dates.
+
+    Examples
+    --------
+    >>> dates = to_np_datetimes64d(['2023-01-01', '2023-01-02', '2023-01-03'])
+    >>> dates.dtype
+    dtype('<M8[D]')
     """
     start_date = datetime.strptime(values[0], date_fmt)
     end_date = datetime.strptime(values[-1], date_fmt)
@@ -73,41 +116,55 @@ def to_np_datetimes64d(values, date_fmt=r'%Y-%m-%d') -> np.typing.NDArray[np.dat
         np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
 
     if len(np_dates) != len(values):
-        raise ValueError(f"ERROR: Expected {len(np_dates)} dates between " +
-                         f"{start_date} and {end_date} but found {len(values)}.")
+        raise ValueError(f"Date sequence validation failed: Expected {len(np_dates)} consecutive dates "
+                         f"between {start_date} and {end_date} but found {len(values)} values. "
+                         f"This suggests non-consecutive dates or gaps in the sequence.")
     return np_dates
 
 
-def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
-           using_end_year=False) -> list[int]:
+def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
+           using_end_year: bool = False) -> list[int]:
     """
-    Returns water years for a given array of dates. Use this to add water year
-    info into a pandas DataFrame. 
+    Returns water years for a given array of dates.
+
+    Use this function to add water year information into a pandas DataFrame.
+    Assumes consecutive dates for efficiency.
 
     Parameters
     ----------
-    dates
-        Assumes consecutive dates.
-    wy_month : int, default 7 (July)
+    dates : pd.Index | list[str] | list[np.datetime64]
+        Array of dates. Assumes consecutive dates.
+    wy_month : int, default 7
+        Water year start month (1=January, 7=July, etc.).
     using_end_year : bool, default False
-        - `False` aligns water years with the primary water allocation at the
-          start of the water year. 
-        - `True` follows the convention used for fiscal years whereby water
-          years are labelled based on their end dates. Using the fiscal
-          convention, the 2022 water year is from 2021-07-01 to 2022-06-30
-          inclusive.
+        Water year labeling convention:
+
+        - ``False`` : Aligns water years with the primary water allocation at the
+          start of the water year.
+        - ``True`` : Follows the fiscal year convention whereby water years are
+          labeled based on their end dates. Using the fiscal convention, the 2022
+          water year is from 2021-07-01 to 2022-06-30 inclusive.
 
     Returns
     -------
-    list of int 
+    list[int]
         The water years corresponding to the given dates.
 
     Examples
     --------
-    Modified excerpt from :mod:`bulum.stats.aggregate_stats`
+    Basic usage with default July start:
 
-    >>> df.groupby(get_wy(df.index, wy_month)).sum().median()
+    >>> get_wy(['2023-06-30', '2023-07-01'])
+    [2022, 2023]
 
+    Using fiscal year convention:
+
+    >>> get_wy(['2023-06-30', '2023-07-01'], using_end_year=True)
+    [2023, 2024]
+
+    Integration with pandas for aggregation:
+
+    >>> df.groupby(get_wy(df.index, wy_month=7)).sum().median()
     """
     # Check if the first values is a string
     if isinstance(dates[0], str):
@@ -132,7 +189,26 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month=7,
 
 
 def get_prev_month_end(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+    """
+    Get the last day of the previous month for a given date.
+
+    Parameters
+    ----------
+    stringdate : str
+        Date string in YYYY-MM-DD format.
+
+    Returns
+    -------
+    str
+        Date string in YYYY-MM-DD format representing the last day of the previous month.
+
+    Examples
+    --------
+    >>> get_prev_month_end("2023-03-15")
+    '2023-02-28'
+    >>> get_prev_month_end("2024-03-15")  # Leap year
+    '2024-02-29'
+    """
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
 
@@ -160,7 +236,28 @@ def get_prev_month_end(stringdate: str) -> str:
 
 
 def get_this_month_end(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+    """
+    Get the last day of the current month for a given date.
+
+    Parameters
+    ----------
+    stringdate : str
+        Date string in YYYY-MM-DD format.
+
+    Returns
+    -------
+    str
+        Date string in YYYY-MM-DD format representing the last day of the current month.
+
+    Examples
+    --------
+    >>> get_this_month_end("2023-02-15")
+    '2023-02-28'
+    >>> get_this_month_end("2024-02-15")  # Leap year
+    '2024-02-29'
+    >>> get_this_month_end("2023-04-15")
+    '2023-04-30'
+    """
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "31"  # default which covers most months
@@ -178,7 +275,26 @@ def get_this_month_end(stringdate: str) -> str:
 
 
 def get_next_month_start(stringdate: str) -> str:
-    """YYYY-MM-DD"""
+    """
+    Get the first day of the next month for a given date.
+
+    Parameters
+    ----------
+    stringdate : str
+        Date string in YYYY-MM-DD format.
+
+    Returns
+    -------
+    str
+        Date string in YYYY-MM-DD format representing the first day of the next month.
+
+    Examples
+    --------
+    >>> get_next_month_start("2023-02-15")
+    '2023-03-01'
+    >>> get_next_month_start("2023-12-15")
+    '2024-01-01'
+    """
     year_str = stringdate[:4]  # "2021"
     month_str = stringdate[5:7]  # "04"
     day_str = "01"
@@ -192,8 +308,28 @@ def get_next_month_start(stringdate: str) -> str:
 
 def get_year_and_month(v: list[str] | list[datetime]) -> list[str]:
     """
-    Returns year and month string e.g. "2022-01", as a list for a given array of dates.
-    Use this to aggregate by month.
+    Extract year and month strings from a list of dates.
+
+    Returns year and month strings in YYYY-MM format for aggregation by month.
+
+    Parameters
+    ----------
+    v : list[str] | list[datetime]
+        List of date strings in YYYY-MM-DD format or datetime objects.
+
+    Returns
+    -------
+    list[str]
+        List of year-month strings in YYYY-MM format.
+
+    Examples
+    --------
+    >>> get_year_and_month(['2023-01-15', '2023-02-20'])
+    ['2023-01', '2023-02']
+
+    >>> from datetime import datetime
+    >>> get_year_and_month([datetime(2023, 1, 15), datetime(2023, 2, 20)])
+    ['2023-01', '2023-02']
     """
     # Guard against empty dates
     if len(v) == 0:
@@ -212,9 +348,26 @@ def get_year_and_month(v: list[str] | list[datetime]) -> list[str]:
     return year_month
 
 
-def get_month(dates: Iterable) -> list[int]:
+def get_month(dates: Iterable[str]) -> list[int]:
     """
-    Returns month, as a list of ints, for a given array of dates.
+    Extract month numbers from a list of date strings.
+
+    Parameters
+    ----------
+    dates : Iterable[str]
+        Iterable of date strings in YYYY-MM-DD format. Assumes consecutive dates.
+
+    Returns
+    -------
+    list[int]
+        List of month numbers (1-12) corresponding to the input dates.
+
+    Examples
+    --------
+    >>> get_month(['2023-01-15', '2023-01-16'])
+    [1, 1]
+    >>> get_month(['2023-12-31'])
+    [12]
     """
     np_dates = to_np_datetimes64d(dates)
     answer = [(d.astype('datetime64[M]').astype(int) % 12 + 1) for d in np_dates]
@@ -223,45 +376,63 @@ def get_month(dates: Iterable) -> list[int]:
 
 @overload
 def get_dates(start_date: str,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
-              str_format=None) -> list[str]:
+              end_date: Optional[str] = None, days: int = 0, years: int = 1,
+              include_end_date: bool = False,
+              str_format: Optional[str] = None) -> list[str]:
     ...
 
 
 @overload
 def get_dates(start_date: datetime,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
+              end_date: Optional[datetime] = None, days: int = 0, years: int = 1,
+              include_end_date: bool = False,
               str_format: Optional[str] = None) -> list[str] | list[datetime]:
     ...
 
 
 def get_dates(start_date: datetime | str,
-              end_date=None, days=0, years=1,
-              include_end_date=False,
+              end_date: Optional[datetime | str] = None, days: int = 0, years: int = 1,
+              include_end_date: bool = False,
               str_format: Optional[str] = None) -> list[str] | list[datetime]:
     """
-    Generates a list of daily datetime values from a given start date. The length 
-    may be defined by an end_date, or a number of days, or a number of years. This 
-    function may be useful for working with daily datasets and models.
+    Generates a list of daily datetime values from a given start date.
 
-    Defaults to 1 year after start_date if end_date, days, and years is not specified.
+    The length may be defined by an end_date, or a number of days, or a number of years.
+    This function is useful for working with daily datasets and models. Defaults to 1 year
+    after start_date if end_date, days, and years are not specified.
 
     Parameters
     ----------
-    start_date 
-        _summary_
-    end_date
-        _summary_
-    include_end_date : bool 
-        _summary_
-    str_format 
-        _summary_
+    start_date : datetime | str
+        The starting date for the sequence.
+    end_date : Optional[datetime | str], default None
+        The ending date for the sequence. If provided, takes precedence over days and years.
+    days : int, default 0
+        Number of days to generate. If > 0, takes precedence over years parameter.
+    years : int, default 1
+        Number of years to generate if neither end_date nor days are specified.
+    include_end_date : bool, default False
+        Whether to include the end_date in the generated sequence.
+    str_format : Optional[str], default None
+        If provided, returns string dates in this format instead of datetime objects.
 
     Returns
     -------
-    A list of datetime objects between 
+    list[str] | list[datetime]
+        A list of datetime objects or formatted date strings covering the specified range.
+
+    Raises
+    ------
+    ValueError
+        If years <= 0 when using years parameter for date generation.
+
+    Examples
+    --------
+    >>> get_dates(datetime(2023, 1, 1), days=3)
+    [datetime.datetime(2023, 1, 1, 0, 0), datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2023, 1, 3, 0, 0)]
+
+    >>> get_dates('2023-01-01', '2023-01-03', str_format='%Y-%m-%d')
+    ['2023-01-01', '2023-01-02']
     """
     # Check if the start_date is a string and convert to datetime
     if isinstance(start_date, str):
@@ -281,9 +452,9 @@ def get_dates(start_date: datetime | str,
     else:
         # use years
         if years <= 0:
-            raise ValueError("This function does not support going back in time - "
-                             f"expected years > 0 but got {years}")
-        # TODO: dateutil relativedelta ?
+            raise ValueError(f"Invalid years parameter: {years}. "
+                             f"Expected a positive integer greater than 0 for date generation. "
+                             f"Use end_date parameter if you need to generate dates in the past.")
         end_date = datetime(start_date.year + years, start_date.month, start_date.day,
                             start_date.hour, start_date.minute,
                             start_date.second, start_date.microsecond)
@@ -296,7 +467,48 @@ def get_dates(start_date: datetime | str,
     return date_list
 
 
-def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
+def _parse_date_components(date_value: str | datetime) -> tuple[int, int, int]:
+    """
+    Extract year, month, day components from a date string or datetime object.
+
+    Parameters
+    ----------
+    date_value : str | datetime
+        Date as string in YYYY-MM-DD format or datetime object.
+
+    Returns
+    -------
+    tuple[int, int, int]
+        Tuple of (year, month, day) as integers.
+
+    Raises
+    ------
+    ValueError
+        If date_value is a string but not in valid YYYY-MM-DD format.
+    TypeError
+        If date_value is not a string or datetime object.
+    """
+    if isinstance(date_value, str):
+        if len(date_value) < 10:
+            raise ValueError(f"Date string '{date_value}' must be in YYYY-MM-DD format")
+        try:
+            year = int(date_value[0:4])
+            month = int(date_value[5:7])
+            day = int(date_value[8:10])
+        except (ValueError, IndexError) as e:
+            raise ValueError(f"Invalid date string format '{date_value}'. Expected YYYY-MM-DD") from e
+    elif isinstance(date_value, datetime):
+        year = date_value.year
+        month = date_value.month
+        day = date_value.day
+    else:
+        raise TypeError(f"Expected str or datetime, got {type(date_value).__name__}. "
+                        "Please pass either a date string in YYYY-MM-DD format or a datetime object.")
+
+    return year, month, day
+
+
+def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month: int = 7) -> datetime:
     """
     Returns an appropriate water year start date based on data frame dates and the
     water year start month.
@@ -311,19 +523,7 @@ def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
     Returns:
         datetime: Water year start date.
     """
-    # Check if the index is string
-    first_date = df.index[0]
-    if isinstance(first_date, str):
-        first_day = int(first_date[8:10])  # 0123-56-89
-        first_month = int(first_date[5:7])
-        first_year = int(first_date[0:4])
-    elif isinstance(first_date, datetime):
-        first_day = first_date.day
-        first_month = first_date.month
-        first_year = first_date.year
-    else:
-        raise ValueError("Index for df must be a date string of format `YYYY-mm-dd`, "
-                         "or a datetime object")
+    first_year, first_month, first_day = _parse_date_components(df.index[0])
 
     if first_month < wy_month:
         # If month is less than wy_month we can start wy this year
@@ -335,7 +535,7 @@ def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
         if first_day > 1:
             start_month = wy_month
             start_day = 1
-            start_year = first_year+1
+            start_year = first_year + 1
         else:
             start_month = wy_month
             start_day = 1
@@ -344,34 +544,29 @@ def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month=7):
         # If month is greater than wy_month we have to start wy next year
         start_month = wy_month
         start_day = 1
-        start_year = first_year+1
+        start_year = first_year + 1
 
     return datetime(start_year, start_month, start_day)
 
 
-def get_wy_end_date(df: pd.DataFrame, wy_month=7):
+def get_wy_end_date(df: pd.DataFrame, wy_month: int = 7) -> datetime:
     """
     Returns an appropriate water year end date based on data frame dates and the
     water year start month.
 
-    Args:
-        df (pd.DataFrame): Dataframe with date as index
-        wy_month (int, optional): Water year start month. Defaults to 7.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with date as index
+    wy_month : int, optional
+        Water year start month. Defaults to 7.
 
-    Returns:
-        datetime: Water year end date.
+    Returns
+    -------
+    datetime
+        Water year end date.
     """
-    # Check if the index is string
-    last_date = df.index[(len(df) - 1)]
-    if isinstance(last_date, str):
-        last_day = int(last_date[8:10])  # 0123-56-89
-        last_month = int(last_date[5:7])
-        last_year = int(last_date[0:4])
-    else:
-        # Assume the index is datetime
-        last_day = last_date.day
-        last_month = last_date.month
-        last_year = last_date.year
+    last_year, last_month, last_day = _parse_date_components(df.index[-1])
 
     if wy_month == 1:
         wy_month_end = 12
@@ -396,7 +591,7 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
         if last_day < wy_day_end:
             end_month = wy_month_end
             end_day = wy_day_end
-            end_year = last_year-1
+            end_year = last_year - 1
         else:
             end_month = wy_month_end
             end_day = wy_day_end
@@ -405,7 +600,7 @@ def get_wy_end_date(df: pd.DataFrame, wy_month=7):
         # If month is less than wy_month_end we have to end wy last year
         end_month = wy_month_end
         end_day = wy_day_end
-        end_year = last_year-1
+        end_year = last_year - 1
 
     # This handles the February's that have 29 days
     if end_month == 2:
