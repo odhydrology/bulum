@@ -1,8 +1,10 @@
 import unittest
+import warnings
 import pandas as pd
 from bulum import utils
 import bulum.io as bio
 from datetime import datetime
+import numpy as np
 
 
 class Tests(unittest.TestCase):
@@ -162,3 +164,208 @@ class Tests(unittest.TestCase):
         start_mar = utils.get_wy_end_date(df, 3)
         self.assertEqual(start_jul, datetime(1919, 6, 30))
         self.assertEqual(start_mar, datetime(1920, 2, 29))
+
+    # ==== NEW EDGE CASE TESTS ====
+
+    def test_get_wy_leap_years(self):
+        """Test get_wy with leap year dates"""
+        # Test leap year February 29th
+        leap_dates = ["2020-02-28", "2020-02-29", "2020-03-01"]
+        wy_results = utils.get_wy(leap_dates, wy_month=3)  # March start
+        self.assertEqual(wy_results[0], 2019)  # Feb 28 is in WY 2019
+        self.assertEqual(wy_results[1], 2019)  # Feb 29 is in WY 2019
+        self.assertEqual(wy_results[2], 2020)  # Mar 1 starts WY 2020
+
+        # Test non-leap year boundary
+        non_leap_dates = ["2021-02-28", "2021-03-01"]
+        wy_results = utils.get_wy(non_leap_dates, wy_month=3)
+        self.assertEqual(wy_results[0], 2020)  # Feb 28 is in WY 2020
+        self.assertEqual(wy_results[1], 2021)  # Mar 1 starts WY 2021
+
+    def test_get_wy_boundary_dates(self):
+        """Test get_wy with water year boundary dates"""
+        # Test individual boundary dates (get_wy doesn't require consecutive dates for individual calls)
+        wy_june30_2023 = utils.get_wy(["2023-06-30"], wy_month=7)
+        self.assertEqual(wy_june30_2023[0], 2022)  # June 30 is end of WY 2022
+
+        wy_july1_2023 = utils.get_wy(["2023-07-01"], wy_month=7)
+        self.assertEqual(wy_july1_2023[0], 2023)  # July 1 starts WY 2023
+
+        wy_june30_2024 = utils.get_wy(["2024-06-30"], wy_month=7)
+        self.assertEqual(wy_june30_2024[0], 2023)  # June 30 is end of WY 2023
+
+        wy_july1_2024 = utils.get_wy(["2024-07-01"], wy_month=7)
+        self.assertEqual(wy_july1_2024[0], 2024)  # July 1 starts WY 2024
+
+    def test_get_wy_using_end_year_parameter(self):
+        """Test get_wy with using_end_year=True (fiscal convention)"""
+        # Test individual dates instead of non-consecutive sequence
+
+        # Standard convention (using_end_year=False)
+        wy_std_june = utils.get_wy(["2023-06-30"], wy_month=7, using_end_year=False)
+        self.assertEqual(wy_std_june[0], 2022)
+
+        wy_std_july = utils.get_wy(["2023-07-01"], wy_month=7, using_end_year=False)
+        self.assertEqual(wy_std_july[0], 2023)
+
+        # Fiscal convention (using_end_year=True)
+        wy_fiscal_june = utils.get_wy(["2023-06-30"], wy_month=7, using_end_year=True)
+        self.assertEqual(wy_fiscal_june[0], 2023)
+
+        wy_fiscal_july = utils.get_wy(["2023-07-01"], wy_month=7, using_end_year=True)
+        self.assertEqual(wy_fiscal_july[0], 2024)
+
+    def test_get_wy_different_water_year_months(self):
+        """Test get_wy with various water year start months"""
+        test_date = ["2023-06-15"]
+
+        # Test different water year start months
+        for wy_month in range(1, 13):
+            wy_result = utils.get_wy(test_date, wy_month=wy_month)
+            self.assertIsInstance(wy_result[0], (int, np.integer))
+            self.assertTrue(1 <= wy_result[0] <= 9999)
+
+    def test_parse_date_components_valid_inputs(self):
+        """Test _parse_date_components with valid inputs"""
+        # Test string input
+        year, month, day = utils.datetime_functions._parse_date_components("2023-12-25")
+        self.assertEqual((year, month, day), (2023, 12, 25))
+
+        # Test datetime input
+        dt = datetime(2023, 12, 25, 10, 30, 45)
+        year, month, day = utils.datetime_functions._parse_date_components(dt)
+        self.assertEqual((year, month, day), (2023, 12, 25))
+
+    def test_parse_date_components_invalid_inputs(self):
+        """Test _parse_date_components with invalid inputs"""
+        # Test invalid string format (too short)
+        with self.assertRaises(ValueError) as cm:
+            utils.datetime_functions._parse_date_components("2023-13")
+        self.assertIn("must be in YYYY-MM-DD format", str(cm.exception))
+
+        # Test malformed date string (non-numeric parts)
+        with self.assertRaises(ValueError) as cm:
+            utils.datetime_functions._parse_date_components("2023-ab-01")
+        self.assertIn("Invalid date string format", str(cm.exception))
+
+        # Test invalid type (integer) - should raise TypeError
+        with self.assertRaises(TypeError) as cm:
+            utils.datetime_functions._parse_date_components(20231225)
+        self.assertIn("Expected str or datetime, got int", str(cm.exception))
+
+        # Test invalid type (None) - should raise TypeError
+        with self.assertRaises(TypeError) as cm:
+            utils.datetime_functions._parse_date_components(None)
+        self.assertIn("Expected str or datetime, got NoneType", str(cm.exception))
+
+        with self.assertRaises(TypeError) as cm:
+            utils.datetime_functions._parse_date_components(["2023-01-01"])
+
+        # Test invalid type (float) - should raise TypeError
+        with self.assertRaises(TypeError) as cm:
+            utils.datetime_functions._parse_date_components(2023.0)
+        self.assertIn("Expected str or datetime, got float", str(cm.exception))
+
+    def test_get_date_format_edge_cases(self):
+        """Test get_date_format with edge cases and error handling"""
+        # Test valid formats
+        self.assertEqual(utils.get_date_format("2023-12-25"), r'%Y-%m-%d')
+        self.assertEqual(utils.get_date_format("25/12/2023"), r'%d/%m/%Y')
+
+        # Test invalid format
+        with self.assertRaises(ValueError) as cm:
+            utils.get_date_format("invalid_date")
+        self.assertIn("Invalid date format", str(cm.exception))
+        self.assertIn("Supported formats:", str(cm.exception))
+
+    def test_standardize_datestring_format_edge_cases(self):
+        """Test standardize_datestring_format with various edge cases"""
+        # Test mixed format detection (should use first date's format)
+        dates = ["25/12/2023", "26/12/2023", "27/12/2023"]
+        standardized = utils.standardize_datestring_format(dates)
+        self.assertEqual(standardized, ["2023-12-25", "2023-12-26", "2023-12-27"])
+
+        # Test single date
+        single_date = utils.standardize_datestring_format(["01/01/2023"])
+        self.assertEqual(single_date, ["2023-01-01"])
+
+    def test_to_np_datetimes64d_edge_cases(self):
+        """Test to_np_datetimes64d with edge cases"""
+        # Test end date boundary (9999-12-31)
+        boundary_dates = ["9999-12-30", "9999-12-31"]
+        np_dates = utils.to_np_datetimes64d(boundary_dates)
+        self.assertEqual(len(np_dates), 2)
+        # numpy datetime64 includes time component when converted to string
+        self.assertTrue(str(np_dates[-1]).startswith("9999-12-31"))
+
+        # Test non-consecutive dates should raise error
+        with self.assertRaises(ValueError) as cm:
+            utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"])  # Missing 2023-01-02
+        self.assertIn("Date sequence validation failed", str(cm.exception))
+
+    def test_get_dates_error_handling(self):
+        """Test get_dates with invalid parameters"""
+        # Test invalid years parameter
+        with self.assertRaises(ValueError) as cm:
+            utils.get_dates(datetime(2023, 1, 1), years=0)
+        self.assertIn("Invalid years parameter", str(cm.exception))
+
+        with self.assertRaises(ValueError) as cm:
+            utils.get_dates(datetime(2023, 1, 1), years=-1)
+        self.assertIn("Use end_date parameter", str(cm.exception))
+
+    def test_get_dates_with_end_date_and_include_flag(self):
+        """Test get_dates with end_date and include_end_date flag"""
+        start = datetime(2023, 1, 1)
+        end = datetime(2023, 1, 3)
+
+        # Without including end date
+        dates_excl = utils.get_dates(start, end_date=end, include_end_date=False)
+        self.assertEqual(len(dates_excl), 2)  # Jan 1, Jan 2
+        self.assertEqual(dates_excl[-1], datetime(2023, 1, 2))
+
+        # Including end date
+        dates_incl = utils.get_dates(start, end_date=end, include_end_date=True)
+        self.assertEqual(len(dates_incl), 3)  # Jan 1, Jan 2, Jan 3
+        self.assertEqual(dates_incl[-1], datetime(2023, 1, 3))
+
+    def test_performance_large_dataset(self):
+        """Test performance with large datasets"""
+        # Generate a large date range (2 years = ~730 days for faster testing)
+        start_date = datetime(2010, 1, 1)
+        large_dates = utils.get_dates(start_date, years=2, str_format=r"%Y-%m-%d")
+
+        # Test get_wy performance
+        wy_results = utils.get_wy(large_dates)
+        self.assertEqual(len(wy_results), len(large_dates))
+        self.assertTrue(all(isinstance(wy, (int, np.integer)) for wy in wy_results))
+
+        # Test standardize_datestring_format performance
+        standardized = utils.standardize_datestring_format(large_dates)
+        self.assertEqual(len(standardized), len(large_dates))
+
+        # Verify first and last dates
+        self.assertEqual(standardized[0], "2010-01-01")
+        self.assertEqual(standardized[-1], "2011-12-31")
+
+    def test_get_month_function(self):
+        """Test get_month function with various inputs"""
+        # Note: get_month requires consecutive dates due to to_np_datetimes64d
+        dates = ["2023-01-15", "2023-01-16", "2023-01-17"]  # Consecutive dates
+        months = utils.get_month(dates)
+        self.assertEqual(months, [1, 1, 1])
+
+        # Test with single date
+        single_month = utils.get_month(["2023-06-15"])
+        self.assertEqual(single_month, [6])
+
+    def test_get_year_and_month_edge_cases(self):
+        """Test get_year_and_month with edge cases"""
+        # Test with datetime objects
+        dt_list = [datetime(2023, 1, 15), datetime(2023, 12, 31)]
+        year_months = utils.get_year_and_month(dt_list)
+        self.assertEqual(year_months, ["2023-01", "2023-12"])
+
+        # Test with empty list
+        empty_result = utils.get_year_and_month([])
+        self.assertEqual(empty_result, [])
