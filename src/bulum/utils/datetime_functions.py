@@ -69,8 +69,18 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     >>> standardize_datestring_format(["25/12/2023", "26/12/2023"])
     ['2023-12-25', '2023-12-26']
     """
-    date_fmt = get_date_format(values[0])
-    np_dates = to_np_datetimes64d(values, date_fmt=date_fmt)
+    date_format = get_date_format(values[0])
+    try:
+        np_dates = to_np_datetimes64d(values, date_fmt=date_format)
+    except ValueError as e:
+        if "End date format does not match start date format" in str(e):
+            end_date_format = get_date_format(values[-1])
+            placeholder_values = ["" for _ in values]
+            placeholder_values[0] = values[0]
+            placeholder_values[-1] = datetime.strptime(values[-1], end_date_format).strftime(date_format)
+            np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format)
+        else:
+            raise e
     return [str(t) for t in np_dates]
 
 
@@ -122,7 +132,11 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     3
     """
     start_date = datetime.strptime(values[0], date_fmt)
-    end_date = datetime.strptime(values[-1], date_fmt)
+    try:
+        end_date = datetime.strptime(values[-1], date_fmt)
+    except ValueError as e:
+        raise ValueError("End date format does not match start date format: "
+                         f"{values[0]=} {values[-1]=} {date_fmt=}") from e
 
     # Handle potential OverflowError at end of representable date range.
     if end_date == datetime(9999, 12, 31):

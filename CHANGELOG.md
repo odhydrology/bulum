@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - stats.StochasticDataComparison(): legend in charts is now interactive, subset of input datasets can now be shown
 - stats.StochasticDataComparison(): adjusted correlation charts so that input dataset colour is consistent with other charts
 - stats.StochasticDataComparison(): sort order of all chart colours now matches input dataset order
+- utils.standardize_datestring_format(): added fallback when date format is not consistent, likely when excel has saved a timeseries file.
 - utils.to_np_datetimes64d(): added check_length parameter
 
 ## 0.3.0
