@@ -47,6 +47,10 @@ class Tests(unittest.TestCase):
         df = bio.read_res_csv("./src/bulum/io/tests/res_csv_files/file_with_missing_vals.res.csv", custom_na_values=['100.00000000000001'])
         self.assertEqual(df.isnull().sum().sum(), 17)
 
+    def test_read_res_csv_date_handling(self):
+        """Timeseries saved by excel."""
+        bio.read_res_csv("./src/bulum/io/tests/res_csv_files/file_with_bad_dates.res.csv")
+
     def test_write_res_csv(self):
         test_output_filename = "./src/bulum/io/tests/test_outputs/test_out.res.csv"
         if os.path.isfile(test_output_filename):
