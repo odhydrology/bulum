@@ -356,6 +356,7 @@ def check_data_equivalence(df1: pd.DataFrame, df2: pd.DataFrame,
         return False
     # Check column order
     if check_col_order:
+        # pylint: disable=consider-using-enumerate
         for i in range(len(c1)):
             if c1[i] != c2[i]:
                 if details is not None:
