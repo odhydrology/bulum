@@ -74,12 +74,17 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     return [str(t) for t in np_dates]
 
 
-def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d') -> np.typing.NDArray[np.datetime64]:
+def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
+                       *, check_length: bool = True) -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetime64[D] array.
 
     This function efficiently converts consecutive date strings to numpy datetime64
     arrays with day precision. It handles edge cases at the end of the representable
     date range (9999-12-31).
+
+    You can turn off the length checking to pass in two dates and receive an
+    array with all dates between the specified dates (inclusive). See the second
+    example below.
 
     Parameters
     ----------
@@ -87,23 +92,29 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d') -> np.typ
         List of consecutive date strings to convert.
     date_fmt : str, default '%Y-%m-%d'
         The date format string for parsing the input dates.
+    check_length : bool, default True
+        Whether to validate that the number of generated dates matches the input length.
+        Set to False to skip consecutive date validation.
 
     Returns
     -------
     np.typing.NDArray[np.datetime64]
-        Numpy array of datetime64[D] values.
+        Numpy array of consecutive datetime64[D] values from start to end date.
 
     Raises
     ------
     ValueError
-        If the number of generated dates doesn't match the input length,
-        indicating non-consecutive dates.
+        If check_length is True and the number of generated dates doesn't match
+        the input length, indicating non-consecutive dates.
 
     Examples
     --------
     >>> dates = to_np_datetimes64d(['2023-01-01', '2023-01-02', '2023-01-03'])
     >>> dates.dtype
     dtype('<M8[D]')
+
+    >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length=False))
+    3
     """
     start_date = datetime.strptime(values[0], date_fmt)
     end_date = datetime.strptime(values[-1], date_fmt)
@@ -115,7 +126,7 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d') -> np.typ
     else:
         np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
 
-    if len(np_dates) != len(values):
+    if check_length and len(np_dates) != len(values):
         raise ValueError(f"Date sequence validation failed: Expected {len(np_dates)} consecutive dates "
                          f"between {start_date} and {end_date} but found {len(values)} values. "
                          f"This suggests non-consecutive dates or gaps in the sequence.")
