@@ -1,4 +1,3 @@
-import itertools
 from datetime import datetime
 from typing import Iterable, Literal, Optional, overload
 
@@ -9,7 +8,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from bulum import utils
 
 
-def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
+def find_col(df: pd.DataFrame, string_pattern: str, unique_match: bool = True) -> pd.Series | pd.DataFrame:
     """
     Find columns in dataframe that match a string pattern.
 
@@ -44,7 +43,7 @@ def find_col(df: pd.DataFrame, string_pattern: str, unique_match=True):
     return df[cols]
 
 
-def assert_df_has_one_column(df: pd.DataFrame):
+def assert_df_has_one_column(df: pd.DataFrame) -> None:
     """
     Assert that a dataframe has exactly one column.
 
@@ -63,16 +62,17 @@ def assert_df_has_one_column(df: pd.DataFrame):
         raise ValueError(f"The dataframe must have exactly 1 column, but {n_cols} were found.")
 
 
-def assert_df_format_standards(df: pd.DataFrame):
+def assert_df_format_standards(df: pd.DataFrame) -> None:
     """
     c.f. :func:`check_df_format_standards`
     """
     violations = check_df_format_standards(df)
-    if len(violations) > 0:
-        raise Exception(f"Dataframe does not meet bulum format standards.\n {violations[0]}")
+    if violations:
+        raise ValueError("Dataframe does not meet bulum format standards.\n" +
+                         '\n'.join(violations))
 
 
-def crop_to_wy(df: pd.DataFrame, wy_month=7):
+def crop_to_wy(df: pd.DataFrame, wy_month: int = 7) -> pd.DataFrame:
     """
     Crop dataframe to complete water years only.
 
@@ -103,7 +103,7 @@ def crop_to_wy(df: pd.DataFrame, wy_month=7):
 def check_df_format_standards(df: pd.DataFrame) -> list[str]:
     # TODO: return optional str instead
     """
-    Checks if a given dataframe meets standards generally requried by
+    Checks if a given dataframe meets standards generally required by
     bulum functions. These standards include:
     - Dataframe is not `None`
     - Dateframe is not empty
@@ -142,7 +142,7 @@ def check_df_format_standards(df: pd.DataFrame) -> list[str]:
     return []
 
 
-def set_index_dt(df: pd.DataFrame, dt_values=None, start_dt=None, **kwargs) -> pd.DataFrame:
+def set_index_dt(df: pd.DataFrame, dt_values: Optional[list] = None, start_dt: Optional[datetime] = None, **kwargs) -> pd.DataFrame:
     """
     Returns a dataframe with datetime index. Useful for converting bulum
     dataframes to datetime as needed.
@@ -260,7 +260,7 @@ def strings_to_datetimes(v: list[str],
     raise ValueError(f"Invalid {engine=}")
 
 
-def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
+def convert_index_to_datetime(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     """
     Converts the index to pandas datetime. Accepts a dataframe with a index as
     datetime or strings.
@@ -299,7 +299,7 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs):
     return df
 
 
-def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
+def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d") -> pd.DataFrame:
     """
     Converts the index of `df` to strings. Accepts a dataframe with a index as
     datetime or strings.
@@ -324,7 +324,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d"):
 
 
 def check_data_equivalence(df1: pd.DataFrame, df2: pd.DataFrame,
-                           check_col_order=True, threshold=1e-6,
+                           check_col_order: bool = True, threshold: float = 1e-6,
                            details: Optional[dict] = None) -> bool:
     """Checks if two numeric dataframes are the same. It checks the names &
     order of the columns, the values of the index, and summary stats on all the
