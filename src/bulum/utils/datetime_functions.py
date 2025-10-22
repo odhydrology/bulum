@@ -74,6 +74,11 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     return [str(t) for t in np_dates]
 
 
+def standardise_datestring_format(values):
+    """Australian spelling version of :func:`standardize_datestring_format`."""
+    return standardize_datestring_format(values)
+
+
 def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
                        *, check_length: bool = True) -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetime64[D] array.
