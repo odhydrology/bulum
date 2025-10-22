@@ -12,16 +12,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - stats.StochasticDataComparison(): added daily correlation outputs
 - stats.StochasticDataComparison(): added monthly statistic charts grouped by timeseries
 - stats.StochasticDataComparison(): added optional 'show_bands' argument to show range of outcomes as grey band on statistic charts
+- utils.interpolation: added proper deprecation warnings with migration guidance
+- stats.standardise_datestring_format(): Australian spelling.
 
 ### Fixes
 
 - stats.StochasticDataComparison(): no longer ignores wy_month argument in cropping input datasets
+- utils.to_np_datetimes64d(): fixed OverflowError when end_date is 9999-12-31
 
 ### Changed
 
 - stats.StochasticDataComparison(): legend in charts is now interactive, subset of input datasets can now be shown
 - stats.StochasticDataComparison(): adjusted correlation charts so that input dataset colour is consistent with other charts
 - stats.StochasticDataComparison(): sort order of all chart colours now matches input dataset order
+- utils.standardize_datestring_format(): added fallback when date format is not consistent, likely when excel has saved a timeseries file.
+- utils.to_np_datetimes64d(): added check_length parameter
 
 ## 0.3.0
 

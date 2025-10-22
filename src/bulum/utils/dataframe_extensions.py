@@ -65,7 +65,7 @@ class TimeseriesDataframe(pd.DataFrame):
         tsdf.copy_from_dataframe(df)
         return tsdf
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         print(f"Name: {self.name}")
         print(f"Source: {self.source}")
         print(f"Description: {self.description}")
@@ -73,7 +73,7 @@ class TimeseriesDataframe(pd.DataFrame):
         print(self.describe())
 
     def has_tag(self, pattern: str | re.Pattern, *, regex: Optional[RegexArg] = None,
-                exact=False) -> bool:
+                exact: bool = False) -> bool:
         """Check if the provided tag matches any of the dataframe's tags.
 
         Parameters
@@ -107,7 +107,7 @@ class TimeseriesDataframe(pd.DataFrame):
                 raise ValueError("Invalid argument supplied to regex, " +
                                  f"{regex=} but expected RegexArg")
 
-    def add_tag(self, tag: str, check_membership=False):
+    def add_tag(self, tag: str, check_membership: bool = False) -> None:
         """Add a tag to the TimeseriesDataframe.
 
         This is the canonical way to add tags to a TimeseriesDataframe. It can
@@ -137,7 +137,7 @@ class TimeseriesDataframe(pd.DataFrame):
             else:
                 self.tags = self.tags + self.TAG_DELIMITER + tag
 
-    def count_tags(self):
+    def count_tags(self) -> int:
         return len(self.tags.split(self.TAG_DELIMITER))
 
 
@@ -169,7 +169,7 @@ class DataframeEnsemble:
     def __len__(self):
         return len(self.ensemble)
 
-    def get(self, key=None):
+    def get(self, key: Optional[Any] = None) -> TimeseriesDataframe:
         """Return the underlying dataframe if the ensemble is a singleton, or
         the dataframe at the given key."""
         if key is None:
@@ -180,7 +180,7 @@ class DataframeEnsemble:
         else:
             return self.ensemble.get(key)
 
-    def add_dataframe(self, df, key=None, tag=None):
+    def add_dataframe(self, df: pd.DataFrame | TimeseriesDataframe, key: Optional[Any] = None, tag: Optional[str] = None) -> None:
         if not isinstance(df, TimeseriesDataframe):
             df = TimeseriesDataframe.from_dataframe(df)
         if tag is not None:
@@ -197,11 +197,11 @@ class DataframeEnsemble:
 #        df = TimeseriesDataframe.from_file(filename)
 #        self.add_dataframe(df, key, tag)
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         for key, val in self.ensemble.items():
             print(f"Key: {key}, Shape: {val.shape}, Tags: {val.tags}")
 
-    def df_shape_matches_ensemble(self, new_df) -> bool:
+    def df_shape_matches_ensemble(self, new_df: pd.DataFrame | TimeseriesDataframe) -> bool:
         """Internal function to verify new dfs."""
         if len(self.ensemble) > 0:
             first_shape = list(self.ensemble.values())[0].shape
@@ -210,7 +210,7 @@ class DataframeEnsemble:
                 return False
         return True
 
-    def assert_df_shape_matches_ensemble(self, new_df):
+    def assert_df_shape_matches_ensemble(self, new_df: pd.DataFrame | TimeseriesDataframe) -> None:
         """Internal function to verify new dfs."""
         if len(self.ensemble) > 0:
             first_shape = list(self.ensemble.values())[0].shape
@@ -221,7 +221,7 @@ class DataframeEnsemble:
                     f" but the ensemble members have shape {first_shape}!"
                 )
 
-    def filter_tag(self, tag: str, *, exclude: bool = False, **kwargs):
+    def filter_tag(self, tag: str, *, exclude: bool = False, **kwargs) -> 'DataframeEnsemble':
         """Return a new ensemble containing dataframes filtered by tag.
 
         By default, it will include all dataframes whose tags partially match
@@ -246,7 +246,7 @@ class DataframeEnsemble:
                 subensemble.add_dataframe(tsdf, key)
         return subensemble
 
-    def add_tag(self, tag: str):
+    def add_tag(self, tag: str) -> None:
         """Add a tag to all member dataframes."""
         for dataframe in self.ensemble.values():
             dataframe.add_tag(tag)

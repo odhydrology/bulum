@@ -136,3 +136,4 @@ test_outputs/
 *.gitignore.*
 trash
 src/bulum/io/tests/iqqm_results/temp.run
+.claude
