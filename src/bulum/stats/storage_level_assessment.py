@@ -23,30 +23,114 @@ class StorageLevelAssessment:
     This class provides comprehensive analysis of storage time series data,
     including event detection when storage falls below specified trigger levels,
     duration analysis, and statistical summaries organized by water year.
+
+    Examples
+    --------
+    Basic usage with numeric triggers:
+
+    >>> import pandas as pd
+    >>> from bulum.stats import StorageLevelAssessment
+    >>>
+    >>> # Create sample storage data
+    >>> dates = pd.date_range('2020-01-01', '2022-12-31', freq='D')
+    >>> storage = pd.Series(np.random.uniform(20, 120, len(dates)), index=dates, name='Storage')
+    >>>
+    >>> # Initialize assessment with trigger levels
+    >>> sla = StorageLevelAssessment(storage, triggers=[100, 75, 50, 25])
+    >>>
+    >>> # Get comprehensive summary
+    >>> summary = sla.Summary()
+    >>> print(summary)
+
+    Usage with named triggers for better readability:
+
+    >>> # Initialize with meaningful trigger names
+    >>> trigger_names = ["Full Supply", "Level 1", "Level 2", "Critical"]
+    >>> sla = StorageLevelAssessment(storage, triggers=[100, 75, 50, 25],
+    ...                            trigger_names=trigger_names)
+    >>>
+    >>> summary = sla.Summary()  # Shows "Trigger Name" column
+    >>>
+    >>> # Add additional trigger dynamically
+    >>> sla.add_trigger(10.0, name="Emergency")
+
+    Advanced analysis and visualization:
+
+    >>> # Get event statistics for specific trigger
+    >>> events_count = sla.EventsBelowTriggerCount(length=7)  # Events >= 7 days
+    >>> max_events = sla.EventsBelowTriggerMax()
+    >>>
+    >>> # Annual analysis
+    >>> annual_days = sla.AnnualDaysBelow()
+    >>> percent_years = sla.PercentWaterYearsBelow()
+    >>>
+    >>> # Create visualizations
+    >>> chart = sla.plot_events_ranked(50, interactive=True)
+    >>> freq_chart = sla.plot_event_length_frequency(25)
+
+    Water year analysis with custom parameters:
+
+    >>> # Use calendar year (wy_month=1) and allow partial years
+    >>> sla_cal = StorageLevelAssessment(storage, triggers=[50, 25],
+    ...                                wy_month=1, allow_part_years=True)
+    >>>
+    >>> # Get summary for single trigger
+    >>> critical_summary = sla_cal.Summary(trigger=25)
+
+    Custom aggregation of event data:
+
+    >>> # Use custom function to analyze events
+    >>> import numpy as np
+    >>> mean_events = sla.EventsBelowTriggerAggregate(np.mean)
+    >>> median_events = sla.EventsBelowTriggerAggregate(np.median)
+
+    See Also
+    --------
+    bulum.utils.crop_to_wy : Crop data to complete water years
+    bulum.utils.get_wy : Get water year for dates
     """
 
     def __init__(self, df: pd.Series, triggers: list[float], wy_month: int = 7, allow_part_years: bool = False) -> None:
         """
         Initialize StorageLevelAssessment with storage data and trigger thresholds.
 
+        The constructor automatically runs event detection algorithms for all trigger
+        levels and prepares the data for analysis by cropping to complete water years
+        if requested.
+
         Parameters
         ----------
         df : :class:`pandas.Series`
-            Daily timeseries of storage data with date as index.
-        triggers : list
-            List of trigger thresholds to be assessed.
+            Daily timeseries of storage data with date as index. The series should
+            contain numeric storage values (e.g., ML, GL) and have a datetime index.
+        triggers : list of float
+            List of trigger thresholds to be assessed. Values should be in the same
+            units as the storage data. Triggers are assessed using <= comparison
+            (storage at or below trigger).
         wy_month : int, optional
-            Water year start month. Default is 7 (July).
+            Water year start month (1-12). Default is 7 (July). For example,
+            wy_month=7 means water years run from July 1 to June 30.
         allow_part_years : bool, optional
-            Allow partial water years or only complete water years. Default is False.
+            Allow partial water years or only complete water years. When False
+            (default), data is cropped to include only complete water years.
+            When True, partial years at the start/end are included.
 
         Raises
         ------
         ValueError
-            Bad argument supplied, namely:
-            - Empty series supplied
+            If empty series is supplied after water year cropping, or if
+            trigger_names length doesn't match triggers length.
         TypeError
-            - Type of argument `df` is not :class:`pandas.Series`
+            If df is not a :class:`pandas.Series`.
+
+        Examples
+        --------
+        >>> # Basic initialization
+        >>> sla = StorageLevelAssessment(storage_data, [100, 50, 25])
+        >>>
+        >>> # With descriptive names and custom water year
+        >>> names = ["Normal", "Alert", "Critical"]
+        >>> sla = StorageLevelAssessment(storage_data, [100, 50, 25], wy_month=1)
         """
 
         if not isinstance(df, pd.Series):
@@ -74,16 +158,79 @@ class StorageLevelAssessment:
         # Get count of WYs
         self.wy_count = self.df.groupby(utils.get_wy(self.df.index, self.wy_month)).sum().count()
 
+    def add_trigger(self, trigger: float, name: Optional[str] = None) -> None:
+        """
+        Add an additional trigger level to the assessment.
+
+        Parameters
+        ----------
+        trigger : float
+            New trigger threshold to be assessed. Must not already exist in the
+            current trigger list. Value should be in same units as storage data.
+        name : str, optional
+            Descriptive name for the new trigger level. Required if the assessment
+            was initialized with trigger_names, otherwise must be None to maintain
+            consistency. Default is None.
+
+        Raises
+        ------
+        ValueError
+            If trigger already exists in the assessment, if name is required but
+            not provided (when trigger_names exist), or if name is provided but
+            no trigger_names exist.
+
+        Examples
+        --------
+        >>> # Assessment without names - add trigger without name
+        >>> sla = StorageLevelAssessment(storage_data, [100, 50])
+        >>> sla.add_trigger(25.0)  # ✓ Valid
+        >>>
+        >>> # Assessment with names - name is required
+        >>> sla_named = StorageLevelAssessment(storage_data, [100, 50],
+        ...                                  trigger_names=["High", "Low"])
+        >>> sla_named.add_trigger(25.0, name="Critical")  # ✓ Valid
+        >>>
+        >>> # Immediate availability for analysis
+        >>> summary = sla_named.Summary()  # Includes new trigger
+        >>> events = sla_named.EventsBelowTriggerCount()  # Includes new trigger
+        >>> chart = sla_named.plot_events_ranked(25.0)  # Can plot new trigger
+
+        See Also
+        --------
+        EventsBelowTriggerAlgorithm : Algorithm used for new trigger analysis
+        Summary : Method that includes newly added triggers
+        """
+        # Check if trigger already exists
+        if trigger in self.triggers:
+            raise ValueError(f"Trigger {trigger} already exists in the assessment")
+        # Add the trigger and run the algorithm
+        self.triggers.append(trigger)
+
+        # Run event algorithm for the new trigger
+        self.events[trigger] = self.EventsBelowTriggerAlgorithm(trigger)
+
     def AnnualDaysBelow(self) -> dict:
         """
         Calculate total days at or below trigger threshold by water year.
 
+        This method counts the number of days in each water year where storage
+        was at or below each trigger threshold.
+
         Returns
         -------
-        dict
-            Dictionary of annual timeseries grouped by trigger threshold,
-            where keys are trigger values and values are :class:`pandas.Series`
-            with water year counts.
+        dict of {float: :class:`pandas.Series`}
+            Dictionary where keys are trigger threshold values (float) and values
+            are :class:`pandas.Series` with water years as index and day counts
+            as values.
+
+        Examples
+        --------
+        >>> annual_days = sla.AnnualDaysBelow()
+        >>> print(annual_days[50])  # Days below 50 ML by water year
+        >>> # Example output:
+        >>> # 2020    45
+        >>> # 2021    12
+        >>> # 2022    78
         """
 
         dailytrigger = {
@@ -141,7 +288,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: int}
             Dictionary of total years grouped by trigger threshold.
         """
 
@@ -164,7 +311,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: float}
             Dictionary of percentage years grouped by trigger threshold.
         """
 
@@ -182,16 +329,41 @@ class StorageLevelAssessment:
         """
         Calculate array of event lengths for a specific trigger threshold.
 
+        This is the core algorithm that detects continuous periods where storage
+        is at or below the trigger threshold. An event starts when storage falls
+        to or below the trigger and ends when storage rises above the trigger.
+
         Parameters
         ----------
-        trigger : float or int
-            Trigger threshold against which daily data input is assessed.
+        trigger : float
+            Trigger threshold against which daily storage data is assessed.
+            Uses <= comparison (storage at or below trigger).
 
         Returns
         -------
-        list
-            Array where each item represents the length of a single continuous event
-            below the trigger threshold.
+        list of int
+            List where each element represents the length (in days) of a single
+            continuous event below the trigger threshold. Empty list if no events
+            occurred.
+
+        Examples
+        --------
+        >>> # Get event lengths for 50 ML trigger
+        >>> events = sla.EventsBelowTriggerAlgorithm(50.0)
+        >>> print(events)  # e.g., [5, 12, 3, 45] - four events of different lengths
+        >>>
+        >>> # Analyze the events
+        >>> print(f"Number of events: {len(events)}")
+        >>> print(f"Longest event: {max(events)} days" if events else "No events")
+        >>> print(f"Average event length: {np.mean(events):.1f} days" if events else "No events")
+
+        Notes
+        -----
+        This algorithm handles edge cases including:
+        - Events that start at the beginning of the time series
+        - Events that end at the end of the time series
+        - Single-day events
+        - No events (returns empty list)
         """
         previous_ended = True
         length_counter = 0
@@ -246,7 +418,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: list of int}
             Dictionary of event length arrays, grouped by trigger threshold.
         """
         trunc_events = {
@@ -266,7 +438,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: int}
             Dictionary of event counts, grouped by trigger threshold.
         """
         output = {
@@ -281,7 +453,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: int}
             Dictionary of maximum event lengths, grouped by trigger threshold.
         """
         output = {
@@ -301,7 +473,7 @@ class StorageLevelAssessment:
 
         Returns
         -------
-        dict
+        dict of {float: float}
             Dictionary of aggregated event values, grouped by trigger threshold.
         """
         output = {
