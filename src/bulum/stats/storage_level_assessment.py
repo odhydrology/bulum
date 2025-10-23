@@ -329,7 +329,7 @@ class StorageLevelAssessment:
         else:
             return out_df[trigger]
 
-    def NumberWaterYearsBelow(self, annualdaysbelow: dict | None = None, *, min_event_length=0):
+    def NumberWaterYearsBelow(self, annualdaysbelow: dict | None = None, *, min_days_per_year: int = 1):
         """
         Calculate total water years with at least one day at or below trigger threshold.
 
@@ -337,23 +337,28 @@ class StorageLevelAssessment:
         ----------
         annualdaysbelow : dict, optional
             Optionally provide output from AnnualDaysBelow, otherwise recalculate. Default is None.
-        min_event_length : int, optional
-            Minimum event length in a WY before counting it. This may be used to ignore single day events, for instance.
+        min_days_per_year : int, optional
+            Minimum number of days in a water year before counting it. Only water years
+            with >= this many days below the trigger are counted. Default is 1.
 
         Returns
         -------
         dict of {float: int}
-            Dictionary of total years grouped by trigger threshold.
+            Dictionary of total water years grouped by trigger threshold.
         """
 
         # If not provided, calculate AnnualDaysBelow
         if annualdaysbelow is None:
             annualdaysbelow = self.AnnualDaysBelow()
 
-        numberyears = {trigger: sum(1 if x > 0 else 0 for x in v) for trigger, v in annualdaysbelow.items()}
+        # Count water years with at least 'length' days below trigger
+        numberyears = {
+            trigger: sum(1 if days >= min_days_per_year else 0 for days in v)
+            for trigger, v in annualdaysbelow.items()
+        }
         return numberyears
 
-    def PercentWaterYearsBelow(self, numberyears: dict | None = None):
+    def PercentWaterYearsBelow(self, numberyears: dict | None = None, *, min_days_per_year: int = 1):
         """
         Calculate percentage of water years with at least one day at or below trigger threshold.
 
@@ -362,6 +367,9 @@ class StorageLevelAssessment:
         numberyears : dict, optional
             Optionally provide output from NumberWaterYearsBelow, otherwise
             recalculate. Default is None.
+        min_days_per_year : int, optional
+            Minimum number of days in a water year before counting it. Only water years
+            with >= this many days below the trigger are counted. Default is 1.
 
         Returns
         -------
@@ -369,9 +377,9 @@ class StorageLevelAssessment:
             Dictionary of percentage years grouped by trigger threshold.
         """
 
-        # If not provided, calculate NumberWaterYearsBelow
+        # If not provided, calculate NumberWaterYearsBelow with the length filter
         if numberyears is None:
-            numberyears = self.NumberWaterYearsBelow()
+            numberyears = self.NumberWaterYearsBelow(min_days_per_year=min_days_per_year)
 
         percent_years = {
             trigger: x / self.wy_count
@@ -461,13 +469,13 @@ class StorageLevelAssessment:
 
         return output
 
-    def EventsBelowTrigger(self, length: int = 1) -> dict:
+    def EventsBelowTrigger(self, min_length: int = 1) -> dict:
         """
         Get event length arrays for each trigger threshold with minimum length filter.
 
         Parameters
         ----------
-        length : int, optional
+        min_length : int, optional
             Minimum event length to return. Default is 1.
 
         Returns
@@ -476,18 +484,18 @@ class StorageLevelAssessment:
             Dictionary of event length arrays, grouped by trigger threshold.
         """
         trunc_events = {
-            k: [i for i in x if i >= length]
+            k: [i for i in x if i >= min_length]
             for k, x in self.events.items()
         }
         return trunc_events
 
-    def EventsBelowTriggerCount(self, length: int = 1) -> dict:
+    def EventsBelowTriggerCount(self, min_length: int = 1) -> dict:
         """
         Count events for each trigger threshold with minimum length filter.
 
         Parameters
         ----------
-        length : int, optional
+        min_length : int, optional
             Minimum event length to count. Default is 1.
 
         Returns
@@ -496,41 +504,66 @@ class StorageLevelAssessment:
             Dictionary of event counts, grouped by trigger threshold.
         """
         output = {
-            k: sum(i >= length for i in x)
+            k: sum(i >= min_length for i in x)
             for k, x in self.events.items()
         }
         return output
 
-    def EventsBelowTriggerMax(self) -> dict:
+    def EventsBelowTriggerMax(self, *, min_length: int = 1) -> dict:
         """
-        Find maximum event length for each trigger threshold.
+        Find maximum event length for each trigger threshold with minimum length filter.
+
+        Only events with duration >= length days are considered in the analysis.
+        This allows filtering out short-duration events that may not be operationally
+        significant.
+
+        Parameters
+        ----------
+        min_length : int, optional
+            Minimum event length (in days). Only events with duration >= this
+            value are included in the analysis. Default is 1.
 
         Returns
         -------
         dict of {float: int}
             Dictionary of maximum event lengths, grouped by trigger threshold.
+            Returns NaN for triggers with no events meeting the minimum length criteria.
         """
         output = {
-            k: max(x) if len(x) > 0 else np.nan
+            k: max([i for i in x if i >= min_length]) if any(i >= min_length for i in x) else np.nan
             for k, x in self.events.items()
         }
         return output
 
-    def EventsBelowTriggerMean(self) -> dict:
+    def EventsBelowTriggerMean(self, *, min_length: int = 1) -> dict:
         """
-        Calculate mean event length for each trigger threshold.
+        Calculate mean event length for each trigger threshold with minimum length filter.
+
+        Only events with duration >= length days are considered in the analysis.
+        This allows filtering out short-duration events that may not be operationally
+        significant when calculating average event durations.
+
+        Parameters
+        ----------
+        min_length : int, optional
+            Minimum event length (in days). Only events with duration >= this
+            value are included in the analysis. Default is 1.
 
         Returns
         -------
         dict of {float: float}
             Dictionary of mean event lengths, grouped by trigger threshold.
-            Returns NaN for triggers with no events.
+            Returns NaN for triggers with no events meeting the minimum length criteria.
 
         Examples
         --------
         >>> mean_events = sla.EventsBelowTriggerMean()
         >>> print(mean_events[50])  # Average event length for 50 ML trigger
         >>> # Example output: 12.5 (average of all events below 50 ML)
+        >>>
+        >>> # Only consider events 7 days or longer before counting
+        >>> mean_long_events = sla.EventsBelowTriggerMean(length=7)
+        >>> print(mean_long_events[50])  # Average of events >= 7 days only
 
         See Also
         --------
@@ -538,27 +571,45 @@ class StorageLevelAssessment:
         EventsBelowTriggerAggregate : Custom aggregation functions
         """
         output = {
-            k: np.mean(x) if len(x) > 0 else np.nan
+            k: np.mean([i for i in x if i >= min_length]) if any(i >= min_length for i in x) else np.nan
             for k, x in self.events.items()
         }
         return output
 
-    def EventsBelowTriggerAggregate(self, function: Callable) -> dict:
+    def EventsBelowTriggerAggregate(self, function: Callable, *, min_length: int = 1) -> dict:
         """
-        Aggregate event lengths using a custom function for each trigger threshold.
+        Aggregate event lengths using a custom function for each trigger threshold with minimum length filter.
+
+        Only events with duration >= length days are considered in the analysis.
+        This allows filtering out short-duration events before applying custom
+        aggregation functions like median, standard deviation, percentiles, etc.
 
         Parameters
         ----------
         function : :class:`typing.Callable`
             Function that acts on arrays/iterables and returns a single value (e.g., float).
+        min_length : int, optional
+            Minimum event length (in days). Only events with duration >= this
+            value are included in the analysis. Default is 1.
 
         Returns
         -------
         dict of {float: float}
             Dictionary of aggregated event values, grouped by trigger threshold.
+            Returns NaN for triggers with no events meeting the minimum length criteria.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> # Get median of events 30 days or longer before counting
+        >>> median_long_events = sla.EventsBelowTriggerAggregate(np.median, length=30)
+        >>>
+        >>> # Get 95th percentile of events 7 days or longer
+        >>> p95_events = sla.EventsBelowTriggerAggregate(
+        ...     lambda x: np.percentile(x, 95), length=7)
         """
         output = {
-            k: function(x) if len(x) > 0 else np.nan
+            k: function([i for i in x if i >= min_length]) if any(i >= min_length for i in x) else np.nan
             for k, x in self.events.items()
         }
         return output
