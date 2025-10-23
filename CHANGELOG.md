@@ -9,9 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- read_iqqm_lqn_output(): `dropna` flag
 - stats.StochasticDataComparison(): added daily correlation outputs
 - stats.StochasticDataComparison(): added monthly statistic charts grouped by timeseries
 - stats.StochasticDataComparison(): added optional 'show_bands' argument to show range of outcomes as grey band on statistic charts
+- stats.StorageLevelAssessment: 
+    - can apply arbitrary functions to aggregate reults
+    - additional parameter for annual calculations to ignore events of length less than parameter
+    - added plotting methods `plot_events_ranked` and `plot_event_length_frequency`
+    - added `add_trigger()` method
+    - added `trigger_names` parameter which is displayed in `Summary()` table
+    - mean event length computation
+    - minimum event length and water year day count parameters
 - utils.interpolation: added proper deprecation warnings with migration guidance
 - stats.standardise_datestring_format(): Australian spelling.
 
