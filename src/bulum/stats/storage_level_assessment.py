@@ -90,7 +90,7 @@ class StorageLevelAssessment:
     bulum.utils.get_wy : Get water year for dates
     """
 
-    def __init__(self, df: pd.Series, triggers: list[float], wy_month: int = 7, allow_part_years: bool = False) -> None:
+    def __init__(self, df: pd.Series, triggers: list[float], wy_month: int = 7, allow_part_years: bool = False, trigger_names: Optional[list[str]] = None) -> None:
         """
         Initialize StorageLevelAssessment with storage data and trigger thresholds.
 
@@ -114,6 +114,11 @@ class StorageLevelAssessment:
             Allow partial water years or only complete water years. When False
             (default), data is cropped to include only complete water years.
             When True, partial years at the start/end are included.
+        trigger_names : list of str, optional
+            Optional list of descriptive names for trigger levels. Must have same
+            length as triggers if provided. Names appear in summary tables for
+            better readability. Can also be provided as a dict mapping trigger
+            levels to names after initialization. Default is None.
 
         Raises
         ------
@@ -130,13 +135,16 @@ class StorageLevelAssessment:
         >>>
         >>> # With descriptive names and custom water year
         >>> names = ["Normal", "Alert", "Critical"]
-        >>> sla = StorageLevelAssessment(storage_data, [100, 50, 25], wy_month=1)
+        >>> sla = StorageLevelAssessment(storage_data, [100, 50, 25],
+        ...                            trigger_names=names, wy_month=1)
         """
 
         if not isinstance(df, pd.Series):
             raise TypeError("Storage data must be a single column of a dataframe (pd.Series)")
 
         self.triggers = triggers
+        # Use property setter for validation and conversion
+        self.trigger_names = trigger_names
         self.wy_month = wy_month
         self.allow_part_years = allow_part_years
         self.df = df.copy(deep=True)
@@ -157,6 +165,38 @@ class StorageLevelAssessment:
 
         # Get count of WYs
         self.wy_count = self.df.groupby(utils.get_wy(self.df.index, self.wy_month)).sum().count()
+
+    @property
+    def trigger_names(self) -> Optional[dict[float, str]]:
+        """Get trigger names as a dictionary mapping trigger levels to names."""
+        return self._trigger_names
+
+    @trigger_names.setter
+    def trigger_names(self, value: Optional[list[str] | dict[float, str]]) -> None:
+        """Set trigger names with validation.
+
+        Parameters
+        ----------
+        value : list of str, dict of {float: str}, or None
+            If list: Must have same length as triggers, will be mapped in order.
+            If dict: Keys must match existing trigger levels.
+            If None: Clears all trigger names.
+        """
+        if value is None:
+            self._trigger_names = None
+        elif isinstance(value, list):
+            if len(value) != len(self.triggers):
+                raise ValueError(f"trigger_names length ({len(value)}) must match triggers length ({len(self.triggers)})")
+            # Convert list to dict mapping triggers to names in order
+            self._trigger_names = {trigger: value[i] for i, trigger in enumerate(self.triggers)}
+        elif isinstance(value, dict):
+            # Validate that all keys exist in triggers
+            missing_triggers = set(value.keys()) - set(self.triggers)
+            if missing_triggers:
+                raise ValueError(f"trigger_names contains triggers not in assessment: {missing_triggers}")
+            self._trigger_names = value.copy()
+        else:
+            raise TypeError("trigger_names must be a list, dict, or None")
 
     def add_trigger(self, trigger: float, name: Optional[str] = None) -> None:
         """
@@ -203,8 +243,22 @@ class StorageLevelAssessment:
         # Check if trigger already exists
         if trigger in self.triggers:
             raise ValueError(f"Trigger {trigger} already exists in the assessment")
+
+        # Validate name parameter based on existing trigger_names
+        if self.trigger_names is not None:
+            if name is None:
+                raise ValueError("name parameter is required when trigger_names are being used")
+        else:
+            if name is not None:
+                raise ValueError("name parameter provided but no trigger_names exist. Initialize with trigger_names or use name=None")
+
         # Add the trigger and run the algorithm
         self.triggers.append(trigger)
+        if self.trigger_names is not None:
+            # Add the new trigger and name to the dictionary
+            new_names = self.trigger_names.copy()
+            new_names[trigger] = name
+            self.trigger_names = new_names
 
         # Run event algorithm for the new trigger
         self.events[trigger] = self.EventsBelowTriggerAlgorithm(trigger)
@@ -497,10 +551,15 @@ class StorageLevelAssessment:
             Comprehensive summary including start/end dates, water year statistics,
             event counts for various durations, and maximum event lengths.
             If trigger is specified, returns Series for that trigger only.
+            When trigger names are provided, they are displayed in the summary.
         """
 
         out_df = pd.DataFrame()
         temp_numberyears = self.NumberWaterYearsBelow()
+
+        # Add trigger names column if names are provided
+        if self.trigger_names is not None:
+            out_df['Trigger Name'] = {trigger: self.trigger_names[trigger] for trigger in self.triggers}
         out_df['Column name'] = {trigger: self.columnname for trigger in self.triggers}
         out_df['Start date'] = {trigger: self.start_date for trigger in self.triggers}
         out_df['End date'] = {trigger: self.end_date for trigger in self.triggers}
