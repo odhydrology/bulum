@@ -404,5 +404,134 @@ class TestStorageLevelAssessment(unittest.TestCase):
         self.assertEqual(summary.loc[90, 'Trigger Name'], "High")
         self.assertEqual(summary.loc[45, 'Trigger Name'], "Low")
 
+    def test_events_below_trigger_mean(self):
+        """Test EventsBelowTriggerMean method."""
+        # Create test data with known events
+        dates = pd.date_range('2020-01-01', '2020-01-20', freq='D')
+        # Create pattern: 5 days below 50, 3 days above, 7 days below 50, 5 days above
+        storage_values = [40, 40, 40, 40, 40, 60, 60, 60, 40, 40, 40, 40, 40, 40, 40, 60, 60, 60, 60, 60]
+        storage = pd.Series(storage_values, index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+
+        # Calculate mean event lengths
+        mean_events = sla.EventsBelowTriggerMean()
+
+        # Should have two events: length 5 and length 7, so mean = (5 + 7) / 2 = 6.0
+        expected_mean = 6.0
+        self.assertAlmostEqual(mean_events[50], expected_mean, places=1)
+
+        # Test with trigger that has no events
+        sla_no_events = osta.StorageLevelAssessment(storage, [10], allow_part_years=True)
+        mean_no_events = sla_no_events.EventsBelowTriggerMean()
+        self.assertTrue(np.isnan(mean_no_events[10]))
+
+    def test_summary_with_include_mean_false(self):
+        """Test Summary method with include_mean=False (default)."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [100, 50])
+
+        # Test default behavior (include_mean=False)
+        summary_default = sla.Summary()
+        self.assertNotIn('Average period at or below trigger (days)', summary_default.columns)
+
+        # Test explicit include_mean=False
+        summary_false = sla.Summary(include_mean=False)
+        self.assertNotIn('Average period at or below trigger (days)', summary_false.columns)
+
+    def test_summary_with_include_mean_true(self):
+        """Test Summary method with include_mean=True."""
+        # Create test data with known events
+        dates = pd.date_range('2020-01-01', '2020-01-15', freq='D')
+        # Pattern: 3 days below 50, 5 days above, 4 days below 50, 3 days above
+        storage_values = [40, 40, 40, 60, 60, 60, 60, 60, 40, 40, 40, 40, 60, 60, 60]
+        storage = pd.Series(storage_values, index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [50, 75], allow_part_years=True)
+
+        # Test with include_mean=True
+        summary = sla.Summary(include_mean=True)
+        self.assertIn('Average period at or below trigger (days)', summary.columns)
+        self.assertIn('Longest period at or below trigger (days)', summary.columns)
+
+        # Verify the average is calculated correctly for trigger 50
+        # Should have two events: length 3 and length 4, so mean = (3 + 4) / 2 = 3.5
+        expected_mean_50 = 3.5
+        self.assertAlmostEqual(summary.loc[50, 'Average period at or below trigger (days)'], expected_mean_50, places=1)
+
+        # For trigger 75, all values should be below, so one event of length 15
+        expected_mean_75 = 15.0
+        self.assertAlmostEqual(summary.loc[75, 'Average period at or below trigger (days)'], expected_mean_75, places=1)
+
+    def test_summary_single_trigger_with_include_mean(self):
+        """Test Summary method for single trigger with include_mean option."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2020-01-10', freq='D')
+        storage_values = [40, 40, 60, 40, 40, 40, 60, 60, 40, 60]
+        storage = pd.Series(storage_values, index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [50, 25], allow_part_years=True)
+
+        # Test single trigger with include_mean=True
+        single_summary = sla.Summary(trigger=50, include_mean=True)
+        self.assertIsInstance(single_summary, pd.Series)
+        self.assertIn('Average period at or below trigger (days)', single_summary.index)
+
+        # Test single trigger with include_mean=False
+        single_summary_no_mean = sla.Summary(trigger=50, include_mean=False)
+        self.assertNotIn('Average period at or below trigger (days)', single_summary_no_mean.index)
+
+    def test_events_below_trigger_mean_edge_cases(self):
+        """Test EventsBelowTriggerMean with edge cases."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2020-01-10', freq='D')
+
+        # Test case 1: Single event
+        storage_single = pd.Series([40, 40, 40, 60, 60, 60, 60, 60, 60, 60], index=dates, name='Storage')
+        sla_single = osta.StorageLevelAssessment(storage_single, [50], allow_part_years=True)
+        mean_single = sla_single.EventsBelowTriggerMean()
+        self.assertEqual(mean_single[50], 3.0)  # Only one event of length 3
+
+        # Test case 2: All values below trigger (entire period is one event)
+        storage_all_below = pd.Series([40, 40, 40, 40, 40, 40, 40, 40, 40, 40], index=dates, name='Storage')
+        sla_all_below = osta.StorageLevelAssessment(storage_all_below, [50], allow_part_years=True)
+        mean_all_below = sla_all_below.EventsBelowTriggerMean()
+        self.assertEqual(mean_all_below[50], 10.0)  # One event spanning all 10 days
+
+        # Test case 3: No events (all values above trigger)
+        storage_no_events = pd.Series([60, 60, 60, 60, 60, 60, 60, 60, 60, 60], index=dates, name='Storage')
+        sla_no_events = osta.StorageLevelAssessment(storage_no_events, [50], allow_part_years=True)
+        mean_no_events = sla_no_events.EventsBelowTriggerMean()
+        self.assertTrue(np.isnan(mean_no_events[50]))
+
+    def test_summary_with_trigger_names_and_include_mean(self):
+        """Test Summary method with both trigger names and include_mean=True."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test with trigger names and include_mean
+        trigger_names = ["High", "Medium", "Low"]
+        sla = osta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=trigger_names)
+
+        summary = sla.Summary(include_mean=True)
+
+        # Should have both trigger names and average columns
+        self.assertIn('Trigger Name', summary.columns)
+        self.assertIn('Average period at or below trigger (days)', summary.columns)
+
+        # Verify trigger names are correct
+        self.assertEqual(summary.loc[100, 'Trigger Name'], "High")
+        self.assertEqual(summary.loc[50, 'Trigger Name'], "Medium")
+        self.assertEqual(summary.loc[25, 'Trigger Name'], "Low")
+
+        # Verify average column has numeric values (not NaN for these random data triggers)
+        for trigger in [100, 50, 25]:
+            avg_value = summary.loc[trigger, 'Average period at or below trigger (days)']
+            self.assertTrue(isinstance(avg_value, (int, float, np.number)))
+
 if __name__ == '__main__':
     unittest.main()

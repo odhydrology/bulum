@@ -516,6 +516,33 @@ class StorageLevelAssessment:
         }
         return output
 
+    def EventsBelowTriggerMean(self) -> dict:
+        """
+        Calculate mean event length for each trigger threshold.
+
+        Returns
+        -------
+        dict of {float: float}
+            Dictionary of mean event lengths, grouped by trigger threshold.
+            Returns NaN for triggers with no events.
+
+        Examples
+        --------
+        >>> mean_events = sla.EventsBelowTriggerMean()
+        >>> print(mean_events[50])  # Average event length for 50 ML trigger
+        >>> # Example output: 12.5 (average of all events below 50 ML)
+
+        See Also
+        --------
+        EventsBelowTriggerMax : Maximum event lengths
+        EventsBelowTriggerAggregate : Custom aggregation functions
+        """
+        output = {
+            k: np.mean(x) if len(x) > 0 else np.nan
+            for k, x in self.events.items()
+        }
+        return output
+
     def EventsBelowTriggerAggregate(self, function: Callable) -> dict:
         """
         Aggregate event lengths using a custom function for each trigger threshold.
@@ -536,7 +563,7 @@ class StorageLevelAssessment:
         }
         return output
 
-    def Summary(self, trigger: float | None = None) -> pd.DataFrame | pd.Series:
+    def Summary(self, trigger: float | None = None, include_mean: bool = False) -> pd.DataFrame | pd.Series:
         """
         Generate comprehensive summary table of storage level assessment outputs.
 
@@ -544,6 +571,8 @@ class StorageLevelAssessment:
         ----------
         trigger : any, optional
             Optionally provide single trigger threshold to be assessed. Default is None.
+        include_mean : bool, optional
+            Include average event length column in the summary. Default is False.
 
         Returns
         -------
@@ -552,6 +581,7 @@ class StorageLevelAssessment:
             event counts for various durations, and maximum event lengths.
             If trigger is specified, returns Series for that trigger only.
             When trigger names are provided, they are displayed in the summary.
+            When include_mean is True, adds "Average period at or below trigger (days)" column.
         """
 
         out_df = pd.DataFrame()
@@ -572,6 +602,10 @@ class StorageLevelAssessment:
         out_df['Number of events at or below trigger (>=183days)'] = self.EventsBelowTriggerCount(183)  # ~6 months
         out_df['Number of events at or below trigger (>=365days)'] = self.EventsBelowTriggerCount(365)  # 1 year
         out_df['Longest period at or below trigger (days)'] = self.EventsBelowTriggerMax()
+
+        # Add average event length column if requested
+        if include_mean:
+            out_df['Average period at or below trigger (days)'] = self.EventsBelowTriggerMean()
 
         # If trigger is provided, subset those outputs
         if trigger is None:
