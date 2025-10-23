@@ -46,6 +46,363 @@ class TestStorageLevelAssessment(unittest.TestCase):
         # Since no trigger_names were provided, the format should match the legacy expected format
         pd.testing.assert_frame_equal(answer_summary, read_summary, check_dtype=False, check_index_type=False, check_column_type=False)
 
+    def test_storage_level_assessment_with_trigger_names(self):
+        """Test StorageLevelAssessment with trigger names functionality."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2022-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test with trigger names
+        triggers = [100, 75, 50, 25]
+        trigger_names = ["Full Supply", "Level 1", "Level 2", "Critical"]
+
+        sla = osta.StorageLevelAssessment(storage, triggers, trigger_names=trigger_names)
+
+        # Verify trigger_names are stored correctly as dict
+        expected_dict = {100: "Full Supply", 75: "Level 1", 50: "Level 2", 25: "Critical"}
+        self.assertEqual(sla.trigger_names, expected_dict)
+        self.assertEqual(len(sla.trigger_names), len(sla.triggers))
+
+        # Test summary includes trigger names
+        summary = sla.Summary()
+        self.assertIn('Trigger Name', summary.columns)
+
+        # Verify trigger names appear in summary
+        for i, trigger in enumerate(triggers):
+            self.assertEqual(summary.loc[trigger, 'Trigger Name'], trigger_names[i])
+
+    def test_storage_level_assessment_without_trigger_names(self):
+        """Test StorageLevelAssessment without trigger names (default behavior)."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2022-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test without trigger names
+        triggers = [100, 75, 50, 25]
+        sla = osta.StorageLevelAssessment(storage, triggers)
+
+        # Verify trigger_names is None
+        self.assertIsNone(sla.trigger_names)
+
+        # Test summary doesn't include trigger names
+        summary = sla.Summary()
+        self.assertNotIn('Trigger Name', summary.columns)
+
+    def test_add_trigger_without_names(self):
+        """Test adding triggers when no trigger names are used."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [100, 50])
+
+        # Add trigger without name (should work)
+        sla.add_trigger(25.0)
+
+        # Verify trigger was added
+        self.assertIn(25.0, sla.triggers)
+        self.assertIn(25.0, sla.events)
+        self.assertIsNone(sla.trigger_names)
+
+        # Test that all methods work with new trigger
+        summary = sla.Summary()
+        self.assertIn(25.0, summary.index)
+
+        events_count = sla.EventsBelowTriggerCount()
+        self.assertIn(25.0, events_count)
+
+    def test_add_trigger_with_names(self):
+        """Test adding triggers when trigger names are used."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+
+        # Add trigger with name (should work)
+        sla.add_trigger(25.0, name="Critical")
+
+        # Verify trigger and name were added
+        self.assertIn(25.0, sla.triggers)
+        self.assertIn(25.0, sla.events)
+        self.assertEqual(sla.trigger_names[25.0], "Critical")
+        self.assertEqual(len(sla.trigger_names), len(sla.triggers))
+
+        # Test summary includes new trigger and name
+        summary = sla.Summary()
+        self.assertIn(25.0, summary.index)
+        self.assertEqual(summary.loc[25.0, 'Trigger Name'], "Critical")
+
+    def test_add_trigger_validation_errors(self):
+        """Test validation errors when adding triggers."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test duplicate trigger error
+        sla = osta.StorageLevelAssessment(storage, [100, 50])
+        with self.assertRaises(ValueError) as cm:
+            sla.add_trigger(100.0)  # Duplicate
+        self.assertIn("already exists", str(cm.exception))
+
+        # Test name required when trigger_names exist
+        sla_named = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+        with self.assertRaises(ValueError) as cm:
+            sla_named.add_trigger(25.0)  # Missing name
+        self.assertIn("name parameter is required", str(cm.exception))
+
+        # Test name provided when no trigger_names exist
+        sla_unnamed = osta.StorageLevelAssessment(storage, [100, 50])
+        with self.assertRaises(ValueError) as cm:
+            sla_unnamed.add_trigger(25.0, name="Critical")  # Unexpected name
+        self.assertIn("no trigger_names exist", str(cm.exception))
+
+    def test_initialization_validation(self):
+        """Test initialization validation for trigger_names."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test mismatched lengths
+        with self.assertRaises(ValueError) as cm:
+            osta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=["High", "Low"])  # 3 triggers, 2 names
+        self.assertIn("trigger_names length", str(cm.exception))
+
+        # Test valid initialization
+        sla = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+        self.assertEqual(len(sla.triggers), len(sla.trigger_names))
+        # Check that names are correctly mapped
+        expected = {100: "High", 50: "Low"}
+        self.assertEqual(sla.trigger_names, expected)
+
+    def test_empty_series_error(self):
+        """Test error handling for empty series."""
+        # Create empty series that would be empty after processing
+        # Use allow_part_years=True to avoid crop_to_wy issues
+        empty_storage = pd.Series([], dtype=float, name='Storage')
+
+        with self.assertRaises((ValueError, IndexError)):
+            # May raise IndexError during processing or ValueError from our check
+            osta.StorageLevelAssessment(empty_storage, [100, 50], allow_part_years=True)
+
+    def test_invalid_series_type(self):
+        """Test error handling for invalid series type."""
+        # Create DataFrame instead of Series
+        df = pd.DataFrame({'Storage': [100, 90, 80]})
+
+        with self.assertRaises(TypeError) as cm:
+            osta.StorageLevelAssessment(df, [100, 50])
+        self.assertIn("pd.Series", str(cm.exception))
+
+    def test_event_algorithm_edge_cases(self):
+        """Test event detection algorithm with edge cases."""
+        # Create specific test data with known events
+        dates = pd.date_range('2020-01-01', '2020-01-10', freq='D')
+
+        # Test case: storage below trigger at start and end
+        storage = pd.Series([40, 60, 40, 40, 60, 40, 40, 40, 60, 40], index=dates, name='Storage')
+        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+
+        events = sla.events[50]
+        # Should detect multiple events
+        self.assertGreater(len(events), 0)
+
+        # Test all analysis methods work
+        annual_days = sla.AnnualDaysBelow()
+        self.assertIn(50, annual_days)
+
+        max_events = sla.EventsBelowTriggerMax()
+        self.assertIn(50, max_events)
+
+        event_counts = sla.EventsBelowTriggerCount()
+        self.assertIn(50, event_counts)
+
+    def test_water_year_parameters(self):
+        """Test different water year parameters."""
+        # Create test data spanning multiple years
+        dates = pd.date_range('2019-07-01', '2022-06-30', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test different water year start months
+        sla_jul = osta.StorageLevelAssessment(storage, [50], wy_month=7)  # July start
+        sla_jan = osta.StorageLevelAssessment(storage, [50], wy_month=1)  # January start
+
+        # Both should work and produce results
+        summary_jul = sla_jul.Summary()
+        summary_jan = sla_jan.Summary()
+
+        self.assertIsInstance(summary_jul, pd.DataFrame)
+        self.assertIsInstance(summary_jan, pd.DataFrame)
+
+        # Test allow_part_years parameter
+        sla_partial = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla_complete = osta.StorageLevelAssessment(storage, [50], allow_part_years=False)
+
+        # Partial years should have more or equal data points
+        self.assertGreaterEqual(len(sla_partial.df), len(sla_complete.df))
+
+    def test_summary_single_trigger(self):
+        """Test Summary method with single trigger parameter."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [100, 50, 25])
+
+        # Test single trigger summary
+        single_summary = sla.Summary(trigger=50)
+        self.assertIsInstance(single_summary, pd.Series)
+
+        # Test full summary
+        full_summary = sla.Summary()
+        self.assertIsInstance(full_summary, pd.DataFrame)
+        self.assertEqual(len(full_summary), 3)  # 3 triggers
+
+    def test_plotting_methods(self):
+        """Test that plotting methods work with new triggers."""
+        # Create test data with known patterns
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        # Create data that will definitely have events below 50
+        storage_values = np.random.uniform(30, 100, len(dates))
+        storage = pd.Series(storage_values, index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [75])
+
+        # Add a new trigger and test plotting still works
+        sla.add_trigger(50.0)
+
+        # Test plotting methods (should not raise errors)
+        try:
+            chart1 = sla.plot_events_ranked(50.0)
+            self.assertIsNotNone(chart1)
+
+            chart2 = sla.plot_event_length_frequency(50.0)
+            self.assertIsNotNone(chart2)
+        except Exception as e:
+            self.fail(f"Plotting methods failed after adding trigger: {e}")
+
+    def test_trigger_names_property_validation(self):
+        """Test that trigger_names property validates and works with both list and dict."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        sla = osta.StorageLevelAssessment(storage, [100, 50, 25])
+
+        # Test valid list assignment (converts to dict)
+        sla.trigger_names = ["High", "Medium", "Low"]
+        expected_dict = {100: "High", 50: "Medium", 25: "Low"}
+        self.assertEqual(sla.trigger_names, expected_dict)
+
+        # Test valid dict assignment
+        new_dict = {100: "Level A", 50: "Level B", 25: "Level C"}
+        sla.trigger_names = new_dict
+        self.assertEqual(sla.trigger_names, new_dict)
+
+        # Test invalid list assignment (wrong length)
+        with self.assertRaises(ValueError) as cm:
+            sla.trigger_names = ["High", "Low"]  # Too few names
+        self.assertIn("trigger_names length", str(cm.exception))
+
+        # Test invalid dict assignment (nonexistent trigger)
+        with self.assertRaises(ValueError) as cm:
+            sla.trigger_names = {100: "High", 999: "Invalid"}  # 999 not in triggers
+        self.assertIn("triggers not in assessment", str(cm.exception))
+
+        # Test setting to None (should work)
+        sla.trigger_names = None
+        self.assertIsNone(sla.trigger_names)
+
+        # Test setting valid names again
+        sla.trigger_names = ["A", "B", "C"]
+        self.assertEqual(len(sla.trigger_names), 3)
+
+        # Test invalid type
+        with self.assertRaises(TypeError):
+            sla.trigger_names = "invalid_type"
+
+    def test_trigger_names_with_unordered_triggers(self):
+        """Test trigger_names behavior when triggers are provided out of order."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Test with triggers provided out of order (descending)
+        unordered_triggers = [100, 25, 75, 50]  # Not sorted
+        trigger_names = ["High", "Critical", "Medium", "Low"]  # Names in same order as triggers
+
+        sla = osta.StorageLevelAssessment(storage, unordered_triggers, trigger_names=trigger_names)
+
+        # Verify that trigger names are correctly mapped to their corresponding trigger levels
+        expected_mapping = {100: "High", 25: "Critical", 75: "Medium", 50: "Low"}
+        self.assertEqual(sla.trigger_names, expected_mapping)
+
+        # Test summary includes correct names for each trigger
+        summary = sla.Summary()
+        self.assertEqual(summary.loc[100, 'Trigger Name'], "High")
+        self.assertEqual(summary.loc[25, 'Trigger Name'], "Critical")
+        self.assertEqual(summary.loc[75, 'Trigger Name'], "Medium")
+        self.assertEqual(summary.loc[50, 'Trigger Name'], "Low")
+
+    def test_trigger_names_setter_with_unordered_triggers(self):
+        """Test trigger_names setter behavior when triggers are unordered."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Initialize with unordered triggers, no names
+        unordered_triggers = [80, 30, 60, 90]
+        sla = osta.StorageLevelAssessment(storage, unordered_triggers)
+
+        # Set trigger names using list (should map in trigger order, not sorted order)
+        names_list = ["Level A", "Level B", "Level C", "Level D"]
+        sla.trigger_names = names_list
+
+        # Verify correct mapping: first name goes to first trigger, etc.
+        expected_mapping = {80: "Level A", 30: "Level B", 60: "Level C", 90: "Level D"}
+        self.assertEqual(sla.trigger_names, expected_mapping)
+
+        # Test setting as dict (should work regardless of order)
+        dict_names = {80: "Eighty", 30: "Thirty", 60: "Sixty", 90: "Ninety"}
+        sla.trigger_names = dict_names
+        self.assertEqual(sla.trigger_names, dict_names)
+
+        # Verify summary works correctly with unordered triggers
+        summary = sla.Summary()
+        self.assertEqual(summary.loc[80, 'Trigger Name'], "Eighty")
+        self.assertEqual(summary.loc[30, 'Trigger Name'], "Thirty")
+        self.assertEqual(summary.loc[60, 'Trigger Name'], "Sixty")
+        self.assertEqual(summary.loc[90, 'Trigger Name'], "Ninety")
+
+    def test_add_trigger_preserves_name_mapping_with_unordered_triggers(self):
+        """Test that adding triggers preserves correct name mapping with unordered triggers."""
+        # Create test data
+        dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
+        storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
+
+        # Start with unordered triggers and names
+        initial_triggers = [70, 20, 90]
+        initial_names = ["Medium", "Critical", "High"]
+
+        sla = osta.StorageLevelAssessment(storage, initial_triggers, trigger_names=initial_names)
+
+        # Verify initial mapping
+        expected_initial = {70: "Medium", 20: "Critical", 90: "High"}
+        self.assertEqual(sla.trigger_names, expected_initial)
+
+        # Add a new trigger with name
+        sla.add_trigger(45, name="Low")
+
+        # Verify the new trigger is correctly mapped and existing mappings are preserved
+        expected_after_add = {70: "Medium", 20: "Critical", 90: "High", 45.0: "Low"}
+        self.assertEqual(sla.trigger_names, expected_after_add)
+
+        # Verify summary works correctly
+        summary = sla.Summary()
+        self.assertEqual(summary.loc[70, 'Trigger Name'], "Medium")
+        self.assertEqual(summary.loc[20, 'Trigger Name'], "Critical")
+        self.assertEqual(summary.loc[90, 'Trigger Name'], "High")
+        self.assertEqual(summary.loc[45, 'Trigger Name'], "Low")
 
 if __name__ == '__main__':
     unittest.main()
