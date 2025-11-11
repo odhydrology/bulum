@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 !! IMPORTANT !! - This repo no longer supports Python 3.9 (end of life). The new minimum tested python version is 3.11.
 
+### Added
+- utils.get_wy() now accepts a single string argument, returning a single integer
+
+### Changed
+- utils.get_wy(using_end_year) is now a keyword argument
+
+
 ## 0.3.2
 
 ### Fixes
