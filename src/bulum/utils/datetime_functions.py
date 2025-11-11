@@ -453,7 +453,15 @@ def get_dates(start_date: str,
 def get_dates(start_date: datetime,
               end_date: datetime | None = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: str | None = None) -> list[str] | list[datetime]:
+              str_format: str = ...) -> list[str]:
+    ...
+
+
+@overload
+def get_dates(start_date: datetime,
+              end_date: Optional[datetime] = None, days: int = 0, years: int = 1,
+              include_end_date: bool = False,
+              str_format: Optional[str] = None) -> list[str] | list[datetime]:
     ...
 
 
