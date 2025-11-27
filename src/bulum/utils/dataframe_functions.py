@@ -114,7 +114,6 @@ def crop_to_wy(df: pd.DataFrame | pd.Series, wy_month: int = 7) -> pd.DataFrame 
 
 
 def check_df_format_standards(df: pd.DataFrame) -> list[str]:
-    # TODO: return optional str instead
     """
     Checks if a given dataframe meets standards generally required by
     bulum functions. These standards include:
@@ -304,7 +303,6 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     elif isinstance(df.index[0], str):
         # Try to convert strings to datetimes.
         # df.index = pd.to_datetime(df.index, **kwargs)
-        # TODO 
         df.index = strings_to_datetimes(df.index, **kwargs)
     else:
         raise TypeError("The index is not strings or datetimes. "
