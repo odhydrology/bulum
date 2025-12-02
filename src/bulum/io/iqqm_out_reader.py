@@ -1,10 +1,8 @@
 """Read .OUT files with an associated .IQN file."""
 
-# TODO: convert this to use pathlib
-
-import os
 import subprocess
 from math import floor
+from pathlib import Path
 from typing import Any, Literal, Optional, Union
 
 import numpy as np
@@ -14,29 +12,28 @@ from bulum import utils
 
 
 class IqqmOutReader:
-    """
+    """Read and parse IQQM .OUT files with associated .IQN index files.
+
     Examples
     --------
     .. code-block:: python
 
-        reader = IqqmOutReader("abcd01.OUT")
+        reader = IqqmOutReader("abcd01.IQN")
         reader.require(node=1)
         reader.require(node=23)
         df = reader.read()
     """
 
-    def __init__(self, iqqm_out_filepath) -> None:
+    def __init__(self, iqn_filepath: str | Path) -> None:
         """
         Parameters
         ----------
-        iqqm_out_filepath
+        iqn_filepath : str or Path
             Path to the describing IQN file.
         """
-        self.iqqm_out_filepath = iqqm_out_filepath
-        # TODO replace iqqm_out_filepath with iqn_filepath
-        self.iqqm_out_folder = os.path.dirname(self.iqqm_out_filepath)
-        self.iqn_filepath = iqqm_out_filepath
-        self.iqqm_out_basename = os.path.basename(self.iqqm_out_filepath)[:-4]
+        self.iqn_filepath = Path(iqn_filepath)
+        self.iqqm_out_folder = self.iqn_filepath.parent
+        self.iqqm_out_basename = self.iqn_filepath.stem
         self.required: dict[str, dict[str, Any]] = {}
         """A dictionary of all nodes marked as 'required' i.e. to be read."""
         self.available: dict[str, dict[str, Any]] = {}
@@ -51,19 +48,19 @@ class IqqmOutReader:
         """
 
         # used for IQQMGUI call
-        self._lqn_filename: str | None = None
-        self._lqn_filepath: str | None = None
-        self._csv_filename: str | None = None
-        self._csv_filepath: str | None = None
-        self._start_dt_str: str | None = None
-        self._end_dt_str: str | None = None
+        self._lqn_filename: Optional[str] = None
+        self._lqn_filepath: Optional[str] = None
+        self._csv_filename: Optional[str] = None
+        self._csv_filepath: Optional[str] = None
+        self._start_dt_str: Optional[str] = None
+        self._end_dt_str: Optional[str] = None
         self._files_requiring_cleanup: list[str] = []
 
         self._search_available_data()
 
     # pylint: disable=w0622
-    def require(self, node: int | str | None = None,
-                supertype: float | None = None, type: float | None = None,
+    def require(self, node: Optional[Union[int, str]] = None,
+                supertype: Optional[float] = None, type: Optional[float] = None,
                 output: Any = None) -> bool:
         """Mark a node or multiple nodes as 'required' i.e. for reading.
         At least one argument must be non-null.
@@ -91,23 +88,24 @@ class IqqmOutReader:
                 self.required[k] = v
         return pre_num_nodes > len(self.required)
 
-    def read(self, remove_temp_files=True, read_all_availabe=False, *,
-             engine: Literal["iqqmgui", "python"] = "iqqmgui", iqqmgui_path=None) -> pd.DataFrame:
+    def read(self, remove_temp_files: bool = True, read_all_availabe: bool = False, *,
+             engine: Literal["iqqmgui", "python"] = "iqqmgui",
+             iqqmgui_path: Optional[str | Path] = None) -> pd.DataFrame:
         """
         Invoke the class to read the associated data.
 
         Parameters
         ----------
-        remove_temp_files : bool
+        remove_temp_files : bool, default=True
             Clean up after yourself (remove artifacts from running ``iqmgui``).
-        read_all_available : bool
+        read_all_availabe : bool, default=False
             Read all nodes instead of just those previously marked by the user
             as required.
-        engine : "iqqmgui" or "python"
+        engine : {"iqqmgui", "python"}, default="iqqmgui"
             Decides how to parse the OUT file data. `"iqqmgui"` will call on the
             executable (on path or provided by `iqqmgui_path`), while `python`
             will use the bulum native implementation.
-        iqqmgui_path : str, optional
+        iqqmgui_path : str or Path, optional
             If `engine` is set to `iqqmgui`, you can specify the executable to
             use to extract data.
 
@@ -138,30 +136,47 @@ class IqqmOutReader:
         """
         Searches the .IQN file for data.
         """
-        with open(self.iqqm_out_filepath, encoding="UTF-8") as file:
-            ss = file.readlines()
-        # HACK: removes comment lines after line 2
-        # TODO: change hardcoded values to make this method more robust
-        while ss[2].strip().startswith('/'):
-            ss.pop(2)
+        with open(self.iqn_filepath, mode="r", encoding="UTF-8") as file:
+            all_lines = file.readlines()
+
+        # Filter out comment lines (lines that start with '/' when stripped)
+        # Keep track of line purpose: first 2 lines are header, then we have data
+        non_comment_lines = []
+        for i, line in enumerate(all_lines):
+            # Keep first 2 lines regardless (they're header/metadata)
+            if i < 2:
+                non_comment_lines.append(line)
+            # After first 2 lines, skip comment lines
+            elif not line.strip().startswith('/'):
+                non_comment_lines.append(line)
+
+        # Now parse using non-comment lines with logical indexing
+        # Line 0-1: Header/metadata (skipped)
+        # Line 2: Recorder-flag matrix dimensions
+        # Line 3 to 3+n_node_types-1: Recorder flags
+        # Line 3+n_node_types: Date range
+        # Line 3+n_node_types+1 onwards: Node definitions
+
+        matrix_info = non_comment_lines[2].split()
+        n_node_types = int(matrix_info[0])
+        n_output_types = int(matrix_info[1])
+
         # Read the recorder-flag matrix
-        ss2 = ss[2].split()  # line 3 in the file
-        n_node_types = int(ss2[0])
-        n_output_types = int(ss2[1])
         recorder_flags: list[list] = []
         for i in range(n_node_types):
-            recorder_line = ss[3 + i].split()
+            recorder_line = non_comment_lines[3 + i].split()
             recorder_flags.append(recorder_line[0:n_output_types])
             self._out_node_order[i] = []
 
         # Read the date range
-        ssx = ss[n_node_types + 3].split()  # 01/01/1890 31/12/2008  0
-        self._start_dt_str = ssx[0].replace('/', ' ')
-        self._end_dt_str = ssx[1].replace('/', ' ')
+        date_line = non_comment_lines[3 + n_node_types].split()
+        self._start_dt_str = date_line[0].replace('/', ' ')
+        self._end_dt_str = date_line[1].replace('/', ' ')
 
         # Read all the nodes (loop over the nodes)
-        for i in range(n_node_types + 4, len(ss)):
-            node_line = ss[i]
+        node_start_idx = 4 + n_node_types
+        for i in range(node_start_idx, len(non_comment_lines)):
+            node_line = non_comment_lines[i]
             if node_line.strip() == "":
                 break
             node_number: str = f"{int(node_line[0:3]):0>3}"  # 053
@@ -220,10 +235,12 @@ class IqqmOutReader:
         for node in search_dict.values():
             required_supertypes.add(node["supertype"])
 
-        df: pd.DataFrame | None = None
+        df: Optional[pd.DataFrame] = None
         for supertype in required_supertypes:
             suffix = f"{supertype:0>2}.OUT"
-            path = self.iqn_filepath[:-4] + suffix
+            # Construct path: parent_dir / (basename + suffix)
+            # E.g., "O02l.IQN" -> "O02l" + "08.OUT" = "O02l08.OUT"
+            path = self.iqn_filepath.parent / (self.iqn_filepath.stem + suffix)
             temp_df = self._py_read_single_out_file(path, supertype)
             if df is None:
                 df = temp_df
@@ -246,14 +263,14 @@ class IqqmOutReader:
         utils.assert_df_format_standards(df)
         return df
 
-    def _py_read_single_out_file(self, path, supertype: int) -> pd.DataFrame:
+    def _py_read_single_out_file(self, path: str | Path, supertype: int) -> pd.DataFrame:
         """python engine: read a single .OUT file.
 
         Parameters
         ----------
-        path
+        path : str or Path
             Path to the .OUT file
-        supertype
+        supertype : int
             Supertype of node(s) of interest. Used to specify which ordered
             nodes to grab data for.
         """
@@ -270,7 +287,7 @@ class IqqmOutReader:
     def _write_iqqmgui_lqn_file(self) -> None:
         """Generates an iqqmgui lqn file so that we can use iqqm to extract data to csv."""
         self._lqn_filename = "temp.run"
-        self._lqn_filepath = f"{self.iqqm_out_folder}/{self._lqn_filename}"
+        self._lqn_filepath = str(self.iqqm_out_folder / self._lqn_filename)
         with open(self._lqn_filepath, "w+", encoding='utf-8') as file:
             # pylint: disable=c0301
             file.write("Listing file generated by bulum\n")
@@ -280,23 +297,23 @@ class IqqmOutReader:
             i = 0
             for k, v in self.required.items():
                 i += 1
-                iqqm_ts_filepath = f"{self.iqqm_out_folder}/{k}"
+                iqqm_ts_filepath = str(self.iqqm_out_folder / k)
                 self._files_requiring_cleanup.append(iqqm_ts_filepath)
                 file.write(f"'{k}' 00 00 00 00 T / {[i]}\n")  # 'O02l#030.01d' 00 00 00 00 T / [1]
                 file.write("1 0 0 /\n")  # 1 0 0 /
                 file.write(f"{v['node']} {v['output']} /\n")  # 030 1 /
             self._csv_filename = "temp.csv"
-            self._csv_filepath = f"{self.iqqm_out_folder}/{self._csv_filename}"
+            self._csv_filepath = str(self.iqqm_out_folder / self._csv_filename)
             file.write(f"{self._csv_filename} /\n")  # DW_Diversions.csv /
             file.write(f"1-{i} /\n")  # 1-17 /
         self._files_requiring_cleanup.append(self._lqn_filepath)
 
-    def _call_iqqmgui_lqn(self, *, iqqmgui_path=None) -> None:
+    def _call_iqqmgui_lqn(self, *, iqqmgui_path: Optional[str | Path] = None) -> None:
         """Uses iqqmgui to extract data to csv.
 
         Parameters
         ----------
-        iqqmgui_path
+        iqqmgui_path : str or Path, optional
             Allows specification of a particular iqqmgui executable.
         """
         if self._csv_filepath is None:
@@ -304,13 +321,13 @@ class IqqmOutReader:
 
         if iqqmgui_path:
             process = subprocess.Popen(f"{iqqmgui_path} {self._lqn_filename}",
-                                       cwd=f"{self.iqqm_out_folder}")
+                                       cwd=str(self.iqqm_out_folder))
         else:
             process = subprocess.Popen(f"iqmgui {self._lqn_filename}",
-                                       cwd=f"{self.iqqm_out_folder}")
+                                       cwd=str(self.iqqm_out_folder))
         process.wait()
         self._files_requiring_cleanup.append(self._csv_filepath)
-        self._files_requiring_cleanup.append(f"{self.iqqm_out_folder}/iqqmml.txt")
+        self._files_requiring_cleanup.append(str(self.iqqm_out_folder / "iqqmml.txt"))
         # ^^^ Artifact from running iqmgui
 
     def _read_iqqmgui_csv(self) -> pd.DataFrame:
@@ -327,7 +344,7 @@ class IqqmOutReader:
     def _clean_up(self) -> None:
         """Removes any file-artifacts created by this class."""
         for f in self._files_requiring_cleanup:
-            os.remove(f)
+            Path(f).unlink()
         self._files_requiring_cleanup.clear()
 
 
