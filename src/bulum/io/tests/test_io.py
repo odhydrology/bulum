@@ -1,5 +1,6 @@
 import os
 import re
+import shutil
 import unittest
 
 import bulum.io as bio
@@ -103,6 +104,113 @@ class Tests(unittest.TestCase):
         bio.write_idx_native(df, test_output_filename)
         self.assertTrue(os.path.isfile(test_output_filename))
         self.assertGreater(os.path.getsize(test_output_filename), 0)
+
+    def test_idx_native_roundtrip_from_csv(self):
+        """Test that writing and reading back preserves data size (from CSV source)."""
+        # delete test output if it already exists
+        test_output_filename = "./src/bulum/io/tests/test_outputs/test_roundtrip.idx"
+        test_output_out = "./src/bulum/io/tests/test_outputs/test_roundtrip.out"
+        for f in [test_output_filename, test_output_out]:
+            if os.path.isfile(f):
+                os.remove(f)
+
+        # Read CSV, write as IDX, read back
+        df_original = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
+        bio.write_idx_native(df_original, test_output_filename)
+        df_roundtrip = bio.read_idx(test_output_filename)
+
+        # Check dimensions are preserved
+        self.assertEqual(len(df_original), len(df_roundtrip),
+                         "Row count changed after round-trip")
+        self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
+                         "Column count changed after round-trip")
+        self.assertEqual(df_original.shape, df_roundtrip.shape,
+                         "DataFrame shape changed after round-trip")
+
+    def test_idx_native_roundtrip_from_idx(self):
+        """Test that writing and reading back preserves data size (from IDX source)."""
+        # delete test output if it already exists
+        test_output_filename = "./src/bulum/io/tests/test_outputs/test_roundtrip2.idx"
+        test_output_out = "./src/bulum/io/tests/test_outputs/test_roundtrip2.out"
+        for f in [test_output_filename, test_output_out]:
+            if os.path.isfile(f):
+                os.remove(f)
+
+        # Read existing IDX, write it out, read back
+        test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
+        df_original = bio.read_idx(test_idx_filename)
+        bio.write_idx_native(df_original, test_output_filename)
+        df_roundtrip = bio.read_idx(test_output_filename)
+
+        # Check dimensions are preserved
+        self.assertEqual(len(df_original), len(df_roundtrip),
+                         "Row count changed after round-trip")
+        self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
+                         "Column count changed after round-trip")
+        self.assertEqual(df_original.shape, df_roundtrip.shape,
+                         "DataFrame shape changed after round-trip")
+
+    def test_ts_csv_roundtrip(self):
+        """Test that writing and reading back preserves data size for ts_csv."""
+        test_output_filename = "./src/bulum/io/tests/test_outputs/test_ts_roundtrip.csv"
+        if os.path.isfile(test_output_filename):
+            os.remove(test_output_filename)
+
+        # Read CSV, write it out, read back
+        df_original = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
+        bio.write_ts_csv(df_original, test_output_filename)
+        df_roundtrip = bio.read_ts_csv(test_output_filename)
+
+        # Check dimensions are preserved
+        self.assertEqual(len(df_original), len(df_roundtrip),
+                         "Row count changed after round-trip")
+        self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
+                         "Column count changed after round-trip")
+        self.assertEqual(df_original.shape, df_roundtrip.shape,
+                         "DataFrame shape changed after round-trip")
+
+    def test_res_csv_roundtrip(self):
+        """Test that writing and reading back preserves data size for res_csv."""
+        test_output_filename = "./src/bulum/io/tests/test_outputs/test_res_roundtrip.res.csv"
+        if os.path.isfile(test_output_filename):
+            os.remove(test_output_filename)
+
+        # Read RES CSV, write it out, read back
+        df_original = bio.read_res_csv("./src/bulum/io/tests/res_csv_files/simple_model.res.csv")
+        bio.write_res_csv(df_original, test_output_filename)
+        df_roundtrip = bio.read_res_csv(test_output_filename)
+
+        # Check dimensions are preserved
+        self.assertEqual(len(df_original), len(df_roundtrip),
+                         "Row count changed after round-trip")
+        self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
+                         "Column count changed after round-trip")
+        self.assertEqual(df_original.shape, df_roundtrip.shape,
+                         "DataFrame shape changed after round-trip")
+
+    @unittest.skipIf(shutil.which('csvidx') is None, "csvidx.exe not found on path")
+    def test_idx_csvidx_roundtrip(self):
+        """Test that writing and reading back preserves data size for write_idx (csvidx)."""
+        test_output_filename = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.idx"
+        test_output_out = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.out"
+        test_temp_csv = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.tempfile.csv"
+        for f in [test_output_filename, test_output_out, test_temp_csv]:
+            if os.path.isfile(f):
+                os.remove(f)
+
+        # Read existing IDX, write using csvidx, read back
+        test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
+        df_original = bio.read_idx(test_idx_filename)
+        bio.write_idx(df_original, test_output_filename)
+        df_roundtrip = bio.read_idx(test_output_filename)
+
+        # Check dimensions are preserved
+        self.assertEqual(len(df_original), len(df_roundtrip),
+                         "Row count changed after round-trip")
+        self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
+                         "Column count changed after round-trip")
+        self.assertEqual(df_original.shape, df_roundtrip.shape,
+                         "DataFrame shape changed after round-trip")
 
     def test_meets_ts_standards_5(self):
         df = bio.read_ts_csv("./src/bulum/utils/tests/test_data_missing.csv")

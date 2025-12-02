@@ -97,15 +97,21 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
     """
     Helper function for :func:`read_idx`. Detects whether the .OUT file was
     written with a version of IQQM with an old compiler with metadata/junk data
-    as a header. Fails if the run was undertaken with only one source of data,
-    i.e. the .idx file has only one entry.
+    as a header.
+
+    Note: This detection only works for files with multiple columns (2 or more).
+    For single-column files, it returns False (assumes no header bytes).
 
     Parameters
     ----------
     b_data : np.ndarray
-        2d array of binary data filled with float32 data
+        Structured array of binary data filled with float32 data
     """
     b_data_slice: tuple[np.float32] = b_data[0]
+    # If there's only one column, we can't reliably detect header bytes
+    # Return False to avoid incorrectly skipping the first data row
+    if len(b_data_slice) == 1:
+        return False
     first_non_zero = b_data_slice[0] != 0.0
     rest_zeroes = not np.any(list(b_data_slice)[1:])
     return first_non_zero and rest_zeroes
@@ -240,5 +246,8 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
                     f" {type_entry} {units_entry}\n")
     # write binary
     out_filepath = filepath.lower().replace('.idx', '.out')
-    df.to_numpy().tofile(out_filepath)
+    # Convert to structured array to match the format expected by read_idx
+    # Each record should contain all columns for one row
+    records = df.to_records(index=False, column_dtypes='f4')
+    records.tofile(out_filepath)
     return
