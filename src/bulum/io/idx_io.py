@@ -19,23 +19,31 @@ import pandas as pd
 from bulum import utils
 
 
-def write_idx(df: pd.DataFrame, filename: str | Path, cleanup_tempfile=True,
-              *, exist_ok: bool = True):
-    """Write IDX file from dataframe, requires csvidx.exe.
+def write_idx(df: pd.DataFrame, filename: str | Path, cleanup_tempfile: bool = True,
+              *, exist_ok: bool = True) -> None:
+    """Write IDX file from dataframe using csvidx.exe.
+
+    This function creates both an .IDX index file and a corresponding .OUT binary
+    file by first writing a temporary CSV file and then calling the external
+    csvidx.exe utility.
 
     Parameters
     ----------
     df : DataFrame
-        DataFrame to write.
+        DataFrame with datetime index to write.
     filename : str or Path
-        Path to the file to write to.
-        Will overwrite any existing file if `exist_ok` is `True`.
-        May be a str for backwards compatibility.
+        Path to the IDX file to write. Will overwrite any existing file if
+        `exist_ok` is `True`.
+    cleanup_tempfile : bool, default=True
+        Whether to remove the temporary CSV file after conversion.
+    exist_ok : bool, default=True
+        If False, raise FileExistsError if the file already exists. If True,
+        allow overwriting existing files.
 
     Raises
     ------
     FileExistsError
-        If `exist_ok` is `True` and `filename` already exists.
+        If `exist_ok` is `False` and `filename` already exists.
     FileNotFoundError
         If csvidx.exe is not found on path.
     """
@@ -54,20 +62,27 @@ def write_idx(df: pd.DataFrame, filename: str | Path, cleanup_tempfile=True,
         os.remove(temp_filename)
 
 
-def write_area_ts_csv(df: pd.DataFrame, filename, units="(mm.d^-1)"):
-    """_summary_
+def write_area_ts_csv(df: pd.DataFrame, filename: str | Path, units: str = "(mm.d^-1)") -> None:
+    """Write timeseries data to area-weighted CSV format for use with csvidx.
+
+    This function writes a DataFrame to a CSV file in a specific format used by
+    the csvidx tool, with column names truncated to 12 characters and a header
+    row containing catchment area information (defaulting to 1.0 km^2 for all
+    columns).
 
     Parameters
     ----------
     df : DataFrame
-    filename
-    units : str, optional
-        Defaults to "(mm.d^-1)".
+        DataFrame with datetime index to write.
+    filename : str or Path
+        Path to the output CSV file.
+    units : str, default="(mm.d^-1)"
+        Units string to write in the header row.
 
     Raises
     ------
-    Exception
-        If shortened field names are going to clash in output file.
+    ValueError
+        If column names clash when truncated to 12 characters.
     """
     # ensures dataframe adheres to standards
     utils.assert_df_format_standards(df)
@@ -76,7 +91,7 @@ def write_area_ts_csv(df: pd.DataFrame, filename, units="(mm.d^-1)"):
     for c in df.columns:
         c12 = f"{c[:12]:<12}"
         if c12 in fields:
-            raise Exception(f"Field names clash when shortened to 12 chars: {c} and {fields[c12]}")
+            raise ValueError(f"Field names clash when shortened to 12 chars: {c} and {fields[c12]}")
         fields[c12] = c
     # create the header text
     header = f"{units}"
@@ -93,46 +108,86 @@ def write_area_ts_csv(df: pd.DataFrame, filename, units="(mm.d^-1)"):
         df.to_csv(file, header=False, na_rep=' NaN')
 
 
-def _detect_header_bytes(b_data: np.ndarray) -> bool:
+def _detect_header_bytes(b_data: np.ndarray, expected_rows: Optional[int] = None) -> bool:
     """
     Helper function for :func:`read_idx`. Detects whether the .OUT file was
     written with a version of IQQM with an old compiler with metadata/junk data
     as a header.
 
-    Note: This detection only works for files with multiple columns (2 or more).
-    For single-column files, it returns False (assumes no header bytes).
+    For multi-column files, detection is based on the pattern of the first row
+    (first value non-zero, rest zero). For single-column files, detection is
+    based on comparing the actual data length to the expected number of rows.
 
     Parameters
     ----------
     b_data : np.ndarray
         Structured array of binary data filled with float32 data
+    expected_rows : int, optional
+        Expected number of data rows based on date range. If provided, enables
+        length-based detection for single-column files.
+
+    Returns
+    -------
+    bool
+        True if header bytes should be skipped, False otherwise
     """
     b_data_slice: tuple[np.float32] = b_data[0]
-    # If there's only one column, we can't reliably detect header bytes
-    # Return False to avoid incorrectly skipping the first data row
-    if len(b_data_slice) == 1:
-        return False
-    first_non_zero = b_data_slice[0] != 0.0
-    rest_zeroes = not np.any(list(b_data_slice)[1:])
-    return first_non_zero and rest_zeroes
+
+    # For single-column files, use length-based detection if expected_rows is provided
+    if len(b_data_slice) == 1 and expected_rows is not None:
+        # If we have exactly one more row than expected, it's likely a header byte
+        if len(b_data) == expected_rows + 1:
+            return True
+        # If we have the expected number of rows, no header bytes
+        elif len(b_data) == expected_rows:
+            return False
+        # If lengths don't match expectations, fall back to no header detection
+        # (let the error surface later in DataFrame construction)
+        else:
+            return False
+
+    # For multi-column files, use pattern-based detection
+    if len(b_data_slice) > 1:
+        first_non_zero = b_data_slice[0] != 0.0
+        rest_zeroes = not np.any(list(b_data_slice)[1:])
+        return first_non_zero and rest_zeroes
+
+    # Default for single-column without expected_rows: assume no header bytes
+    return False
 
 
 def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> utils.TimeseriesDataframe:
-    """
-    Read IDX file and corresponding IQQM .OUT binary file.
+    """Read IDX file and corresponding IQQM .OUT binary file.
+
+    This function reads an IQQM .IDX index file and its corresponding .OUT binary
+    data file, returning the data as a DataFrame. Currently only supports daily
+    data (date_flag=0).
 
     Parameters
     ----------
-    filename
-        Name of the IDX file.
+    filename : str or Path
+        Path to the IDX file. The corresponding .OUT file is expected to be in
+        the same directory with the same base name.
     skip_header_bytes : bool, optional
-        Whether to skip header bytes in the corresponding .OUT file (related to
-        the compiler used for IQQM). If set to None, attempt to detect the
-        presence of header bytes automatically.
+        Whether to skip header bytes in the corresponding .OUT file. Some versions
+        of IQQM compiled with older compilers include metadata/junk data as a
+        header row. If None (default), attempts automatic detection based on file
+        structure.
 
     Returns
     -------
     utils.TimeseriesDataframe
+        DataFrame with datetime index and columns named as
+        "{num}>{source_file}>{description}".
+
+    Raises
+    ------
+    FileNotFoundError
+        If the IDX file or corresponding OUT file does not exist.
+    NotImplementedError
+        If the file contains monthly (date_flag=1) or annual (date_flag=3) data.
+    ValueError
+        If the date_flag in the file is not 0, 1, or 3.
     """
     if not isinstance(filename, Path):
         filename = Path(filename)
@@ -161,15 +216,22 @@ def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> 
     b_types = [(s, 'f4') for s in snames]
     # Read all data in, drop header bytes (first row) if necessary
     b_data = np.fromfile(out_filename, dtype=np.dtype(b_types))
+    # Calculate date values for header detection and DataFrame construction
+    if date_flag == 0:
+        daily_date_values = utils.datetime_functions.get_dates(
+            date_start, end_date=date_end, include_end_date=True)
     # Detection of header bytes
     if skip_header_bytes is None:
-        skip_header_bytes = _detect_header_bytes(b_data)
+        expected_rows = None
+        if date_flag == 0:
+            expected_rows = len(daily_date_values)
+        # Note: For date_flag 1 (monthly) and 3 (annual), we don't calculate
+        # expected_rows since these are not yet implemented
+        skip_header_bytes = _detect_header_bytes(b_data, expected_rows=expected_rows)
     if skip_header_bytes:
         b_data = b_data[1:]  # skip header bytes
     # Read data
     if date_flag == 0:
-        daily_date_values = utils.datetime_functions.get_dates(
-            date_start, end_date=date_end, include_end_date=True)
         df = pd.DataFrame.from_records(b_data, index=daily_date_values)
         df.columns = snames  # type: ignore
         df.index.name = "Date"
@@ -187,25 +249,48 @@ def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> 
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> None:
-    """Writer for .IDX and corresponding .OUT binary files written in native
-    Python. Currently only supports daily data (date flag 0), as with the reader
-    :func:`read_idx`.
+def write_idx_native(df: pd.DataFrame, filepath: str | Path, type: str = "None", units: str = "None") -> None:
+    """Write IDX and OUT binary files using pure Python (no external tools).
 
-    Assumes that data are homogeneous in units and type e.g. Precipitation & mm
-    resp., or Flow & ML/d.
+    This function writes both an .IDX index file and a corresponding .OUT binary
+    file using native Python, without requiring external tools like csvidx.exe.
+    Currently only supports daily data (date_flag=0), matching the capabilities
+    of :func:`read_idx`.
+
+    The function assumes all columns in the DataFrame share the same units and
+    data type (e.g., all Precipitation in mm, or all Flow in ML/d).
 
     Parameters
     ----------
-    df : pd.Dataframe
-        DataFrame as per the output of :func:`read_idx`.
-    filepath
-        Path to the IDX file to be written to including .IDX extension.
-    units : str, optional
-        Units for data in df.
-    type : str, optional
-        Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.
+    df : pd.DataFrame
+        DataFrame with datetime index containing the data to write. Should
+        follow the same format as output from :func:`read_idx`.
+    filepath : str or Path
+        Path to the IDX file to write (including .IDX extension). The
+        corresponding .OUT file will be created with the same base name.
+    type : str, default="None"
+        Data type specifier for all columns in df, e.g., "Gauged Flow",
+        "Precipitation", "Evaporation", etc.
+    units : str, default="None"
+        Units for all data in df, e.g., "mm", "ML/d", "mm/day", etc.
+
+    Notes
+    -----
+    - The first line of the IDX file contains version/timestamp metadata
+      (currently a placeholder copied from reference files).
+    - Column names in the output are truncated/padded to fit the IDX format
+      specifications (12 chars for source, 40 for description, etc.).
+    - The .OUT file is written in binary format as 32-bit floats (float32).
+
+    See Also
+    --------
+    read_idx : Read IDX and OUT files.
+    write_idx : Write IDX files using the external csvidx.exe tool.
     """
+    # Convert filepath to Path for consistent handling
+    if not isinstance(filepath, Path):
+        filepath = Path(filepath)
+
     date_flag = 0
     # TODO: When generalising to other frequencies, we may be able to simply
     # read the data type off the time delta in df.index values As is, I've
@@ -245,7 +330,8 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
             f.write(f"{source_entry} {name_entry}" +
                     f" {type_entry} {units_entry}\n")
     # write binary
-    out_filepath = filepath.lower().replace('.idx', '.out')
+    # Replace extension with .out (handles .idx, .IDX, etc.)
+    out_filepath = filepath.with_suffix('.out')
     # Convert to structured array to match the format expected by read_idx
     # Each record should contain all columns for one row
     records = df.to_records(index=False, column_dtypes='f4')
