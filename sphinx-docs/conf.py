@@ -11,7 +11,7 @@
 project = 'Bulum'
 copyright = '2025, OD Hydrology'
 author = 'OD Hydrology'
-release = '0.2.10'
+release = '0.3.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
