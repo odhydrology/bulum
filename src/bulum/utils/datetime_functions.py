@@ -1,4 +1,5 @@
 import calendar
+import warnings
 from datetime import datetime, timedelta
 from typing import Iterable, Optional, cast, overload
 
@@ -51,8 +52,8 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     Converts a list of date strings into a list of date strings in the format YYYY-MM-DD.
 
     This function automatically detects the input date format and converts all dates
-    to the standard ISO 8601 format (YYYY-MM-DD). Tested over the range 0001-01-01
-    to 9999-12-31.
+    to the standard ISO 8601 format (YYYY-MM-DD). Uses numpy datetime64 for efficient
+    processing. Tested over the range 0001-01-01 to 9999-12-31.
 
     Parameters
     ----------
@@ -70,10 +71,13 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     ['2023-12-25', '2023-12-26']
     """
     date_format = get_date_format(values[0])
+
     try:
+        # Use numpy datetime64 for efficient conversion
         np_dates = to_np_datetimes64d(values, date_fmt=date_format)
     except ValueError as e:
         if "End date format does not match start date format" in str(e):
+            # Handle mixed date formats by converting end date to match start format
             end_date_format = get_date_format(values[-1])
             placeholder_values = ["" for _ in values]
             placeholder_values[0] = values[0]
@@ -81,7 +85,10 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
             np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format)
         else:
             raise e
-    return [str(t) for t in np_dates]
+
+    # Convert numpy datetime64 to clean YYYY-MM-DD strings by taking first 10 characters
+    # This strips any timestamp component (e.g., "T00:00:00.000000")
+    return [str(t)[:10] for t in np_dates]
 
 
 def standardise_datestring_format(values):
@@ -93,34 +100,33 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
                        *, check_length: bool = True) -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetime64[D] array.
 
-    This function efficiently converts consecutive date strings to numpy datetime64
-    arrays with day precision. It handles edge cases at the end of the representable
-    date range (9999-12-31).
-
-    You can turn off the length checking to pass in two dates and receive an
-    array with all dates between the specified dates (inclusive). See the second
-    example below.
+    This function efficiently converts date strings to numpy datetime64 arrays with
+    day precision. It generates all dates between the first and last date in the input.
+    Handles edge cases at the end of the representable date range (9999-12-31).
 
     Parameters
     ----------
     values : list[str]
-        List of consecutive date strings to convert.
+        List of date strings to convert. Can also accept pandas Series.
+        Generates all dates from first to last date (inclusive).
     date_fmt : str, default '%Y-%m-%d'
         The date format string for parsing the input dates.
     check_length : bool, default True
         Whether to validate that the number of generated dates matches the input length.
-        Set to False to skip consecutive date validation.
+        If True and lengths don't match, issues a warning but still returns all dates
+        between start and end. Set to False to suppress the warning.
 
     Returns
     -------
     np.typing.NDArray[np.datetime64]
-        Numpy array of consecutive datetime64[D] values from start to end date.
+        Numpy array of datetime64[D] values from first to last date (inclusive).
+        Returns all dates in the range, regardless of input length.
 
-    Raises
-    ------
-    ValueError
+    Warns
+    -----
+    UserWarning
         If check_length is True and the number of generated dates doesn't match
-        the input length, indicating non-consecutive dates.
+        the input length, indicating non-consecutive dates or gaps.
 
     Examples
     --------
@@ -131,6 +137,10 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length=False))
     3
     """
+    # Convert pandas Series to list if needed (most robust fix for pandas Series indexing)
+    if hasattr(values, 'tolist'):
+        values = values.tolist()
+
     start_date = datetime.strptime(values[0], date_fmt)
     try:
         end_date = datetime.strptime(values[-1], date_fmt)
@@ -146,9 +156,11 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
         np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
 
     if check_length and len(np_dates) != len(values):
-        raise ValueError(f"Date sequence validation failed: Expected {len(np_dates)} consecutive dates "
-                         f"between {start_date} and {end_date} but found {len(values)} values. "
-                         f"This suggests non-consecutive dates or gaps in the sequence.")
+        warnings.warn(f"Date sequence validation: Expected {len(np_dates)} consecutive dates "
+                     f"between {start_date} and {end_date} but found {len(values)} values. "
+                     f"This suggests non-consecutive dates or gaps in the sequence. "
+                     f"Returning all dates between start and end.",
+                     UserWarning, stacklevel=2)
     return np_dates
 
 

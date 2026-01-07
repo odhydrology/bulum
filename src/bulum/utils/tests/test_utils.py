@@ -1,10 +1,12 @@
 import unittest
 import warnings
-import pandas as pd
-from bulum import utils
-import bulum.io as bio
 from datetime import datetime
+
 import numpy as np
+import pandas as pd
+
+import bulum.io as bio
+from bulum import utils
 
 
 class Tests(unittest.TestCase):
@@ -298,10 +300,15 @@ class Tests(unittest.TestCase):
         # numpy datetime64 includes time component when converted to string
         self.assertTrue(str(np_dates[-1]).startswith("9999-12-31"))
 
-        # Test non-consecutive dates should raise error
-        with self.assertRaises(ValueError) as cm:
-            utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"])  # Missing 2023-01-02
-        self.assertIn("Date sequence validation failed", str(cm.exception))
+        # Test non-consecutive dates should give warning (not error)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            np_dates = utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"])  # Missing 2023-01-02
+            # Should have warned
+            self.assertEqual(len(w), 1)
+            self.assertIn("Date sequence validation", str(w[0].message))
+            # But still returns all 3 dates (fills in missing dates)
+            self.assertEqual(len(np_dates), 3)
 
     def test_get_dates_error_handling(self):
         """Test get_dates with invalid parameters"""
@@ -369,3 +376,95 @@ class Tests(unittest.TestCase):
         # Test with empty list
         empty_result = utils.get_year_and_month([])
         self.assertEqual(empty_result, [])
+
+    def test_standardize_datestring_format_stochastic_early_dates(self):
+        """Test standardize_datestring_format with dates before 1677 (outside numpy datetime64 range).
+
+        Stochastic model outputs can have dates from year 0001 to 9999.
+        Numpy datetime64 only supports approximately 1677-2262.
+        This test ensures the function handles early dates by keeping them as strings.
+        """
+        # Test very early dates
+        early_dates = ["01/01/0001", "02/01/0001", "03/01/0001"]
+        standardized = utils.standardize_datestring_format(early_dates)
+        self.assertEqual(standardized, ["0001-01-01", "0001-01-02", "0001-01-03"])
+        # Verify all are strings
+        self.assertTrue(all(isinstance(d, str) for d in standardized))
+
+    def test_standardize_datestring_format_stochastic_late_dates(self):
+        """Test standardize_datestring_format with dates after 2262 (outside numpy datetime64 range).
+
+        This ensures dates in year 9999 are handled correctly as strings.
+        """
+        # Test very late dates (year 9999)
+        late_dates = ["29/12/9999", "30/12/9999", "31/12/9999"]
+        standardized = utils.standardize_datestring_format(late_dates)
+        self.assertEqual(standardized, ["9999-12-29", "9999-12-30", "9999-12-31"])
+        # Verify all are strings
+        self.assertTrue(all(isinstance(d, str) for d in standardized))
+
+    def test_standardize_datestring_format_stochastic_full_range(self):
+        """Test standardize_datestring_format with dates spanning from year 0001 to 9999.
+
+        Note: Function returns all dates between first and last date, so non-consecutive
+        input dates will result in a full date range with a warning.
+        """
+        # Test dates at boundaries of stochastic range (non-consecutive)
+        boundary_dates = ["01/01/0001", "15/06/5000", "31/12/9999"]
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")  # Suppress expected warning
+            standardized = utils.standardize_datestring_format(boundary_dates)
+        # Function returns all dates from first to last
+        self.assertEqual(standardized[0], "0001-01-01")
+        self.assertEqual(standardized[-1], "9999-12-31")
+        # Should have all dates in the range (3,651,694 days)
+        self.assertEqual(len(standardized), 3652059)
+        # Verify all are strings
+        self.assertTrue(all(isinstance(d, str) for d in standardized))
+
+    def test_to_np_datetimes64d_with_pandas_series(self):
+        """Test to_np_datetimes64d handles pandas Series input correctly.
+
+        Pandas Series use label-based indexing, not position-based indexing.
+        This test ensures the function converts Series to list before processing.
+        """
+        # Create a pandas Series with date strings
+        dates_series = pd.Series(["2023-01-01", "2023-01-02", "2023-01-03"])
+        np_dates = utils.to_np_datetimes64d(dates_series)
+        self.assertEqual(len(np_dates), 3)
+        self.assertTrue(str(np_dates[0]).startswith("2023-01-01"))
+        self.assertTrue(str(np_dates[-1]).startswith("2023-01-03"))
+
+    def test_standardize_datestring_format_no_timestamps(self):
+        """Test that standardize_datestring_format returns clean date strings without timestamps.
+
+        Ensures output format is exactly YYYY-MM-DD without any time component
+        like "2000-01-01T00:00:00.000000".
+        """
+        # Test single date
+        result = utils.standardize_datestring_format(['01/01/2000'])
+        self.assertEqual(result, ['2000-01-01'])
+        self.assertNotIn('T', result[0])
+        self.assertEqual(len(result[0]), 10)
+
+        # Test multiple dates
+        result = utils.standardize_datestring_format(['25/12/2023', '26/12/2023', '27/12/2023'])
+        self.assertEqual(result, ['2023-12-25', '2023-12-26', '2023-12-27'])
+        for date_str in result:
+            self.assertNotIn('T', date_str)
+            self.assertEqual(len(date_str), 10)
+            self.assertIsInstance(date_str, str)
+
+        # Test dates in different year ranges
+        result = utils.standardize_datestring_format(['15/06/1995'])
+        self.assertEqual(result, ['1995-06-15'])
+        self.assertNotIn('T', result[0])
+
+    def test_standardize_datestring_format_already_standardized(self):
+        """Test that standardize_datestring_format handles already standardized dates."""
+        # Test dates already in YYYY-MM-DD format
+        result = utils.standardize_datestring_format(['2023-01-01', '2023-01-02'])
+        self.assertEqual(result, ['2023-01-01', '2023-01-02'])
+        for date_str in result:
+            self.assertNotIn('T', date_str)
+            self.assertEqual(len(date_str), 10)

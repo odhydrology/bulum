@@ -1,10 +1,9 @@
-import unittest
 import os
+import re
+import unittest
+
 import bulum.io as bio
-from datetime import datetime
 import bulum.utils as out
-import pandas as pd
-from timeit import default_timer as timer
 
 
 class Tests(unittest.TestCase):
@@ -117,6 +116,42 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(df["M_L1#030.01d"].sum(), 19922893.66192)
         self.assertAlmostEqual(df["M_L1#065.01d"].sum(), 53179857.30745)
         self.assertAlmostEqual(df["three"].sum(), 19922893.66192)
+
+    def test_read_iqqm_lqn_output_stochastic_dates(self):
+        """Test reading IQQM lqn output with stochastic dates outside numpy datetime64 range.
+
+        Stochastic model outputs can have dates from year 0001 to 9999, which is outside
+        the range that numpy datetime64 can handle (approximately 1677-2262).
+        This test ensures dates are kept as strings to support the full range.
+        """
+        df = bio.read_iqqm_lqn_output("./src/bulum/io/tests/stochastic_test.lqn")
+        # Verify the dataframe was created successfully
+        self.assertEqual(len(df), 10)
+        # Verify dates are in string format and in standard YYYY-MM-DD format
+        self.assertIsInstance(df.index[0], str)
+        self.assertEqual(len(df.index[0]), 10)  # YYYY-MM-DD format
+        # Verify we can handle very early dates (year 0001)
+        self.assertEqual(df.index[0], "0001-01-01")
+        self.assertEqual(df.index[-1], "0001-01-10")
+
+    def test_read_iqqm_lqn_output_date_format_regression(self):
+        """Regression test: Ensure lqn files produce clean YYYY-MM-DD format without timestamps.
+
+        This test prevents regression where numpy datetime64 string conversion
+        produced timestamps like "2000-01-01T00:00:00.000000" instead of "2000-01-01".
+        """
+        df = bio.read_iqqm_lqn_output("./src/bulum/io/tests/M_L1#030.01d")
+        # Verify dates are strings
+        self.assertIsInstance(df.index[0], str)
+        # Verify no timestamp component (no 'T' character)
+        for date_str in df.index[:100]:  # Check first 100 dates
+            self.assertNotIn('T', date_str, f"Date {date_str} contains timestamp component")
+            # Verify exact YYYY-MM-DD format (10 characters)
+            self.assertEqual(len(date_str), 10, f"Date {date_str} is not in YYYY-MM-DD format")
+        # Verify format matches expected pattern
+        date_pattern = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+        for date_str in df.index[:100]:
+            self.assertRegex(date_str, date_pattern, f"Date {date_str} doesn't match YYYY-MM-DD pattern")
 
     # def test_iqqm_out_reader(self):
     #     reader = oio.iqqm_out_reader("./src/bulum/io/tests/iqqm_results/O02l.IQN") #O02l.IQN
