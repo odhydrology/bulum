@@ -5,7 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
-## Unreleased
+## 0.3.2
+
+### Fixes
+- 'Unreleased' below changed to 'v0.3.1' - whoops!
+- utils.standardize_datestring_format(): should now return YYYY-MM-DD format strings without timestamp components (e.g., "2000-01-01" instead of "2000-01-01T00:00:00.000000")
+- utils.to_np_datetimes64d(): now handles pandas Series inputs correctly by converting to list before processing
+- io.read_iqqm_lqn_output(): now correctly processes stochastic model outputs with dates outside numpy datetime64's typical range (see above)
+
+### Changed
+- utils.standardize_datestring_format(): now uses numpy datetime64 for efficient processing while ensuring clean YYYY-MM-DD string output
+- utils.to_np_datetimes64d(): now issues UserWarning instead of raising ValueError for non-consecutive dates, still returns all dates in the range
+
+
+## 0.3.1
 
 ### Added
 
