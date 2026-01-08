@@ -1,7 +1,7 @@
 import calendar
 import warnings
 from datetime import datetime, timedelta
-from typing import Literal, Optional, Union, cast, overload
+from typing import Iterable, Literal, Optional, Union, cast, overload
 
 from collections.abc import Iterable
 
@@ -56,7 +56,8 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
 
     This function automatically detects the input date format and converts all dates
     to the standard ISO 8601 format (YYYY-MM-DD). Uses numpy datetime64 for efficient
-    processing. Tested over the range 0001-01-01 to 9999-12-31.
+    processing and ensures clean YYYY-MM-DD output without timestamp components.
+    Tested over the range 0001-01-01 to 9999-12-31.
 
     Parameters
     ----------
@@ -76,8 +77,8 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
     date_format = get_date_format(values[0])
 
     try:
-        # Use numpy datetime64 for efficient conversion
-        np_dates = to_np_datetimes64d(values, date_fmt=date_format)
+        # Use check_length=False to suppress warnings for non-consecutive dates
+        np_dates = to_np_datetimes64d(values, date_fmt=date_format, check_dates=False)
     except ValueError as e:
         if "End date format does not match start date format" in str(e):
             # Handle mixed date formats by converting end date to match start format
@@ -85,10 +86,9 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
             placeholder_values = ["" for _ in values]
             placeholder_values[0] = values[0]
             placeholder_values[-1] = datetime.strptime(values[-1], end_date_format).strftime(date_format)
-            np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format)
+            np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format, check_dates=False)
         else:
             raise e
-
     # Convert numpy datetime64 to clean YYYY-MM-DD strings by taking first 10 characters
     # This strips any timestamp component (e.g., "T00:00:00.000000")
     return [str(t)[:10] for t in np_dates]
@@ -100,7 +100,7 @@ def standardise_datestring_format(values):
 
 
 def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
-                       *, check_length: bool = True) -> np.typing.NDArray[np.datetime64]:
+                       *, check_dates: bool | Literal["warn", "strict"] = "warn") -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetime64[D] array.
 
     This function efficiently converts date strings to numpy datetime64 arrays with
@@ -114,10 +114,12 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
         Generates all dates from first to last date (inclusive).
     date_fmt : str, default '%Y-%m-%d'
         The date format string for parsing the input dates.
-    check_length : bool, default True
-        Whether to validate that the number of generated dates matches the input length.
-        If True and lengths don't match, issues a warning but still returns all dates
-        between start and end. Set to False to suppress the warning.
+    check_length : bool or {"warn", "strict"}, default "warn"
+        Controls validation that the number of generated dates matches input length:
+
+        - ``False`` : No validation (suppress all warnings/errors)
+        - ``True`` or ``"warn"`` : Issue UserWarning if lengths don't match
+        - ``"strict"`` : Raise ValueError if lengths don't match
 
     Returns
     -------
@@ -125,11 +127,17 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
         Numpy array of datetime64[D] values from first to last date (inclusive).
         Returns all dates in the range, regardless of input length.
 
+    Raises
+    ------
+    ValueError
+        If check_length is "strict" and the number of generated dates doesn't match
+        the input length, indicating non-consecutive dates or gaps.
+
     Warns
     -----
     UserWarning
-        If check_length is True and the number of generated dates doesn't match
-        the input length, indicating non-consecutive dates or gaps.
+        If check_length is True or "warn" and the number of generated dates doesn't
+        match the input length, indicating non-consecutive dates or gaps.
 
     Examples
     --------
@@ -139,6 +147,14 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
 
     >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length=False))
     3
+
+    >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length="warn"))  # doctest: +SKIP
+    3  # Issues warning but returns all dates
+
+    >>> to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length="strict")  # doctest: +SKIP
+    Traceback (most recent call last):
+        ...
+    ValueError: Date sequence validation failed...
     """
     # Convert pandas Series to list if needed (most robust fix for pandas Series indexing)
     if hasattr(values, 'tolist'):
@@ -158,23 +174,39 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     else:
         np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
 
-    if check_length and len(np_dates) != len(values):
-        warnings.warn(f"Date sequence validation: Expected {len(np_dates)} consecutive dates "
-                     f"between {start_date} and {end_date} but found {len(values)} values. "
-                     f"This suggests non-consecutive dates or gaps in the sequence. "
-                     f"Returning all dates between start and end.",
-                     UserWarning, stacklevel=2)
+    # Handle length validation based on check_length mode
+    if len(np_dates) != len(values):
+        error_msg = (f"Date sequence validation failed: Expected {len(np_dates)} consecutive dates "
+                    f"between {start_date} and {end_date} but found {len(values)} values. "
+                    f"This suggests non-consecutive dates or gaps in the sequence.")
+
+        if check_dates == "strict":
+            raise ValueError(error_msg)
+        elif check_dates is True or check_dates == "warn":
+            warnings.warn(error_msg + " Returning all dates between start and end.",
+                         UserWarning, stacklevel=2)
+        # If check_length is False, do nothing
+
     return np_dates
 
 
 @overload
-def get_wy(dates: str, wy_month: int = ..., *,
-           using_end_year: bool = ..., as_list: bool = ...) -> int: ...
+def get_wy(dates: str, 
+           wy_month: int = ..., 
+           *,
+           using_end_year: bool = ..., 
+           as_list: bool = ...
+           ) -> int: ...
 @overload
-def get_wy(dates: Union[pd.Index, list[str], list[np.datetime64]], wy_month: int = ..., *,
-           using_end_year: bool = ..., as_list: Literal[True] = ...) -> list[int]: ...
+def get_wy(dates: pd.Index | list[str] | list[np.datetime64], 
+           wy_month: int = ..., 
+           *,
+           using_end_year: bool = ..., 
+           as_list: Literal[True] = ...
+           ) -> list[int]: ...
 @overload
-def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
+def get_wy(dates: pd.Index | list[str] | list[np.datetime64], 
+           wy_month: int = 7,
            *,
            using_end_year: bool = False) -> list[int]:
     ...
@@ -235,6 +267,7 @@ def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: in
     if _dates_is_str:
         dates = [dates]
     if isinstance(dates[0], str):
+        np_dates = to_np_datetimes64d(dates, check_dates=False)
         np_dates = to_np_datetimes64d(cast(list[str], dates))
     else:
         np_dates = np.array(dates, dtype='datetime64[D]')
@@ -367,7 +400,7 @@ def get_next_month_start(stringdate: str) -> str:
     return f"{year_str}-{month_str}-{day_str}"
 
 
-def get_year_and_month(v: list[str] | list[datetime]) -> list[str]:
+def get_year_and_month(v: Union[list[str], list[datetime]]) -> list[str]:
     """
     Extract year and month strings from a list of dates.
 
@@ -437,16 +470,17 @@ def get_month(dates: Iterable[str]) -> list[int]:
 
 @overload
 def get_dates(start_date: str,
-              end_date: str | None = None, days: int = 0, years: int = 1,
+              end_date: Optional[str] = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: str | None = None) -> list[str]:
+              str_format: Optional[str] = None) -> list[str]:
     ...
 
 
 @overload
 def get_dates(start_date: datetime,
-              end_date: datetime | None = None, days: int = 0, years: int = 1,
+              end_date: Optional[datetime] = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
+              str_format: Optional[str] = None) -> Union[list[str], list[datetime]]:
               str_format: str = ...) -> list[str]:
     ...
 
@@ -459,10 +493,10 @@ def get_dates(start_date: datetime,
     ...
 
 
-def get_dates(start_date: datetime | str,
-              end_date: datetime | str | None = None, days: int = 0, years: int = 1,
+def get_dates(start_date: Union[datetime, str],
+              end_date: Optional[Union[datetime, str]] = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: str | None = None) -> list[str] | list[datetime]:
+              str_format: Optional[str] = None) -> Union[list[str], list[datetime]]:
     """
     Generates a list of daily datetime values from a given start date.
 
@@ -536,7 +570,7 @@ def get_dates(start_date: datetime | str,
     return date_list
 
 
-def _parse_date_components(date_value: str | datetime) -> tuple[int, int, int]:
+def _parse_date_components(date_value: Union[str, datetime]) -> tuple[int, int, int]:
     """
     Extract year, month, day components from a date string or datetime object.
 
@@ -577,7 +611,7 @@ def _parse_date_components(date_value: str | datetime) -> tuple[int, int, int]:
     return year, month, day
 
 
-def get_wy_start_date(df: pd.Series | pd.DataFrame, wy_month: int = 7) -> datetime:
+def get_wy_start_date(df: Union[pd.Series, pd.DataFrame], wy_month: int = 7) -> datetime:
     """
     Returns an appropriate water year start date based on data frame dates and the
     water year start month.
