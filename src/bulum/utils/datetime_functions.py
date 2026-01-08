@@ -99,23 +99,83 @@ def standardise_datestring_format(values):
     return standardize_datestring_format(values)
 
 
+def _generate_date_range(start_date: datetime, end_date: datetime) -> np.typing.NDArray[np.datetime64]:
+    """Generate all dates between start_date and end_date (inclusive).
+
+    Efficiently generates a continuous range of dates using numpy.arange.
+    Handles edge case at the end of the representable date range (9999-12-31).
+
+    Parameters
+    ----------
+    start_date : datetime
+        The start date of the range.
+    end_date : datetime
+        The end date of the range (inclusive).
+
+    Returns
+    -------
+    np.typing.NDArray[np.datetime64]
+        Numpy array of consecutive datetime64[D] values from start to end date.
+    """
+    # Handle potential OverflowError at end of representable date range.
+    if end_date == datetime(9999, 12, 31):
+        np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')
+        np_dates = np.append(np_dates, np.datetime64(end_date))
+    else:
+        np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
+    return np_dates
+
+
+def _parse_date_list(values: list[str], date_fmt: str) -> np.typing.NDArray[np.datetime64]:
+    """Parse each date string in the list individually.
+
+    Iterates over each date string and converts it to numpy datetime64.
+    Preserves non-consecutive dates and gaps in the sequence.
+
+    Parameters
+    ----------
+    values : list[str]
+        List of date strings to convert.
+    date_fmt : str
+        The date format string for parsing the dates.
+
+    Returns
+    -------
+    np.typing.NDArray[np.datetime64]
+        Numpy array of datetime64[D] values, one for each input date.
+    """
+    parsed_dates = []
+    for date_str in values:
+        dt = datetime.strptime(date_str, date_fmt)
+        parsed_dates.append(np.datetime64(dt, 'D'))
+    return np.array(parsed_dates, dtype='datetime64[D]')
+
+
 def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
-                       *, check_dates: bool | Literal["warn", "strict"] = "warn") -> np.typing.NDArray[np.datetime64]:
+                       *, mode: Literal["generate", "parse"] = "generate",
+                       check_dates: bool | Literal["warn", "strict"] = "warn") -> np.typing.NDArray[np.datetime64]:
     """Convert a list of date strings to numpy datetime64[D] array.
 
-    This function efficiently converts date strings to numpy datetime64 arrays with
-    day precision. It generates all dates between the first and last date in the input.
-    Handles edge cases at the end of the representable date range (9999-12-31).
+    This function converts date strings to numpy datetime64 arrays with day precision.
+    Two modes are available: "generate" efficiently creates all dates in a range,
+    while "parse" individually converts each date string preserving gaps.
 
     Parameters
     ----------
     values : list[str]
         List of date strings to convert. Can also accept pandas Series.
-        Generates all dates from first to last date (inclusive).
     date_fmt : str, default '%Y-%m-%d'
         The date format string for parsing the input dates.
+    mode : {"generate", "parse"}, default "generate"
+        Conversion mode:
+
+        - ``"generate"`` : Generate all dates between first and last date (inclusive).
+          Efficient for consecutive or near-consecutive dates. Uses numpy.arange.
+        - ``"parse"`` : Parse each date string individually, preserving non-consecutive
+          dates and gaps. Iterates over all values.
+
     check_length : bool or {"warn", "strict"}, default "warn"
-        Controls validation that the number of generated dates matches input length:
+        Controls validation for "generate" mode only (ignored in "parse" mode):
 
         - ``False`` : No validation (suppress all warnings/errors)
         - ``True`` or ``"warn"`` : Issue UserWarning if lengths don't match
@@ -124,34 +184,43 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     Returns
     -------
     np.typing.NDArray[np.datetime64]
-        Numpy array of datetime64[D] values from first to last date (inclusive).
-        Returns all dates in the range, regardless of input length.
+        Numpy array of datetime64[D] values.
+        - In "generate" mode: All dates from first to last (inclusive)
+        - In "parse" mode: Exactly the dates provided (same length as input)
 
     Raises
     ------
     ValueError
-        If check_length is "strict" and the number of generated dates doesn't match
-        the input length, indicating non-consecutive dates or gaps.
+        If mode="generate" and check_length="strict", raises error when generated
+        dates don't match input length (indicating non-consecutive dates or gaps).
 
     Warns
     -----
     UserWarning
-        If check_length is True or "warn" and the number of generated dates doesn't
-        match the input length, indicating non-consecutive dates or gaps.
+        If mode="generate" and check_length is True or "warn", warns when generated
+        dates don't match input length (indicating non-consecutive dates or gaps).
 
     Examples
     --------
+    Generate mode (default) - fills in gaps:
+
     >>> dates = to_np_datetimes64d(['2023-01-01', '2023-01-02', '2023-01-03'])
     >>> dates.dtype
     dtype('<M8[D]')
 
     >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length=False))
-    3
+    3  # Generates all 3 dates: Jan 1, 2, 3
 
-    >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length="warn"))  # doctest: +SKIP
+    Parse mode - preserves gaps:
+
+    >>> dates = to_np_datetimes64d(['2023-01-01', '2023-01-03'], mode="parse")
+    >>> len(dates)
+    2  # Only Jan 1 and 3, no filling
+
+    >>> len(to_np_datetimes64d(['2023-01-01', '2023-01-03'], mode="generate", check_length="warn"))  # doctest: +SKIP
     3  # Issues warning but returns all dates
 
-    >>> to_np_datetimes64d(['2023-01-01', '2023-01-03'], check_length="strict")  # doctest: +SKIP
+    >>> to_np_datetimes64d(['2023-01-01', '2023-01-03'], mode="generate", check_length="strict")  # doctest: +SKIP
     Traceback (most recent call last):
         ...
     ValueError: Date sequence validation failed...
@@ -160,6 +229,11 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     if hasattr(values, 'tolist'):
         values = values.tolist()
 
+    if mode == "parse":
+        # Parse mode: Convert each date string individually, preserving gaps
+        return _parse_date_list(values, date_fmt)
+
+    # Generate mode: Create all dates between first and last date
     start_date = datetime.strptime(values[0], date_fmt)
     try:
         end_date = datetime.strptime(values[-1], date_fmt)
@@ -167,12 +241,7 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
         raise ValueError("End date format does not match start date format: "
                          f"{values[0]=} {values[-1]=} {date_fmt=}") from e
 
-    # Handle potential OverflowError at end of representable date range.
-    if end_date == datetime(9999, 12, 31):
-        np_dates = np.arange(start_date, end_date, dtype='datetime64[D]')
-        np_dates = np.append(np_dates, np.datetime64(end_date))
-    else:
-        np_dates = np.arange(start_date, end_date + timedelta(days=1), dtype='datetime64[D]')
+    np_dates = _generate_date_range(start_date, end_date)
 
     # Handle length validation based on check_length mode
     if len(np_dates) != len(values):
