@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.trans.transformers module &mdash; Bulum 0.2.10 documentation</title>
+  <title>bulum.trans.transformers module &mdash; Bulum 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
+      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -93,14 +93,14 @@
 <span id="bulum-trans-transformers-module"></span><h1>bulum.trans.transformers module<a class="headerlink" href="#module-bulum.trans.transformers" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.trans.transformers.get_exceedence">
-<span class="sig-name descname"><span class="pre">get_exceedence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotting_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cunnane'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.trans.transformers.get_exceedence" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_exceedence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obs_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mod_df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotting_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cunnane'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.trans.transformers.get_exceedence" title="Link to this definition"></a></dt>
 <dd><p>_summary_</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>obs_df</strong> (<em>DataFrame</em>) – Dataframe of observed values.</p></li>
 <li><p><strong>mod_df</strong> (<em>DataFrame</em>) – _description_</p></li>
-<li><p><strong>plotting_position</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Defaults to “cunnane”. Other supported values: “weibull”, “gringorten”.
+<li><p><strong>plotting_position</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Defaults to “cunnane”. Other supported values: “weibull”, “gringorten”.
 See <a class="reference external" href="https://glossary.ametsoc.org/wiki/Plotting_position">https://glossary.ametsoc.org/wiki/Plotting_position</a>.</p></li>
 </ul>
 </dd>
@@ -115,31 +115,31 @@ See <a class="reference external" href="https://glossary.ametsoc.org/wiki/Plotti
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.trans.transformers.get_exceedence_plotting_position">
-<span class="sig-name descname"><span class="pre">get_exceedence_plotting_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotting_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cunnane'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.trans.transformers.get_exceedence_plotting_position" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">get_exceedence_plotting_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotting_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cunnane'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.trans.transformers.get_exceedence_plotting_position" title="Link to this definition"></a></dt>
 <dd><p>Get plotting position values for a given length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a>)</p></li>
-<li><p><strong>plotting_position</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Defaults to “cunnane”. Other supported values: “weibull”, “gringorten”.
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>)</p></li>
+<li><p><strong>plotting_position</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Defaults to “cunnane”. Other supported values: “weibull”, “gringorten”.
 See <a class="reference external" href="https://glossary.ametsoc.org/wiki/Plotting_position">https://glossary.ametsoc.org/wiki/Plotting_position</a>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.13)"><strong>ValueError</strong></a> – If plotting position is not supported.</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If plotting position is not supported.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A list of length <cite>n</cite> of plotting positions.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)">float</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.trans.transformers.join_on_dates">
-<span class="sig-name descname"><span class="pre">join_on_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">assert_format_standards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.trans.transformers.join_on_dates" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">join_on_dates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">df2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">assert_format_standards</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.trans.transformers.join_on_dates" title="Link to this definition"></a></dt>
 <dd><p>Join the input dataframes on datetime index.</p>
 <p>Assumes df1 and df2 both have datetime indexes with values that are daily,
 and sequentially ascending.</p>
@@ -148,7 +148,7 @@ and sequentially ascending.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df1</strong> (<em>DataFrame</em>)</p></li>
 <li><p><strong>df2</strong> (<em>DataFrame</em>)</p></li>
-<li><p><strong>assert_format_standards</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>default True</em>) – Enforce dataframe standards.</p></li>
+<li><p><strong>assert_format_standards</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Enforce dataframe standards.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>

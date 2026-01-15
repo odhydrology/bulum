@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.stats.storage_level_assessment module &mdash; Bulum 0.2.10 documentation</title>
+  <title>bulum.stats.storage_level_assessment module &mdash; Bulum 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
+      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -92,164 +92,490 @@
              
   <section id="module-bulum.stats.storage_level_assessment">
 <span id="bulum-stats-storage-level-assessment-module"></span><h1>bulum.stats.storage_level_assessment module<a class="headerlink" href="#module-bulum.stats.storage_level_assessment" title="Link to this heading"></a></h1>
+<p>Storage level assessment functionality for water resource analysis.</p>
+<p>This module provides the StorageLevelAssessment class for analyzing storage
+levels against trigger thresholds, including event detection, duration analysis,
+and statistical summaries by water year.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StorageLevelAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.2.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow">
-<span class="sig-name descname"><span class="pre">AnnualDaysBelow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow" title="Link to this definition"></a></dt>
-<dd><p>Returns the total days at or below trigger threshold by WY.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary of annual timeseries grouped by trigger threshold.</p>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">StorageLevelAssessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wy_month</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">7</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_part_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Analyze storage levels against trigger thresholds for water resource management.</p>
+<p>This class provides comprehensive analysis of storage time series data,
+including event detection when storage falls below specified trigger levels,
+duration analysis, and statistical summaries organized by water year.</p>
+<p class="rubric">Examples</p>
+<p>Basic usage with numeric triggers:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bulum.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageLevelAssessment</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create sample storage data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2020-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2022-12-31&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">storage</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Storage&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initialize assessment with trigger levels</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get comprehensive summary</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Usage with named triggers for better readability:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initialize with meaningful trigger names</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trigger_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Full Supply&quot;</span><span class="p">,</span> <span class="s2">&quot;Level 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Level 2&quot;</span><span class="p">,</span> <span class="s2">&quot;Critical&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
+<span class="gp">... </span>                           <span class="n">trigger_names</span><span class="o">=</span><span class="n">trigger_names</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>  <span class="c1"># Shows &quot;Trigger Name&quot; column</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add additional trigger dynamically</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Emergency&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Advanced analysis and visualization:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get event statistics for specific trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">events_count</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerCount</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>  <span class="c1"># Events &gt;= 7 days</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerMax</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Annual analysis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual_days</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">AnnualDaysBelow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">percent_years</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">PercentWaterYearsBelow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create visualizations</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chart</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">plot_events_ranked</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="n">interactive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">freq_chart</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">plot_event_length_frequency</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Water year analysis with custom parameters:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use calendar year (wy_month=1) and allow partial years</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla_cal</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
+<span class="gp">... </span>                               <span class="n">wy_month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">allow_part_years</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get summary for single trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">critical_summary</span> <span class="o">=</span> <span class="n">sla_cal</span><span class="o">.</span><span class="n">Summary</span><span class="p">(</span><span class="n">trigger</span><span class="o">=</span><span class="mi">25</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Custom aggregation of event data:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use custom function to analyze events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerAggregate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerAggregate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">bulum.utils.crop_to_wy</span></code></dt><dd><p>Crop data to complete water years</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">bulum.utils.get_wy</span></code></dt><dd><p>Get water year for dates</p>
 </dd>
 </dl>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow">
+<span class="sig-name descname"><span class="pre">AnnualDaysBelow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelow" title="Link to this definition"></a></dt>
+<dd><p>Calculate total days at or below trigger threshold by water year.</p>
+<p>This method counts the number of days in each water year where storage
+was at or below each trigger threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dict of {float</strong> – Dictionary where keys are trigger threshold values (float) and values
+are <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a> with water years as index and day counts
+as values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a>}</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">annual_days</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">AnnualDaysBelow</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">annual_days</span><span class="p">[</span><span class="mi">50</span><span class="p">])</span>  <span class="c1"># Days below 50 ML by water year</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example output:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 2020    45</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 2021    12</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># 2022    78</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelowSummary">
-<span class="sig-name descname"><span class="pre">AnnualDaysBelowSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annualdaysbelow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelowSummary" title="Link to this definition"></a></dt>
-<dd><p>Returns summary of total days at or below trigger threshold by WY.</p>
+<span class="sig-name descname"><span class="pre">AnnualDaysBelowSummary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annualdaysbelow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.AnnualDaysBelowSummary" title="Link to this definition"></a></dt>
+<dd><p>Generate summary of total days at or below trigger threshold by water year.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trigger</strong> (<em>optional</em>) – Optionally provide single trigger threshold to be assessed. Defaults
-to None.</p></li>
-<li><p><strong>annualdaysbelow</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise
-recalculate. Defaults to None.</p></li>
+<li><p><strong>trigger</strong> (<em>any</em><em>, </em><em>optional</em>) – Optionally provide single trigger threshold to be assessed.
+Default is None.</p></li>
+<li><p><strong>annualdaysbelow</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise
+recalculate. Default is None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe of total days at or below threshold by WY, grouped by trigger threshold.</p>
+<dd class="field-even"><p>DataFrame of total days at or below threshold by water year, grouped by
+trigger threshold. If trigger is specified, returns Series for that trigger.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataFrame</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTrigger">
-<span class="sig-name descname"><span class="pre">EventsBelowTrigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTrigger" title="Link to this definition"></a></dt>
-<dd><p>Returns event length array for each trigger threshold.</p>
+<span class="sig-name descname"><span class="pre">EventsBelowTrigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTrigger" title="Link to this definition"></a></dt>
+<dd><p>Get event length arrays for each trigger threshold with minimum length filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Optional minimum event length to return. Defaults to 1.</p>
+<dd class="field-odd"><p><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum event length to return. Default is 1.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of event length arrays, grouped by trigger threshold.</p>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of event length arrays, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of int}</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAggregate">
+<span class="sig-name descname"><span class="pre">EventsBelowTriggerAggregate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAggregate" title="Link to this definition"></a></dt>
+<dd><p>Aggregate event lengths using a custom function for each trigger threshold with minimum length filter.</p>
+<p>Only events with duration &gt;= length days are considered in the analysis.
+This allows filtering out short-duration events before applying custom
+aggregation functions like median, standard deviation, percentiles, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>function</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Callable</span></code>) – Function that acts on arrays/iterables and returns a single value (e.g., float).</p></li>
+<li><p><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum event length (in days). Only events with duration &gt;= this
+value are included in the analysis. Default is 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of aggregated event values, grouped by trigger threshold.
+Returns NaN for triggers with no events meeting the minimum length criteria.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float}</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get median of events 30 days or longer before counting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">median_long_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerAggregate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get 95th percentile of events 7 days or longer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p95_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerAggregate</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">95</span><span class="p">),</span> <span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm">
-<span class="sig-name descname"><span class="pre">EventsBelowTriggerAlgorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm" title="Link to this definition"></a></dt>
-<dd><p>Returns array of event lengths.</p>
+<span class="sig-name descname"><span class="pre">EventsBelowTriggerAlgorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm" title="Link to this definition"></a></dt>
+<dd><p>Calculate array of event lengths for a specific trigger threshold.</p>
+<p>This is the core algorithm that detects continuous periods where storage
+is at or below the trigger threshold. An event starts when storage falls
+to or below the trigger and ends when storage rises above the trigger.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trigger</strong> – Trigger threshold against which daily data input is assessed.</p>
+<dd class="field-odd"><p><strong>trigger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Trigger threshold against which daily storage data is assessed.
+Uses &lt;= comparison (storage at or below trigger).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Array where each item represents the length of a single continuous event.</p>
+<dd class="field-even"><p>List where each element represents the length (in days) of a single
+continuous event below the trigger threshold. Empty list if no events
+occurred.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)">list</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a></p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Get event lengths for 50 ML trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerAlgorithm</span><span class="p">(</span><span class="mf">50.0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>  <span class="c1"># e.g., [5, 12, 3, 45] - four events of different lengths</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Analyze the events</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Longest event: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2"> days&quot;</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">&quot;No events&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average event length: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> days&quot;</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">&quot;No events&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>This algorithm handles edge cases including:
+- Events that start at the beginning of the time series
+- Events that end at the end of the time series
+- Single-day events
+- No events (returns empty list)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerCount">
-<span class="sig-name descname"><span class="pre">EventsBelowTriggerCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerCount" title="Link to this definition"></a></dt>
-<dd><p>Returns count of events for each trigger threshold</p>
+<span class="sig-name descname"><span class="pre">EventsBelowTriggerCount</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerCount" title="Link to this definition"></a></dt>
+<dd><p>Count events for each trigger threshold with minimum length filter.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><em>int</em></a><em>, </em><em>optional</em>) – Optional minimum event length to count. Defaults to 1.</p>
+<dd class="field-odd"><p><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum event length to count. Default is 1.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of event counts, grouped by trigger threshold.</p>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of event counts, grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p>int}</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax">
-<span class="sig-name descname"><span class="pre">EventsBelowTriggerMax</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax" title="Link to this definition"></a></dt>
-<dd><p>Returns max event length for each trigger threshold</p>
+<span class="sig-name descname"><span class="pre">EventsBelowTriggerMax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax" title="Link to this definition"></a></dt>
+<dd><p>Find maximum event length for each trigger threshold with minimum length filter.</p>
+<p>Only events with duration &gt;= length days are considered in the analysis.
+This allows filtering out short-duration events that may not be operationally
+significant.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Dictionary of event counts, grouped by trigger threshold.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum event length (in days). Only events with duration &gt;= this
+value are included in the analysis. Default is 1.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of maximum event lengths, grouped by trigger threshold.
+Returns NaN for triggers with no events meeting the minimum length criteria.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int}</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMean">
+<span class="sig-name descname"><span class="pre">EventsBelowTriggerMean</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMean" title="Link to this definition"></a></dt>
+<dd><p>Calculate mean event length for each trigger threshold with minimum length filter.</p>
+<p>Only events with duration &gt;= length days are considered in the analysis.
+This allows filtering out short-duration events that may not be operationally
+significant when calculating average event durations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>min_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum event length (in days). Only events with duration &gt;= this
+value are included in the analysis. Default is 1.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of mean event lengths, grouped by trigger threshold.
+Returns NaN for triggers with no events meeting the minimum length criteria.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float}</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mean_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerMean</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mean_events</span><span class="p">[</span><span class="mi">50</span><span class="p">])</span>  <span class="c1"># Average event length for 50 ML trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Example output: 12.5 (average of all events below 50 ML)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Only consider events 7 days or longer before counting</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_long_events</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">EventsBelowTriggerMean</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mean_long_events</span><span class="p">[</span><span class="mi">50</span><span class="p">])</span>  <span class="c1"># Average of events &gt;= 7 days only</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax" title="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerMax"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventsBelowTriggerMax</span></code></a></dt><dd><p>Maximum event lengths</p>
+</dd>
+<dt><a class="reference internal" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAggregate" title="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAggregate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventsBelowTriggerAggregate</span></code></a></dt><dd><p>Custom aggregation functions</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.NumberWaterYearsBelow">
-<span class="sig-name descname"><span class="pre">NumberWaterYearsBelow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annualdaysbelow</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.NumberWaterYearsBelow" title="Link to this definition"></a></dt>
-<dd><p>Returns total WYs with at least one day at or below trigger threshold.</p>
+<span class="sig-name descname"><span class="pre">NumberWaterYearsBelow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">annualdaysbelow</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_days_per_year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.NumberWaterYearsBelow" title="Link to this definition"></a></dt>
+<dd><p>Calculate total water years with at least one day at or below trigger threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>(</strong><strong>dict</strong> (<em>annualdaysbelow</em>)</p></li>
-<li><p><strong>optional</strong><strong>)</strong> (<em>Optionally provide output from AnnualDaysBelow</em><em>, </em><em>otherwise recalculate. Defaults to None.</em>)</p></li>
+<li><p><strong>annualdaysbelow</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from AnnualDaysBelow, otherwise recalculate. Default is None.</p></li>
+<li><p><strong>min_days_per_year</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum number of days in a water year before counting it. Only water years
+with &gt;= this many days below the trigger are counted. Default is 1.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of total years grouped by trigger threshold.</p>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of total water years grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p>int}</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.PercentWaterYearsBelow">
-<span class="sig-name descname"><span class="pre">PercentWaterYearsBelow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberyears</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.PercentWaterYearsBelow" title="Link to this definition"></a></dt>
-<dd><p>Returns percent of WYs with at least one day at or below trigger threshold.</p>
+<span class="sig-name descname"><span class="pre">PercentWaterYearsBelow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numberyears</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_days_per_year</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.PercentWaterYearsBelow" title="Link to this definition"></a></dt>
+<dd><p>Calculate percentage of water years with at least one day at or below trigger threshold.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>numberyears</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from NumberWaterYearsBelow, otherwise
-recalculate. Defaults to None.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numberyears</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>, </em><em>optional</em>) – Optionally provide output from NumberWaterYearsBelow, otherwise
+recalculate. Default is None.</p></li>
+<li><p><strong>min_days_per_year</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Minimum number of days in a water year before counting it. Only water years
+with &gt;= this many days below the trigger are counted. Default is 1.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dictionary of percent years grouped by trigger threshold.</p>
+<dd class="field-even"><p><strong>dict of {float</strong> – Dictionary of percentage years grouped by trigger threshold.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)">dict</a></p>
+<dd class="field-odd"><p>float}</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary">
-<span class="sig-name descname"><span class="pre">Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary" title="Link to this definition"></a></dt>
-<dd><p>Returns table summary of key storage level assessment outputs.</p>
+<span class="sig-name descname"><span class="pre">Summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary" title="Link to this definition"></a></dt>
+<dd><p>Generate comprehensive summary table of storage level assessment outputs.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>trigger</strong> (<em>any</em><em>, </em><em>optional</em>) – Optionally provide single trigger threshold to be assessed. Defaults to None.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trigger</strong> (<em>any</em><em>, </em><em>optional</em>) – Optionally provide single trigger threshold to be assessed. Default is None.</p></li>
+<li><p><strong>include_mean</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Include average event length column in the summary. Default is False.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dataframe summary</p>
+<dd class="field-even"><p>Comprehensive summary including start/end dates, water year statistics,
+event counts for various durations, and maximum event lengths.
+If trigger is specified, returns Series for that trigger only.
+When trigger names are provided, they are displayed in the summary.
+When include_mean is True, adds “Average period at or below trigger (days)” column.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>df</p>
+<dd class="field-odd"><p><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a> or <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.Series</span></code></a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.add_trigger">
+<span class="sig-name descname"><span class="pre">add_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.add_trigger" title="Link to this definition"></a></dt>
+<dd><p>Add an additional trigger level to the assessment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trigger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – New trigger threshold to be assessed. Must not already exist in the
+current trigger list. Value should be in same units as storage data.</p></li>
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Descriptive name for the new trigger level. Required if the assessment
+was initialized with trigger_names, otherwise must be None to maintain
+consistency. Default is None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If trigger already exists in the assessment, if name is required but
+    not provided (when trigger_names exist), or if name is provided but
+    no trigger_names exist.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assessment without names - add trigger without name</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage_data</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">25.0</span><span class="p">)</span>  <span class="c1"># ✓ Valid</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assessment with names - name is required</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla_named</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage_data</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
+<span class="gp">... </span>                                 <span class="n">trigger_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla_named</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Critical&quot;</span><span class="p">)</span>  <span class="c1"># ✓ Valid</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Immediate availability for analysis</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla_named</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>  <span class="c1"># Includes new trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">events</span> <span class="o">=</span> <span class="n">sla_named</span><span class="o">.</span><span class="n">EventsBelowTriggerCount</span><span class="p">()</span>  <span class="c1"># Includes new trigger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chart</span> <span class="o">=</span> <span class="n">sla_named</span><span class="o">.</span><span class="n">plot_events_ranked</span><span class="p">(</span><span class="mf">25.0</span><span class="p">)</span>  <span class="c1"># Can plot new trigger</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm" title="bulum.stats.storage_level_assessment.StorageLevelAssessment.EventsBelowTriggerAlgorithm"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EventsBelowTriggerAlgorithm</span></code></a></dt><dd><p>Algorithm used for new trigger analysis</p>
+</dd>
+<dt><a class="reference internal" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary" title="bulum.stats.storage_level_assessment.StorageLevelAssessment.Summary"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Summary</span></code></a></dt><dd><p>Method that includes newly added triggers</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.plot_event_length_frequency">
+<span class="sig-name descname"><span class="pre">plot_event_length_frequency</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'bar'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'rect'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bar'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Chart</span></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.plot_event_length_frequency" title="Link to this definition"></a></dt>
+<dd><p>Create an Altair chart showing frequency distribution of event lengths.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trigger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Trigger level for which to plot the frequency distribution.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Plot width. Default is 600.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Plot height. Default is 400.</p></li>
+<li><p><strong>xmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum event length to plot. Default is None, indicating all data.</p></li>
+<li><p><strong>interactive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Set to True to enable pan and zoom functionality. Default is False.</p></li>
+<li><p><strong>bind_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – When True (default), zooming will only be horizontal; vertical values remain fixed.</p></li>
+<li><p><strong>mark</strong> (<em>{&quot;bar&quot;</em><em>, </em><em>&quot;rect&quot;}</em><em>, </em><em>optional</em>) – Controls plot style. “rect” fixes gaps between data but may be harder to read.
+Default is “bar”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Altair chart showing frequency distribution of event lengths with tooltips.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">altair.Chart</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – Provided trigger has not been evaluated previously for this assessment.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – Invalid keyword argument supplied.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.plot_events_ranked">
+<span class="sig-name descname"><span class="pre">plot_events_ranked</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trigger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xmax</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interactive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bind_y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mark</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'bar'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'rect'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bar'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Chart</span></span></span><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.plot_events_ranked" title="Link to this definition"></a></dt>
+<dd><p>Create an Altair chart of ranked event durations below the trigger threshold.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>trigger</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Trigger level for which to plot the ranking.</p></li>
+<li><p><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Plot width. Default is 600.</p></li>
+<li><p><strong>height</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Plot height. Default is 400.</p></li>
+<li><p><strong>xmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Controls how many data points to plot. Default is None, indicating all data.</p></li>
+<li><p><strong>interactive</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Set to True to enable pan and zoom functionality. Default is False.</p></li>
+<li><p><strong>bind_y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – When True (default), zooming will only be horizontal; vertical values remain fixed.</p></li>
+<li><p><strong>mark</strong> (<em>{&quot;bar&quot;</em><em>, </em><em>&quot;rect&quot;}</em><em>, </em><em>optional</em>) – Controls plot style. “rect” fixes gaps between data but may be harder to read.
+Default is “bar”.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Altair chart showing ranked event durations with tooltips and interactive features.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">altair.Chart</span></code></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#KeyError" title="(in Python v3.14)"><strong>KeyError</strong></a> – Provided trigger has not been evaluated previously for this assessment.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – Invalid keyword argument supplied.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="bulum.stats.storage_level_assessment.StorageLevelAssessment.trigger_names">
+<em class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">trigger_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></em><a class="headerlink" href="#bulum.stats.storage_level_assessment.StorageLevelAssessment.trigger_names" title="Link to this definition"></a></dt>
+<dd><p>Get trigger names as a dictionary mapping trigger levels to names.</p>
 </dd></dl>
 
 </dd></dl>

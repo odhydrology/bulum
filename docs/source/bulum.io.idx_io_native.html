@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.io.idx_io_native module &mdash; Bulum 0.2.10 documentation</title>
+  <title>bulum.io.idx_io_native module &mdash; Bulum 0.3.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=8db09a1e"></script>
+      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
       <script src="../_static/doctools.js?v=9bcbadda"></script>
       <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/js/theme.js"></script>
@@ -94,13 +94,13 @@
 <p>IO functions for IDX format (binary) written in native Python.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.io.idx_io_native.read_idx">
-<span class="sig-name descname"><span class="pre">read_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_header_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io_native.read_idx" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">read_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_header_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io_native.read_idx" title="Link to this definition"></a></dt>
 <dd><p>Read IDX file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> – Name of the IDX file.</p></li>
-<li><p><strong>skip_header_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to skip header bytes in the corresponding OUTs file (related to
+<li><p><strong>skip_header_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to skip header bytes in the corresponding OUTs file (related to
 the compiler used for IQQM). If set to None, attempt to detect the
 presence of header bytes automatically.</p></li>
 </ul>
@@ -113,7 +113,7 @@ presence of header bytes automatically.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.io.idx_io_native.write_idx_native">
-<span class="sig-name descname"><span class="pre">write_idx_native</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.2.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io_native.write_idx_native" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">write_idx_native</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io_native.write_idx_native" title="Link to this definition"></a></dt>
 <dd><p>Writer for .IDX and corresponding .OUT binary files written in native
 Python. Currently only supports daily data (date flag 0), as with the reader
 <a class="reference internal" href="#bulum.io.idx_io_native.read_idx" title="bulum.io.idx_io_native.read_idx"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_idx()</span></code></a>.</p>
@@ -124,8 +124,8 @@ resp., or Flow &amp; ML/d.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>df</strong> (<em>pd.Dataframe</em>) – DataFrame as per the output of <a class="reference internal" href="#bulum.io.idx_io_native.read_idx" title="bulum.io.idx_io_native.read_idx"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_idx()</span></code></a>.</p></li>
 <li><p><strong>filepath</strong> – Path to the IDX file to be written to including .IDX extension.</p></li>
-<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Units for data in df.</p></li>
-<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>, </em><em>optional</em>) – Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Units for data in df.</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Data specifier for data in df, e.g. Gauged Flow, Precipitation, etc.</p></li>
 </ul>
 </dd>
 </dl>
