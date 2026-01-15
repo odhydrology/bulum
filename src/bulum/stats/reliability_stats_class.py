@@ -8,8 +8,10 @@ from bulum import utils
 
 
 class Reliability:
-    """ 
-    Reliability of water supply statistics generator.
+    """Reliability of water supply statistics generator.
+
+    This class provides methods to calculate reliability statistics comparing
+    water supply against demand for different timescales (monthly, annual).
     """
 
     def __init__(self, demand: Union[pd.Series, list, float, int], supply: pd.Series,
@@ -17,17 +19,17 @@ class Reliability:
                  demand_type: Literal["total", "daily_constant"] = "total",
                  ignore_leap_years=False, quiet=False) -> None:
         """Initialise Reliability class. Functions available are
-        - `Reliability.DemandTS`, 
+        - `Reliability.ReliabilityTS`,
         - `Reliability.MonthlyReliability`, and
         - `Reliability.AnnualReliability`.
-        
+
         Parameters
         ----------
-        demand : Union[pd.Series,list,float,int]
+        demand : :class:`pandas.Series` or list or float or int
             Demand timeseries with date string as index. Alternatively, a list
             of monthly values or single demand which will be disaggregated
             according to other input parameters.
-        supply : pd.Series
+        supply : :class:`pandas.Series`
             Daily supply timeseries with date as index.
         demand_timescale : Literal["daily","monthly","yearly"], optional
             If a float or int demand is provided, which timescale does it apply
@@ -42,38 +44,49 @@ class Reliability:
             days in Feb, and value for the 29th Feb will be equal to the 28th of
             Feb value. Defaults to False.
 
+        Raises
+        ------
+        TypeError
+            If demand is not one of :class:`~pandas.Series`, list, float, or int.
+            If supply is not a :class:`~pandas.Series`.
+            If ignore_leap_years is not a boolean.
+        ValueError
+            If demand_type is not "total" or "daily_constant".
+            If demand_timescale is not "daily", "monthly", or "yearly".
+            If demand list has fewer than 12 elements.
+
         """
 
         def maybe_print(string):
             if not quiet:
                 print(string)
 
-        if type(demand) not in [pd.Series,list,float,int]:
-            raise Exception("Demand must be one of timeseries, monthly list or single demand.")
-        
-        if type(supply) != pd.Series:
-            raise Exception("Supply must be a single column of a date-indexed dataframe (pd.Series).")
-        
-        if type(demand) == pd.Series:
+        if not isinstance(demand, (pd.Series, list, float, int)):
+            raise TypeError("Demand must be one of timeseries, monthly list or single demand.")
+
+        if not isinstance(supply, pd.Series):
+            raise TypeError("Supply must be a single column of a date-indexed dataframe (pd.Series).")
+
+        if isinstance(demand, pd.Series):
             maybe_print("Comparing provided demand timeseries with supply timeseries.")
             state = "ts"
 
-        if type(demand) != pd.Series:
-            if demand_type not in ["total","daily_constant"]:
-                raise Exception("demand_type must be one of \"total\" or \"daily_constant\".")
-            
-            if demand_timescale not in ["daily","monthly","yearly"]:
-                raise Exception("demand_timescale must be one of \"daily\", \"monthly\" or \"yearly\".")
-            
+        if not isinstance(demand, pd.Series):
+            if demand_type not in ["total", "daily_constant"]:
+                raise ValueError("demand_type must be one of \"total\" or \"daily_constant\".")
+
+            if demand_timescale not in ["daily", "monthly", "yearly"]:
+                raise ValueError("demand_timescale must be one of \"daily\", \"monthly\" or \"yearly\".")
+
             if ignore_leap_years not in [True, False]:
-                    raise Exception(f"ignore_leap_years must be one of {True} or {False}.")
+                raise TypeError(f"ignore_leap_years must be one of {True} or {False}.")
 
         lookup_leap = {True: 28, False: 29}
 
-        if type(demand) is list:
-            if len(demand)<12:
-                raise Exception("Monthly demand list must have a length of 12.")
-            
+        if isinstance(demand, list):
+            if len(demand) < 12:
+                raise ValueError("Monthly demand list must have a length of 12.")
+
             maybe_print("Comparing list of monthly demands with supply timeseries. demand_timescale parameter is unused.")
 
             if demand_type == "daily_constant":
@@ -85,7 +98,7 @@ class Reliability:
                 maybe_print(f"Leap years will be disaggregated assuming {lookup_leap[ignore_leap_years]} days in February.")
                 state = "monthly_total_list"
 
-        if type(demand) in [float, int]:
+        if isinstance(demand, (float, int)):
             if not quiet:
                 maybe_print("Comparing provided demand with supply timeseries.")
             if (demand_timescale == "daily") or (demand_type == "daily_constant"):
@@ -97,86 +110,94 @@ class Reliability:
                     maybe_print("demand_type and ignore_leap_years parameters are unused.")
                 if (demand_type == "daily_constant") and (demand_timescale != "daily"):
                     maybe_print("demand_timescale and ignore_leap_years parameters are unused.")
-                state="daily_constant"
+                state = "daily_constant"
             else:
                 maybe_print(f"Assumed that {demand} ML is the total demand over the {demand_timescale} timescale. {demand} ML {demand_timescale} will be disaggregated to ML/d.")
                 maybe_print(f"Leap years will be disaggregated assuming {lookup_leap[ignore_leap_years]} days in February.")
                 if demand_timescale == "yearly":
-                    state="yearly_total"
+                    state = "yearly_total"
                 if demand_timescale == "monthly":
-                    state="monthly_total"
+                    state = "monthly_total"
 
-        self.demand=demand
-        self.supply=supply
-        self.demand_timescale=demand_timescale
-        self.demand_type=demand_type
-        self.ignore_leap_years=ignore_leap_years
-        self.state=state
-        
-    def ReliabilityTS(self, wy_month):
-        """Returns demand as a timeseries for input to reliability statistics.
+        self.demand = demand
+        self.supply = supply
+        self.demand_timescale = demand_timescale
+        self.demand_type = demand_type
+        self.ignore_leap_years = ignore_leap_years
+        self.state = state
+
+    def ReliabilityTS(self, wy_month: int) -> pd.Series:
+        """Return demand as a timeseries for input to reliability statistics.
+
         Matches date range of supply timeseries input.
+
+        Parameters
+        ----------
+        wy_month : int
+            Water year start month
 
         Returns
         -------
-        pd.Series
+        :class:`pandas.Series`
             Demand timeseries for input to reliability stats
         """
         # If provided demand is a timeseries, just return timeseries.
-        if self.state=="ts":
-            common_dates=np.intersect1d(self.demand.index,self.supply.index)
-            demand_ts=self.demand[common_dates]
-            self.supply=self.supply[common_dates]
+        if self.state == "ts":
+            common_dates = np.intersect1d(self.demand.index, self.supply.index)
+            demand_ts = self.demand[common_dates]
+            self.supply = self.supply[common_dates]
             return demand_ts
 
         else:
             # Copy date range of supply TS
-            demand_ts=self.supply.copy(deep=True)
+            demand_ts = self.supply.copy(deep=True).astype(float)
 
             #  Overwrite demand_ts with constant daily demand.
-            if self.state=="daily_constant":
-                demand_ts[:]=self.demand
+            if self.state == "daily_constant":
+                demand_ts[:] = self.demand
                 return demand_ts
-            
+
             # Overwrite demand_ts with respective month constant daily demand
-            if self.state=="monthly_constant_list":
-                month_list=list(utils.get_month(demand_ts.index))
-                demand_ts[:]=[self.demand[x-1] for x in month_list]
+            if self.state == "monthly_constant_list":
+                month_list = list(utils.get_month(demand_ts.index))
+                demand_ts[:] = [self.demand[x-1] for x in month_list]
                 return demand_ts
 
             # Overwrite demand_ts with respective total month demand disaggregated to daily.
-            if self.state=="monthly_total_list":
-                year_month=utils.get_year_and_month(demand_ts.index)
-                if self.ignore_leap_years == False:
-                    demand_ts[:]=[self.demand[int(x[5:7])-1]/calendar.monthrange(int(x[0:4]),int(x[5:7]))[1] for x in year_month] # If using leap years, divide by 28 or 29 Feb days depending on year
+            if self.state == "monthly_total_list":
+                year_month = utils.get_year_and_month(demand_ts.index)
+                if not self.ignore_leap_years:
+                    demand_ts[:] = [self.demand[int(x[5:7])-1]/calendar.monthrange(int(x[0:4]), int(x[5:7]))[1]
+                                    for x in year_month]  # If using leap years, divide by 28 or 29 Feb days depending on year
                 else:
-                    demand_ts[:]=[self.demand[int(x[5:7])-1]/calendar.monthrange(2002,int(x[5:7]))[1] for x in year_month] # If not using leap years, only divide by 28 Feb days
+                    demand_ts[:] = [self.demand[int(x[5:7])-1]/calendar.monthrange(2002, int(x[5:7]))[1] for x in year_month]  # If not using leap years, only divide by 28 Feb days
                 return demand_ts
-            
+
             # Overwrite demand_ts with total month demand disaggregated to daily.
-            if self.state=="monthly_total":
-                year_month=utils.get_year_and_month(demand_ts.index)
-                if self.ignore_leap_years == False:
-                    demand_ts[:]=[self.demand/calendar.monthrange(int(x[0:4]),int(x[5:7]))[1] for x in year_month] # If using leap years, divide by 28 or 29 Feb days depending on year
+            if self.state == "monthly_total":
+                year_month = utils.get_year_and_month(demand_ts.index)
+                if not self.ignore_leap_years:
+                    demand_ts[:] = [self.demand/calendar.monthrange(int(x[0:4]), int(x[5:7]))[1] for x in year_month]  # If using leap years, divide by 28 or 29 Feb days depending on year
                 else:
-                    demand_ts[:]=[self.demand/calendar.monthrange(2002,int(x[5:7]))[1] for x in year_month] # If not using leap years, only divide by 28 Feb days
+                    demand_ts[:] = [self.demand/calendar.monthrange(2002, int(x[5:7]))[1] for x in year_month]  # If not using leap years, only divide by 28 Feb days
                 return demand_ts
 
             # Overwrite demand_ts with total annual demand disaggregated to daily.
-            if self.state=="yearly_total":
-                if self.ignore_leap_years == False:
-                    wy = utils.get_wy(demand_ts.index,wy_month,using_end_year=False)
-                    if wy_month>2:
-                        demand_ts[:]=[self.demand/(365+calendar.isleap(x+1)) for x in wy] # If using leap years, divide by 365 or 366 days depending on year. If wy_month > 2, leap day will occur in the next calendar year
+            if self.state == "yearly_total":
+                if not self.ignore_leap_years:
+                    wy = utils.get_wy(demand_ts.index, wy_month, using_end_year=False)
+                    if wy_month > 2:
+                        # If using leap years, divide by 365 or 366 days depending on year. If wy_month > 2, leap day will occur in the next calendar year
+                        demand_ts[:] = [self.demand/(365+calendar.isleap(x+1)) for x in wy]
                     else:
-                        demand_ts[:]=[self.demand/(365+calendar.isleap(x)) for x in wy] # If using leap years, divide by 365 or 366 days depending on year. If wy_month <= 2, leap day will occur in this calendar year
+                        # If using leap years, divide by 365 or 366 days depending on year. If wy_month <= 2, leap day will occur in this calendar year
+                        demand_ts[:] = [self.demand/(365+calendar.isleap(x)) for x in wy]
                 else:
-                    demand_ts[:]=self.demand/365 # If not using leap years, only ever divide by 365                    
+                    demand_ts[:] = self.demand/365  # If not using leap years, only ever divide by 365
                 return demand_ts
 
-
-    def MonthlyReliability(self, tol=1, allow_part_months=False, wy_month=7):
-        """Returns the monthly reliability statistic for a daily timeseries of demand and supply.
+    def MonthlyReliability(self, tol: float = 1, allow_part_months: bool = False, wy_month: int = 7) -> float:
+        """Calculate the monthly reliability statistic for daily timeseries of demand and supply.
 
         Parameters
         ----------
@@ -194,37 +215,36 @@ class Reliability:
 
         """
         # Pass input to reliability_ts first and enforce common date range.
-        demand_ts=self.ReliabilityTS(wy_month)
+        demand_ts = self.ReliabilityTS(wy_month)
 
         # Collate timeseries data to monthly
         if allow_part_months:
-            dem_month=demand_ts.groupby(utils.get_year_and_month(demand_ts.index)).sum()
-            sup_month=self.supply.groupby(utils.get_year_and_month(self.supply.index)).sum()
+            dem_month = demand_ts.groupby(utils.get_year_and_month(demand_ts.index)).sum()
+            sup_month = self.supply.groupby(utils.get_year_and_month(self.supply.index)).sum()
         else:
-            if self.supply.index[0][8:10]=="01": #0123-56-89
-                #First date is the start of a month; use this as start date.
-                start_date=self.supply.index[0]
+            if self.supply.index[0][8:10] == "01":  # 0123-56-89
+                # First date is the start of a month; use this as start date.
+                start_date = self.supply.index[0]
             else:
-                #Start on the first date of the next month
+                # Start on the first date of the next month
                 start_date = utils.get_next_month_start(self.supply.index[0])
             if self.supply.index[-1] == utils.get_this_month_end(self.supply.index[-1]):
-                end_date=self.supply.index[-1]
+                end_date = self.supply.index[-1]
             else:
-                end_date=utils.get_prev_month_end(self.supply.index[-1])
+                end_date = utils.get_prev_month_end(self.supply.index[-1])
             demand_trim = demand_ts[start_date:end_date]
             supply_trim = self.supply[start_date:end_date]
             year_month = utils.get_year_and_month(demand_trim.index)
-            dem_month=demand_trim.groupby(year_month).sum()
-            sup_month=supply_trim.groupby(year_month).sum()
+            dem_month = demand_trim.groupby(year_month).sum()
+            sup_month = supply_trim.groupby(year_month).sum()
 
         # Check whether demand is met within given tolerance (to 6 decimal places) and express as a percentage
-        rel=np.where((sup_month-(dem_month*tol)<-0.000001),0,1).sum()/sup_month.count()
+        rel = np.where((sup_month-(dem_month*tol) < -0.000001), 0, 1).sum()/sup_month.count()
 
         return rel
 
-
-    def AnnualReliability(self, tol=1, wy_month=7, allow_part_years=False):
-        """Returns the annual reliability statistic for a daily timeseries of demand and supply.
+    def AnnualReliability(self, tol: float = 1, wy_month: int = 7, allow_part_years: bool = False) -> float:
+        """Calculate the annual reliability statistic for daily timeseries of demand and supply.
 
         Parameters
         ----------
@@ -240,10 +260,10 @@ class Reliability:
         float
             Annual reliability (%)
         """
-        
+
         # Pass input to reliability_ts first and enforce common date range.
-        demand_ts=self.ReliabilityTS(wy_month)
-        
+        demand_ts = self.ReliabilityTS(wy_month)
+
         # Collate timeseries data to annual
         if not allow_part_years:
             demand_ts = utils.crop_to_wy(demand_ts, wy_month)
@@ -252,11 +272,11 @@ class Reliability:
             supply = self.supply
         if (len(demand_ts) == 0):
             return np.nan
-        dem_annual=demand_ts.groupby(utils.get_wy(demand_ts.index, wy_month)).sum()
-        sup_annual=supply.groupby(utils.get_wy(supply.index, wy_month)).sum()
-        no_years=sup_annual.count()
+        dem_annual = demand_ts.groupby(utils.get_wy(demand_ts.index, wy_month)).sum()
+        sup_annual = supply.groupby(utils.get_wy(supply.index, wy_month)).sum()
+        no_years = sup_annual.count()
 
         # Check whether demand is met within given tolerance (to 6 decimal places) and express as a percentage
-        rel=np.where((sup_annual-(dem_annual*tol)<-0.000001),0,1).sum()/no_years
+        rel = np.where((sup_annual-(dem_annual*tol) < -0.000001), 0, 1).sum()/no_years
 
         return rel
