@@ -11,9 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - utils.get_wy() now accepts a single string argument, returning a single integer
+- utils.DataframeEnsemble.map() - apply function over all dataframes in ensemble. Note this is distinct to the inbuilt `map` as it returns a new DataframeEnsemble.
+- utils.TimeseriesDataframe.tsdf_apply() which does not clobber metadata - see also changes in Changed subsection.
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument
+- utils.TimeseriesDataframe.add_tag() now accepts lists of strings as tags
+- utils.TimeseriesDataframe now defines _constructor and _metadata - standard pandas operations will now return a TimeseriesDataframe as opposed to a pandas.DataFrame for most standard operations.
+
+### Fixed
+- utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.
 
 
 ## 0.3.2

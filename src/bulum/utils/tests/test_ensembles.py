@@ -1,7 +1,15 @@
-import unittest
-from bulum import utils
-import bulum.io as bio
+"""
+This file contains tests for the DataframeEnsemble class from bulum.utils.dataframe_extensions.
+"""
+
 import re
+import unittest
+
+import numpy as np
+import pandas as pd
+
+import bulum.io as bio
+from bulum import utils
 
 
 class Tests(unittest.TestCase):
@@ -12,7 +20,7 @@ class Tests(unittest.TestCase):
                          "./src/bulum/io/tests/test_data.csv",
                          "./src/bulum/io/tests/test_data2.csv"]:
             ensemble.add_dataframe(bio.read(filename))
-            #ensemble.add_dataframe_from_file(filename) //TODO: I have replaced this with above until we can unpick the cicrular import issue
+            # ensemble.add_dataframe_from_file(filename) //TODO: I have replaced this with above until we can unpick the cicrular import issue
         self.assertEqual(min(ensemble.ensemble.keys()), 0)
         self.assertEqual(max(ensemble.ensemble.keys()), 2)
         self.assertEqual(len(ensemble), 3)
@@ -22,7 +30,7 @@ class Tests(unittest.TestCase):
         for filename in ["./src/bulum/io/tests/test_data.csv",
                          "./src/bulum/io/tests/test_data2.csv"]:
             ensemble.add_dataframe(bio.read(filename), key=filename.split('/')[-1], tag="hist_clim")
-            #ensemble.add_dataframe_from_file(filename, key=filename.split('/')[-1], tag="hist_clim") //TODO: I have replaced this with above until we can unpick the cicrular import issue
+            # ensemble.add_dataframe_from_file(filename, key=filename.split('/')[-1], tag="hist_clim") //TODO: I have replaced this with above until we can unpick the cicrular import issue
         # The below dataframe should not be the same shape.
         other_df = bio.read("./src/bulum/io/tests/modelled_flow.csv")
         self.assertFalse(ensemble.df_shape_matches_ensemble(other_df))
@@ -95,3 +103,65 @@ class Tests(unittest.TestCase):
         ensemble = utils.DataframeEnsemble([df1, df2])
         self.assertEqual(len(ensemble.filter_tag("a")), 2)
         self.assertEqual(len(ensemble.filter_tag("b")), 1)
+
+    def test_map(self):
+        ensemble = utils.DataframeEnsemble()
+        for filename in ["./src/bulum/utils/tests/test_data.csv"]:
+            df = bio.read(filename)
+            ensemble.add_dataframe(df)
+
+        def internal_fn(df: pd.DataFrame) -> pd.DataFrame:
+            return pd.DataFrame(np.mean(df.values, axis=0))
+
+        new_ensemble = ensemble.map(internal_fn)
+        for _, df in new_ensemble.ensemble.items():
+            self.assertEqual(df.shape, (2, 1))
+            self.assertAlmostEqual(df.iloc[0, 0], 1.5681824, places=6) # type: ignore
+            self.assertAlmostEqual(df.iloc[1, 0], 0.5, places=6) # type: ignore
+
+    def test_map_and_tsdf_apply(self):
+        """Test ensemble.map with tsdf_map for operations that create new DataFrames."""
+        ensemble = utils.DataframeEnsemble()
+        df = bio.read("./src/bulum/utils/tests/test_data.csv")
+        tsdf = utils.TimeseriesDataframe.from_dataframe(df)
+        tsdf.add_tag("tag")
+        ensemble.add_dataframe(tsdf)
+
+        def compute_column_means(tsdf: utils.TimeseriesDataframe) -> utils.TimeseriesDataframe:
+            # pd.DataFrame() creates a new DataFrame, bypassing _constructor
+            # Use tsdf_map to preserve metadata
+            return tsdf.tsdf_apply(lambda df: pd.DataFrame(np.mean(df.values, axis=0)))
+
+        new_ensemble = ensemble.map(compute_column_means)
+        for _, df in new_ensemble.ensemble.items():
+            self.assertEqual(df.shape, (2, 1))
+            self.assertAlmostEqual(df.iloc[0, 0], 1.5681824, places=6) # type: ignore
+            self.assertAlmostEqual(df.iloc[1, 0], 0.5, places=6) # type: ignore
+            self.assertTrue(df.has_tag("tag"))
+
+    def test_map_with_automatic_metadata_preservation(self):
+        """Test ensemble.map with operations that automatically preserve metadata."""
+        ensemble = utils.DataframeEnsemble()
+        df = bio.read("./src/bulum/utils/tests/test_data.csv")
+        tsdf = utils.TimeseriesDataframe.from_dataframe(df, name="original", source="test.csv")
+        tsdf.add_tag("validated,processed")
+        ensemble.add_dataframe(tsdf)
+
+        def double_values(tsdf: utils.TimeseriesDataframe) -> utils.TimeseriesDataframe:
+            # With _constructor, arithmetic operations preserve metadata automatically
+            return tsdf * 2
+
+        new_ensemble = ensemble.map(double_values)
+        for _, df in new_ensemble.ensemble.items():
+            # Verify metadata was preserved
+            self.assertIsInstance(df, utils.TimeseriesDataframe)
+            self.assertEqual(df.name, "original")
+            self.assertEqual(df.source, "test.csv")
+            self.assertTrue(df.has_tag("validated"))
+            self.assertTrue(df.has_tag("processed"))
+            # Verify transformation was applied
+            self.assertEqual(df.shape, (10, 2))
+            self.assertAlmostEqual(df.iloc[0, 0], 2.267945, places=5) # type: ignore
+
+if __name__ == '__main__':
+    unittest.main()
