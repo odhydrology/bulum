@@ -2,8 +2,9 @@
 This file contains tests for the DataframeEnsemble class from bulum.utils.dataframe_extensions.
 """
 
-import re
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -11,30 +12,32 @@ import pandas as pd
 import bulum.io as bio
 from bulum import utils
 
+# pylint: disable=missing-class-docstring, missing-function-docstring, protected-access
 
-class Tests(unittest.TestCase):
+class TestTSDF(unittest.TestCase):
+
+    def setUp(self):
+        df = bio.read("./src/bulum/io/tests/test_data.csv")
+        self.tsdf = utils.TimeseriesDataframe.from_dataframe(df, 
+                                                             name="test", 
+                                                             source="test_source")
 
     def test_create_tsdf(self):
-        df = bio.read("./src/bulum/io/tests/test_data.csv")
-        tsdf = utils.TimeseriesDataframe.from_dataframe(df)
-        self.assertIsInstance(tsdf, utils.TimeseriesDataframe)
-        self.assertEqual(tsdf.tags, "")
-        self.assertEqual(tsdf.count_tags(), 0)
+        self.assertIsInstance(self.tsdf, utils.TimeseriesDataframe)
+        self.assertEqual(self.tsdf.tags, "")
+        self.assertEqual(self.tsdf.count_tags(), 0)
 
-        tsdf.add_tag("tag")
-        self.assertTrue(tsdf.has_tag("tag"))
-        self.assertEqual(tsdf.count_tags(), 1)
+        self.tsdf.add_tag("tag")
+        self.assertTrue(self.tsdf.has_tag("tag"))
+        self.assertEqual(self.tsdf.count_tags(), 1)
 
     def test_map(self):
-        filename = "./src/bulum/utils/tests/test_data.csv"
-        df = bio.read(filename)
-        tsdf = utils.TimeseriesDataframe.from_dataframe(df)
-        tsdf.add_tag("tag")
+        self.tsdf.add_tag("tag")
 
         def internal_fn(df):
             return df.map(np.mean)
 
-        new_tsdf = tsdf.tsdf_apply(internal_fn)
+        new_tsdf = self.tsdf.tsdf_apply(internal_fn)
         self.assertIsInstance(new_tsdf, utils.TimeseriesDataframe)
         self.assertTrue(new_tsdf.has_tag("tag"))
         self.assertEqual(new_tsdf.tags, "tag")
@@ -42,25 +45,22 @@ class Tests(unittest.TestCase):
 
     def test_constructor_propagates_metadata(self):
         """Test that _constructor ensures pandas operations return TimeseriesDataframe."""
-        filename = "./src/bulum/utils/tests/test_data.csv"
-        df = bio.read(filename)
-        tsdf = utils.TimeseriesDataframe.from_dataframe(df, name="test", source="test_source")
-        tsdf.add_tag("tag1,tag2")
+        self.tsdf.add_tag("tag1,tag2")
 
         # Direct pandas operations should now return TimeseriesDataframe
-        result = tsdf.map(np.mean)
+        result = self.tsdf.map(np.mean)
         self.assertIsInstance(result, utils.TimeseriesDataframe)
         self.assertEqual(result.tags, "tag1,tag2")
         self.assertEqual(result.name, "test")
         self.assertEqual(result.source, "test_source")
 
         # Slicing should also preserve type and metadata
-        sliced = tsdf.iloc[:1]
+        sliced = self.tsdf.iloc[:1]
         self.assertIsInstance(sliced, utils.TimeseriesDataframe)
         self.assertEqual(sliced.tags, "tag1,tag2")
 
         # Copy should preserve metadata
-        copied = tsdf.copy()
+        copied = self.tsdf.copy()
         self.assertIsInstance(copied, utils.TimeseriesDataframe)
         self.assertEqual(copied.tags, "tag1,tag2")
         self.assertEqual(copied.name, "test")
@@ -194,7 +194,7 @@ class TestMetadataPropagation(unittest.TestCase):
         # is not preserved. This is a pandas limitation.
         tsdf2 = utils.TimeseriesDataframe.from_dataframe(
             pd.DataFrame({"A": [7.0], "B": [8.0]},
-                        index=pd.date_range("2020-01-04", periods=1))
+                         index=pd.date_range("2020-01-04", periods=1))
         )
 
         result = pd.concat([self.tsdf, tsdf2])
@@ -227,6 +227,313 @@ class TestMetadataPropagation(unittest.TestCase):
         self._assert_full_metadata(unpickled, "pickle round-trip failed")
         # Verify data is also preserved
         pd.testing.assert_frame_equal(self.tsdf, unpickled)
+
+
+class TestSerialise(unittest.TestCase):
+    """Tests for TimeseriesDataframe.save() and .load() methods."""
+
+    def setUp(self):
+        """Create a TSDF with all metadata fields populated."""
+        df = pd.DataFrame(
+            {"A": [1.0, 2.0, 3.0], "B": [4.0, 5.0, 6.0]},
+            index=["r1", "r2", "r3"]
+        )
+        self.tsdf = utils.TimeseriesDataframe.from_dataframe(
+            df, name="test_save", source="test_source.csv", description="Test save/load"
+        )
+        self.tsdf.add_tag("tag1,tag2,tag3")
+
+    def test_json_round_trip(self):
+        """Test saving and loading as JSON preserves all data and metadata."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+            self.tsdf.save(path, save_format="json")
+
+            # Verify file was created
+            self.assertTrue((Path(tmp) / "test.json").exists())
+
+            # Load and verify
+            loaded = utils.TimeseriesDataframe.load(Path(tmp) / "test.json")
+            self.assertIsInstance(loaded, utils.TimeseriesDataframe)
+            self.assertEqual(loaded.name, "test_save")
+            self.assertEqual(loaded.source, "test_source.csv")
+            self.assertEqual(loaded.description, "Test save/load")
+            self.assertEqual(loaded.tags, "tag1,tag2,tag3")
+            pd.testing.assert_frame_equal(self.tsdf, loaded)
+
+    def test_csv_round_trip(self):
+        """Test saving and loading as CSV+metadata preserves all data and metadata."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+            self.tsdf.save(path, save_format="csv")
+
+            # Verify files were created
+            self.assertTrue((Path(tmp) / "test.csv").exists())
+            self.assertTrue((Path(tmp) / "test.metadata.json").exists())
+
+            # Load and verify
+            loaded = utils.TimeseriesDataframe.load(Path(tmp) / "test.csv")
+            self.assertIsInstance(loaded, utils.TimeseriesDataframe)
+            self.assertEqual(loaded.name, "test_save")
+            self.assertEqual(loaded.source, "test_source.csv")
+            self.assertEqual(loaded.description, "Test save/load")
+            self.assertEqual(loaded.tags, "tag1,tag2,tag3")
+            pd.testing.assert_frame_equal(self.tsdf, loaded)
+
+    def test_csv_without_metadata(self):
+        """Test that loading CSV without metadata file raises FileNotFoundError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            # Save just the CSV without metadata
+            csv_path = Path(tmp) / "test.csv"
+            self.tsdf.to_csv(csv_path)
+
+            # Should raise FileNotFoundError with helpful message
+            with self.assertRaises(FileNotFoundError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            # Verify error message is helpful
+            error_msg = str(cm.exception)
+            self.assertIn("Metadata file not found", error_msg)
+            self.assertIn("bulum.io.read", error_msg)
+
+    def test_overwrite_false_raises(self):
+        """Test that overwrite=False raises when file exists."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+            self.tsdf.save(path, save_format="json")
+            self.assertRaises(FileExistsError, self.tsdf.save, path, "json", overwrite=False)
+
+    def test_overwrite_true(self):
+        """Test that overwrite=True allows overwriting existing files."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+            self.tsdf.save(path, save_format="json")
+            # Should not raise
+            self.tsdf.save(path, save_format="json", overwrite=True)
+
+    def test_format_override(self):
+        """Test that format_override works for non-standard extensions."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test.dat"
+            self.tsdf.save(path.with_suffix(''), save_format="json")
+            path.with_suffix('.json').rename(path)  # Rename to .dat
+
+            # Load with format override
+            loaded = utils.TimeseriesDataframe.load(path, format_override="json")
+            self.assertEqual(loaded.name, "test_save")
+            pd.testing.assert_frame_equal(self.tsdf, loaded)
+
+    def test_invalid_format_raises(self):
+        """Test that invalid format raises ValueError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+            self.assertRaises(ValueError, self.tsdf.save, path, save_format="invalid")
+
+    def test_unknown_extension_raises(self):
+        """Test that unknown extension without format_override raises."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test.xyz"
+            self.assertRaises(ValueError, utils.TimeseriesDataframe.load, path)
+
+    # --- Error Handling Tests ---
+
+    def test_json_malformed_file(self):
+        """Test that loading malformed JSON raises ValueError with helpful message."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "malformed.json"
+            with open(path, 'w') as f:
+                f.write("{invalid json syntax")
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("Failed to parse JSON file", error_msg)
+            self.assertIn(str(path), error_msg)
+
+    def test_json_wrong_type(self):
+        """Test that loading JSON with wrong __type__ raises ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "wrong_type.json"
+            with open(path, 'w') as f:
+                json.dump({"__type__": "SomeOtherClass", "version": 1, "data": {}}, f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("does not contain a TimeseriesDataframe", error_msg)
+
+    def test_json_unsupported_version(self):
+        """Test that loading JSON with unsupported version raises ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "future_version.json"
+            # Create valid TSDF structure but with future version
+            with open(path, 'w') as f:
+                json.dump({
+                    "__type__": "TimeseriesDataframe",
+                    "version": 999,
+                    "data": {"columns": ["A"], "index": [0], "data": [[1.0]]},
+                    "metadata": {"name": "", "source": "", "description": "", "tags": ""}
+                }, f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("Unsupported TimeseriesDataframe version", error_msg)
+            self.assertIn("999", error_msg)
+
+    def test_csv_metadata_malformed_json(self):
+        """Test that malformed metadata JSON raises ValueError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "test.csv"
+            metadata_path = Path(tmp) / "test.metadata.json"
+
+            self.tsdf.to_csv(csv_path)
+            with open(metadata_path, 'w') as f:
+                f.write("{malformed json")
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("Failed to parse metadata file", error_msg)
+            self.assertIn(str(metadata_path), error_msg)
+
+    def test_csv_metadata_wrong_type(self):
+        """Test that metadata with wrong __type__ raises ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "test.csv"
+            metadata_path = Path(tmp) / "test.metadata.json"
+
+            self.tsdf.to_csv(csv_path)
+            with open(metadata_path, 'w') as f:
+                json.dump({"__type__": "DataframeEnsemble", "version": 1}, f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("not for a TimeseriesDataframe", error_msg)
+            self.assertIn("DataframeEnsemble", error_msg)
+
+    def test_csv_metadata_wrong_version(self):
+        """Test that metadata with unsupported version raises ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "test.csv"
+            metadata_path = Path(tmp) / "test.metadata.json"
+
+            self.tsdf.to_csv(csv_path)
+            with open(metadata_path, 'w') as f:
+                json.dump({
+                    "__type__": "TimeseriesDataframe",
+                    "version": 42,
+                    "name": "", "source": "", "description": "", "tags": ""
+                }, f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("unsupported version", error_msg)
+            self.assertIn("42", error_msg)
+
+    def test_csv_metadata_non_dict_structure(self):
+        """Test that metadata as JSON array instead of object raises ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "test.csv"
+            metadata_path = Path(tmp) / "test.metadata.json"
+
+            self.tsdf.to_csv(csv_path)
+            with open(metadata_path, 'w') as f:
+                json.dump(["not", "a", "dict"], f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("invalid structure", error_msg)
+            self.assertIn("expected a JSON object", error_msg)
+
+    def test_csv_metadata_non_string_field(self):
+        """Test that non-string metadata field values raise ValueError."""
+        import json
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "test.csv"
+            metadata_path = Path(tmp) / "test.metadata.json"
+
+            self.tsdf.to_csv(csv_path)
+            with open(metadata_path, 'w') as f:
+                json.dump({
+                    "__type__": "TimeseriesDataframe",
+                    "version": 1,
+                    "name": 123,  # Should be string
+                    "source": "", "description": "", "tags": ""
+                }, f)
+
+            with self.assertRaises(ValueError) as cm:
+                utils.TimeseriesDataframe.load(csv_path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("must be a string", error_msg)
+            self.assertIn("name", error_msg)
+
+    def test_csv_file_missing(self):
+        """Test that loading non-existent CSV file raises FileNotFoundError."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "nonexistent.csv"
+
+            with self.assertRaises(FileNotFoundError) as cm:
+                utils.TimeseriesDataframe.load(path)
+
+            error_msg = str(cm.exception)
+            self.assertIn("CSV file not found", error_msg)
+
+    def test_empty_tsdf_serialization(self):
+        """Test that empty TSDF can be saved and loaded."""
+        empty_tsdf = utils.TimeseriesDataframe(name="empty", source="test")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            # JSON format
+            json_path = Path(tmp) / "empty"
+            empty_tsdf.save(json_path, save_format="json")
+            loaded_json = utils.TimeseriesDataframe.load(Path(tmp) / "empty.json")
+            self.assertEqual(loaded_json.name, "empty")
+            self.assertEqual(loaded_json.source, "test")
+            self.assertEqual(len(loaded_json), 0)
+
+            # CSV format
+            csv_path = Path(tmp) / "empty_csv"
+            empty_tsdf.save(csv_path, save_format="csv")
+            loaded_csv = utils.TimeseriesDataframe.load(Path(tmp) / "empty_csv.csv")
+            self.assertEqual(loaded_csv.name, "empty")
+            self.assertEqual(loaded_csv.source, "test")
+            self.assertEqual(len(loaded_csv), 0)
+
+    def test_csv_overwrite_partial_collision(self):
+        """Test overwrite when only metadata file exists."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "test"
+
+            # Create only metadata file (unusual but possible)
+            metadata_path = Path(tmp) / "test.metadata.json"
+            with open(metadata_path, 'w') as f:
+                f.write("{}")
+
+            # Should fail with overwrite=False
+            with self.assertRaises(FileExistsError):
+                self.tsdf.save(path, save_format="csv", overwrite=False)
+
+            # Should succeed with overwrite=True
+            self.tsdf.save(path, save_format="csv", overwrite=True)
+            self.assertTrue((Path(tmp) / "test.csv").exists())
+            self.assertTrue(metadata_path.exists())
 
 
 if __name__ == '__main__':
