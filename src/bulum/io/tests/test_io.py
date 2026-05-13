@@ -2,6 +2,7 @@ import os
 import re
 import shutil
 import unittest
+from pathlib import Path
 
 import bulum.io as bio
 import bulum.utils as out
@@ -100,6 +101,15 @@ class Tests(unittest.TestCase):
         test_output_filename = "./src/bulum/io/tests/test_outputs/test_data.idx"
         if os.path.isfile(test_output_filename):
             os.remove(test_output_filename)
+        df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
+        bio.write_idx_native(df, test_output_filename)
+        self.assertTrue(os.path.isfile(test_output_filename))
+        self.assertGreater(os.path.getsize(test_output_filename), 0)
+
+    def test_write_idx_native_2(self):
+        # delete test output if it already exists
+        test_output_filename = Path("./src/bulum/io/tests/test_outputs/test_data.idx")
+        test_output_filename.unlink(missing_ok=True)
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
         bio.write_idx_native(df, test_output_filename)
         self.assertTrue(os.path.isfile(test_output_filename))
