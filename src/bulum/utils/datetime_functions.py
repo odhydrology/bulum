@@ -1,7 +1,9 @@
 import calendar
 import warnings
 from datetime import datetime, timedelta
-from typing import Iterable, Optional, cast, overload
+from typing import Optional, Union, cast, overload
+
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -174,7 +176,7 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
 
     Parameters
     ----------
-    dates : pd.Index | list[str] | list[np.datetime64]
+    dates : Union[pd.Index, list[str], list[np.datetime64]]
         Array of dates. Assumes consecutive dates.
     wy_month : int, default 7
         Water year start month (1=January, 7=July, etc.).
@@ -356,7 +358,7 @@ def get_year_and_month(v: list[str] | list[datetime]) -> list[str]:
 
     Parameters
     ----------
-    v : list[str] | list[datetime]
+    v : Union[list[str], list[datetime]]
         List of date strings in YYYY-MM-DD format or datetime objects.
 
     Returns
@@ -418,24 +420,24 @@ def get_month(dates: Iterable[str]) -> list[int]:
 
 @overload
 def get_dates(start_date: str,
-              end_date: Optional[str] = None, days: int = 0, years: int = 1,
+              end_date: str | None = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: Optional[str] = None) -> list[str]:
+              str_format: str | None = None) -> list[str]:
     ...
 
 
 @overload
 def get_dates(start_date: datetime,
-              end_date: Optional[datetime] = None, days: int = 0, years: int = 1,
+              end_date: datetime | None = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: Optional[str] = None) -> list[str] | list[datetime]:
+              str_format: str | None = None) -> list[str] | list[datetime]:
     ...
 
 
 def get_dates(start_date: datetime | str,
-              end_date: Optional[datetime | str] = None, days: int = 0, years: int = 1,
+              end_date: datetime | str | None = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
-              str_format: Optional[str] = None) -> list[str] | list[datetime]:
+              str_format: str | None = None) -> list[str] | list[datetime]:
     """
     Generates a list of daily datetime values from a given start date.
 
@@ -445,9 +447,9 @@ def get_dates(start_date: datetime | str,
 
     Parameters
     ----------
-    start_date : datetime | str
+    start_date : Union[datetime, str]
         The starting date for the sequence.
-    end_date : Optional[datetime | str], default None
+    end_date : Optional[Union[datetime, str]], default None
         The ending date for the sequence. If provided, takes precedence over days and years.
     days : int, default 0
         Number of days to generate. If > 0, takes precedence over years parameter.
@@ -460,7 +462,7 @@ def get_dates(start_date: datetime | str,
 
     Returns
     -------
-    list[str] | list[datetime]
+    Union[list[str], list[datetime]]
         A list of datetime objects or formatted date strings covering the specified range.
 
     Raises
@@ -515,7 +517,7 @@ def _parse_date_components(date_value: str | datetime) -> tuple[int, int, int]:
 
     Parameters
     ----------
-    date_value : str | datetime
+    date_value : Union[str, datetime]
         Date as string in YYYY-MM-DD format or datetime object.
 
     Returns

@@ -1,11 +1,14 @@
-""" 
+"""
 Functions for reading CSVs, particularly time-series CSVs.
 """
 
+import os
+from typing import Union
+
 import numpy as np
 import pandas as pd
+
 from bulum import utils
-import os
 
 na_values = ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan']
 
@@ -20,7 +23,7 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
 
     Parameters
     ----------
-    filename : str | PathLike
+    filename : Union[str, PathLike]
     date_format : str, optional
         defaults to "%d/%m/%Y" as per Fors. Other common formats include "%Y-%m-%d", "%Y/%m/%d".
     df : pd.DataFrame, optional

@@ -5,6 +5,7 @@ This module provides functionality to read IQQM listquan output files,
 which are space-separated text files containing time series data.
 """
 import os
+from typing import Union
 
 import numpy as np
 import pandas as pd

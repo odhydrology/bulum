@@ -3,7 +3,7 @@
 import os
 import subprocess
 from math import floor
-from typing import Any, Literal, Optional
+from typing import Any, Literal, Optional, Union
 
 import numpy as np
 import pandas as pd
@@ -49,19 +49,19 @@ class IqqmOutReader:
         """
 
         # used for IQQMGUI call
-        self._lqn_filename: Optional[str] = None
-        self._lqn_filepath: Optional[str] = None
-        self._csv_filename: Optional[str] = None
-        self._csv_filepath: Optional[str] = None
-        self._start_dt_str: Optional[str] = None
-        self._end_dt_str: Optional[str] = None
+        self._lqn_filename: str | None = None
+        self._lqn_filepath: str | None = None
+        self._csv_filename: str | None = None
+        self._csv_filepath: str | None = None
+        self._start_dt_str: str | None = None
+        self._end_dt_str: str | None = None
         self._files_requiring_cleanup: list[str] = []
 
         self._search_available_data()
 
     # pylint: disable=w0622
-    def require(self, node: Optional[int | str] = None,
-                supertype: Optional[float] = None, type: Optional[float] = None,
+    def require(self, node: int | str | None = None,
+                supertype: float | None = None, type: float | None = None,
                 output: Any = None) -> bool:
         """Mark a node or multiple nodes as 'required' i.e. for reading.
         At least one argument must be non-null.
@@ -136,7 +136,7 @@ class IqqmOutReader:
         """
         Searches the .IQN file for data.
         """
-        with open(self.iqqm_out_filepath, mode="r", encoding="UTF-8") as file:
+        with open(self.iqqm_out_filepath, encoding="UTF-8") as file:
             ss = file.readlines()
         # Read the recorder-flag matrix
         ss2 = ss[2].split()  # line 3 in the file
@@ -187,15 +187,12 @@ class IqqmOutReader:
 
         Purely here for convenience in cross-referencing nodes."""
         src: dict[str, dict[str, str]] = {}
-        match which:
-            case "required":
-                src = self.required
-
-            case "available":
-                src = self.available
-
-            case _:
-                raise ValueError("Invalid `which` argument to IqqmOutReader.num_to_name()")
+        if which == "required":
+            src = self.required
+        elif which == "available":
+            src = self.available
+        else:
+            raise ValueError("Invalid `which` argument to IqqmOutReader.num_to_name()")
 
         d: dict[str, str] = {}
         for node_info in src.values():
@@ -217,7 +214,7 @@ class IqqmOutReader:
         for node in search_dict.values():
             required_supertypes.add(node["supertype"])
 
-        df: Optional[pd.DataFrame] = None
+        df: pd.DataFrame | None = None
         for supertype in required_supertypes:
             suffix = f"{supertype:0>2}.OUT"
             path = self.iqn_filepath[:-4] + suffix

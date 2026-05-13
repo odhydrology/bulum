@@ -19,7 +19,7 @@ import itertools
 import logging
 import re
 from collections.abc import MutableSequence
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import pandas as pd
 
@@ -41,7 +41,7 @@ class Negflo:
                  df_residual: pd.DataFrame | TimeseriesDataframe,
                  flow_limit: float = 0.0,
                  num_segments: int = 0,
-                 segments: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = None
+                 segments: MutableSequence[tuple[pd.Timestamp, pd.Timestamp]] | None = None
                  ):
         super().__init__()
 
@@ -51,7 +51,7 @@ class Negflo:
         self.df_residual = df_residual
         self.neg_overflows: dict[Any, float] = {}
 
-        self.df_name: Optional[str]
+        self.df_name: str | None
         if isinstance(df_residual, TimeseriesDataframe):
             self.df_name = df_residual.name
         else:
@@ -62,7 +62,7 @@ class Negflo:
         self._analysis_type = helpers.NegfloAnalysisType.RAW
 
         self._sm6_num_segments = num_segments
-        self._sm6_segment_boundaries: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
+        self._sm6_segment_boundaries: MutableSequence[tuple[pd.Timestamp, pd.Timestamp]] | None = segments
 
     @classmethod
     def _from_config_file(cls, filepath, *, execute=False):
@@ -83,7 +83,7 @@ class Negflo:
         An instance of the Negflo class.
         """
         # TODO unfinished
-        with open(filepath, 'r', encoding="ascii") as file:
+        with open(filepath, encoding="ascii") as file:
             # date line
             line = file.readline().strip()
             try:
@@ -166,7 +166,7 @@ class Negflo:
 
     @staticmethod
     def _has_neg_flow_to_redistribute(
-            neg_acc: float, neg_tracker: Optional[helpers.ContiguousIndexTracker] = None) -> bool:
+            neg_acc: float, neg_tracker: helpers.ContiguousIndexTracker | None = None) -> bool:
         if neg_tracker is None:
             return neg_acc != 0
         else:
@@ -424,8 +424,8 @@ class Negflo:
         self.df_residual = self.df_residual.apply(self._sm_backward_series, carry_negative=False)
 
     def sm6(self, *, use_predefined_segments=True,
-            sampling_frequency: Optional[pd.DateOffset] = None,
-            sampling_start_date: Optional[pd.Timestamp] = None) -> None:
+            sampling_frequency: pd.DateOffset | None = None,
+            sampling_start_date: pd.Timestamp | None = None) -> None:
         """Smooths over the specified segments.
 
         Applies the SM1 smoothing algorithm (ie global smoothing) for flows
@@ -561,7 +561,7 @@ class Negflo:
 
         self.log()
 
-    def to_file(self, *, out_filename: Optional[str] = None):
+    def to_file(self, *, out_filename: str | None = None):
         """Saves the result dataframe to the output file."""
         if out_filename is None:  # Automatically determine file name.
             out_filename = (

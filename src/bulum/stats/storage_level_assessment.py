@@ -7,7 +7,9 @@ and statistical summaries by water year.
 """
 # As this class was originally written with Pascal style naming for methods:
 # pylint: disable=C0103
-from typing import Callable, Literal, Optional
+from typing import Literal, Optional, Union
+
+from collections.abc import Callable
 
 import altair as alt
 import numpy as np
@@ -90,7 +92,7 @@ class StorageLevelAssessment:
     bulum.utils.get_wy : Get water year for dates
     """
 
-    def __init__(self, df: pd.Series, triggers: list[float], wy_month: int = 7, allow_part_years: bool = False, trigger_names: Optional[list[str]] = None) -> None:
+    def __init__(self, df: pd.Series, triggers: list[float], wy_month: int = 7, allow_part_years: bool = False, trigger_names: list[str] | None = None) -> None:
         """
         Initialize StorageLevelAssessment with storage data and trigger thresholds.
 
@@ -167,12 +169,12 @@ class StorageLevelAssessment:
         self.wy_count = self.df.groupby(utils.get_wy(self.df.index, self.wy_month)).sum().count()
 
     @property
-    def trigger_names(self) -> Optional[dict[float, str]]:
+    def trigger_names(self) -> dict[float, str] | None:
         """Get trigger names as a dictionary mapping trigger levels to names."""
         return self._trigger_names
 
     @trigger_names.setter
-    def trigger_names(self, value: Optional[list[str] | dict[float, str]]) -> None:
+    def trigger_names(self, value: list[str] | dict[float, str] | None) -> None:
         """Set trigger names with validation.
 
         Parameters
@@ -198,7 +200,7 @@ class StorageLevelAssessment:
         else:
             raise TypeError("trigger_names must be a list, dict, or None")
 
-    def add_trigger(self, trigger: float, name: Optional[str] = None) -> None:
+    def add_trigger(self, trigger: float, name: str | None = None) -> None:
         """
         Add an additional trigger level to the assessment.
 
@@ -669,7 +671,7 @@ class StorageLevelAssessment:
     # pylint: disable=too-many-arguments
     def plot_events_ranked(self, trigger: float, *,
                            width=600, height=400,
-                           xmax: Optional[int] = None,
+                           xmax: int | None = None,
                            interactive=False,
                            bind_y=True,
                            mark: Literal["bar", "rect"] = "bar"
@@ -753,7 +755,7 @@ class StorageLevelAssessment:
 
     def plot_event_length_frequency(self, trigger: float, *,
                                     width=600, height=400,
-                                    xmax: Optional[int] = None,
+                                    xmax: int | None = None,
                                     interactive=False,
                                     bind_y=True,
                                     mark: Literal["bar", "rect"] = "bar"
