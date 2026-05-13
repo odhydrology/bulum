@@ -43,7 +43,7 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
     new_df.set_index(new_df.columns[0], inplace=True)
     if assert_date:
         new_df.index = utils.standardize_datestring_format(new_df.index)
-    new_df.index.name = "Date"
+    new_df.index.name = "Date" # type: ignore
     # df = df.replace(r'^\s*$', np.nan, regex=True)
     # Check values
     if not allow_nonnumeric:
@@ -73,4 +73,5 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
 def write_ts_csv(df: pd.DataFrame, filename: str,
                  *args, **kwargs):
     """Wrapper around ``pandas.DataFrame.to_csv()``."""
+    # TODO update docstring with sphinx link
     df.to_csv(filename, *args, **kwargs)
