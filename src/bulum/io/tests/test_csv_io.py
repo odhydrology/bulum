@@ -1,5 +1,6 @@
-import os
+import tempfile
 import unittest
+from pathlib import Path
 
 import bulum.io as bio
 import bulum.utils as out
@@ -7,10 +8,12 @@ import bulum.utils as out
 
 class Tests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        os.makedirs("./src/bulum/io/tests/test_outputs", exist_ok=True)
-        return super().setUpClass()
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_dir = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
 
     def test_read_ts_csv(self):
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
@@ -30,14 +33,10 @@ class Tests(unittest.TestCase):
 
     def test_ts_csv_roundtrip(self):
         """Test that writing and reading back preserves data size for ts_csv."""
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_ts_roundtrip.csv"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
-
+        tmp_path = self.tmp_dir / "test_ts_roundtrip.csv"
         df_original = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_ts_csv(df_original, test_output_filename)
-        df_roundtrip = bio.read_ts_csv(test_output_filename)
-
+        bio.write_ts_csv(df_original, tmp_path)
+        df_roundtrip = bio.read_ts_csv(tmp_path)
         self.assertEqual(len(df_original), len(df_roundtrip),
                          "Row count changed after round-trip")
         self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),

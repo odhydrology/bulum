@@ -1,15 +1,18 @@
-import os
+import tempfile
 import unittest
+from pathlib import Path
 
 import bulum.io as bio
 
 
 class Tests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        os.makedirs("./src/bulum/io/tests/test_outputs", exist_ok=True)
-        return super().setUpClass()
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_dir = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
 
     def test_read_res_csv(self):
         df = bio.read_res_csv("./src/bulum/io/tests/res_csv_files/simple_model.res.csv")
@@ -33,24 +36,18 @@ class Tests(unittest.TestCase):
         bio.read_res_csv("./src/bulum/io/tests/res_csv_files/file_with_bad_dates.res.csv")
 
     def test_write_res_csv(self):
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_out.res.csv"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
+        tmp_path = self.tmp_dir / "test_out.res.csv"
         df = bio.read_res_csv("./src/bulum/io/tests/res_csv_files/simple_model.res.csv")
-        bio.write_res_csv(df, test_output_filename)
-        self.assertTrue(os.path.isfile(test_output_filename))
-        self.assertGreater(os.path.getsize(test_output_filename), 0)
+        bio.write_res_csv(df, tmp_path)
+        self.assertTrue(tmp_path.is_file())
+        self.assertGreater(tmp_path.stat().st_size, 0)
 
     def test_res_csv_roundtrip(self):
         """Test that writing and reading back preserves data size for res_csv."""
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_res_roundtrip.res.csv"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
-
+        tmp_path = self.tmp_dir / "test_res_roundtrip.res.csv"
         df_original = bio.read_res_csv("./src/bulum/io/tests/res_csv_files/simple_model.res.csv")
-        bio.write_res_csv(df_original, test_output_filename)
-        df_roundtrip = bio.read_res_csv(test_output_filename)
-
+        bio.write_res_csv(df_original, tmp_path)
+        df_roundtrip = bio.read_res_csv(tmp_path)
         self.assertEqual(len(df_original), len(df_roundtrip),
                          "Row count changed after round-trip")
         self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),

@@ -1,5 +1,5 @@
-import os
 import shutil
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -8,10 +8,12 @@ import bulum.io as bio
 
 class Tests(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        os.makedirs("./src/bulum/io/tests/test_outputs", exist_ok=True)
-        return super().setUpClass()
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp_dir = Path(self._tmp.name)
+
+    def tearDown(self):
+        self._tmp.cleanup()
 
     def test_read_idx(self):
         test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
@@ -20,52 +22,40 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(df.columns), 53)
 
     def test_write_area_ts_csv(self):
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_data.area.csv"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
+        tmp_path = self.tmp_dir / "test_data.area.csv"
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_area_ts_csv(df, test_output_filename)
-        self.assertTrue(os.path.isfile(test_output_filename))
-        self.assertGreater(os.path.getsize(test_output_filename), 0)
+        bio.write_area_ts_csv(df, tmp_path)
+        self.assertTrue(tmp_path.is_file())
+        self.assertGreater(tmp_path.stat().st_size, 0)
 
     def test_write_idx(self):
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_data.idx"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
+        tmp_path = self.tmp_dir / "test_data.idx"
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_idx(df, test_output_filename)
-        self.assertTrue(os.path.isfile(test_output_filename))
-        self.assertGreater(os.path.getsize(test_output_filename), 0)
+        bio.write_idx(df, tmp_path)
+        self.assertTrue(tmp_path.is_file())
+        self.assertGreater(tmp_path.stat().st_size, 0)
 
     def test_write_idx_native(self):
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_data.idx"
-        if os.path.isfile(test_output_filename):
-            os.remove(test_output_filename)
+        tmp_path = self.tmp_dir / "test_data.idx"
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_idx_native(df, test_output_filename)
-        self.assertTrue(os.path.isfile(test_output_filename))
-        self.assertGreater(os.path.getsize(test_output_filename), 0)
+        bio.write_idx_native(df, tmp_path)
+        self.assertTrue(tmp_path.is_file())
+        self.assertGreater(tmp_path.stat().st_size, 0)
 
     def test_write_idx_native_2(self):
-        test_output_filename = Path("./src/bulum/io/tests/test_outputs/test_data.idx")
-        test_output_filename.unlink(missing_ok=True)
+        """Test that write_idx_native accepts a Path object."""
+        tmp_path = self.tmp_dir / "test_data.idx"
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_idx_native(df, test_output_filename)
-        self.assertTrue(os.path.isfile(test_output_filename))
-        self.assertGreater(os.path.getsize(test_output_filename), 0)
+        bio.write_idx_native(df, tmp_path)
+        self.assertTrue(tmp_path.is_file())
+        self.assertGreater(tmp_path.stat().st_size, 0)
 
     def test_idx_native_roundtrip_from_csv(self):
         """Test that writing and reading back preserves data size (from CSV source)."""
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_roundtrip.idx"
-        test_output_out = "./src/bulum/io/tests/test_outputs/test_roundtrip.out"
-        for f in [test_output_filename, test_output_out]:
-            if os.path.isfile(f):
-                os.remove(f)
-
+        tmp_path = self.tmp_dir / "test_roundtrip.idx"
         df_original = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        bio.write_idx_native(df_original, test_output_filename)
-        df_roundtrip = bio.read_idx(test_output_filename)
-
+        bio.write_idx_native(df_original, tmp_path)
+        df_roundtrip = bio.read_idx(tmp_path)
         self.assertEqual(len(df_original), len(df_roundtrip),
                          "Row count changed after round-trip")
         self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
@@ -75,17 +65,11 @@ class Tests(unittest.TestCase):
 
     def test_idx_native_roundtrip_from_idx(self):
         """Test that writing and reading back preserves data size (from IDX source)."""
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_roundtrip2.idx"
-        test_output_out = "./src/bulum/io/tests/test_outputs/test_roundtrip2.out"
-        for f in [test_output_filename, test_output_out]:
-            if os.path.isfile(f):
-                os.remove(f)
-
+        tmp_path = self.tmp_dir / "test_roundtrip2.idx"
         test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
         df_original = bio.read_idx(test_idx_filename)
-        bio.write_idx_native(df_original, test_output_filename)
-        df_roundtrip = bio.read_idx(test_output_filename)
-
+        bio.write_idx_native(df_original, tmp_path)
+        df_roundtrip = bio.read_idx(tmp_path)
         self.assertEqual(len(df_original), len(df_roundtrip),
                          "Row count changed after round-trip")
         self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
@@ -96,18 +80,11 @@ class Tests(unittest.TestCase):
     @unittest.skipIf(shutil.which('csvidx') is None, "csvidx.exe not found on path")
     def test_idx_csvidx_roundtrip(self):
         """Test that writing and reading back preserves data size for write_idx (csvidx)."""
-        test_output_filename = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.idx"
-        test_output_out = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.out"
-        test_temp_csv = "./src/bulum/io/tests/test_outputs/test_csvidx_roundtrip.tempfile.csv"
-        for f in [test_output_filename, test_output_out, test_temp_csv]:
-            if os.path.isfile(f):
-                os.remove(f)
-
+        tmp_path = self.tmp_dir / "test_csvidx_roundtrip.idx"
         test_idx_filename = "./src/bulum/io/tests/da_file/BUR_FLWX.IDX"
         df_original = bio.read_idx(test_idx_filename)
-        bio.write_idx(df_original, test_output_filename)
-        df_roundtrip = bio.read_idx(test_output_filename)
-
+        bio.write_idx(df_original, tmp_path)
+        df_roundtrip = bio.read_idx(tmp_path)
         self.assertEqual(len(df_original), len(df_roundtrip),
                          "Row count changed after round-trip")
         self.assertEqual(len(df_original.columns), len(df_roundtrip.columns),
