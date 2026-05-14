@@ -60,6 +60,8 @@ class IqqmOutReader:
 
         self._search_available_data()
 
+    def __del__(self) -> None:
+        self._clean_up()
 
     # pylint: disable=w0622
     def require(self, node: Optional[Union[int, str]] = None,
@@ -120,11 +122,13 @@ class IqqmOutReader:
             if read_all_availabe:
                 required_memo = self.required
                 self.required = self.available
-            self._write_iqqmgui_lqn_file()
-            self._call_iqqmgui_lqn(iqqmgui_path=iqqmgui_path)
-            answer = self._read_iqqmgui_csv()
-            if remove_temp_files:
-                self._clean_up()
+            try:
+                self._write_iqqmgui_lqn_file()
+                self._call_iqqmgui_lqn(iqqmgui_path=iqqmgui_path)
+                answer = self._read_iqqmgui_csv()
+            finally:
+                if remove_temp_files:
+                    self._clean_up()
             if read_all_availabe:
                 # Remember previous settings
                 self.required = required_memo
