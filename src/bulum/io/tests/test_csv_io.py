@@ -16,20 +16,21 @@ class Tests(unittest.TestCase):
         self._tmp.cleanup()
 
     def test_read_ts_csv(self):
-        df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        self.assertEqual(len(df), 10)
-        df_min_df = min(df.index)
-        df_max_df = max(df.index)
-        self.assertEqual(df_min_df[:4], "1889")
-        self.assertEqual(df_max_df, "1889-01-10")
+        for path in [
+            "./src/bulum/io/tests/test_data.csv",
+            "./src/bulum/io/tests/test_data2.csv",
+        ]:
+            with self.subTest(path=path):
+                df = bio.read_ts_csv(path)
+                self.assertEqual(len(df), 10)
+                self.assertEqual(min(df.index)[:4], "1889")
+                self.assertEqual(max(df.index), "1889-01-10")
 
-    def test_read_ts_csv2(self):
-        df = bio.read_ts_csv("./src/bulum/io/tests/test_data2.csv")
-        self.assertEqual(len(df), 10)
-        df_min_df = min(df.index)
-        df_max_df = max(df.index)
-        self.assertEqual(df_min_df[:4], "1889")
-        self.assertEqual(df_max_df, "1889-01-10")
+    def test_read_ts_csv_non_numeric_raises(self):
+        tmp_path = self.tmp_dir / "bad.csv"
+        tmp_path.write_text("Date,value\n2000-01-01,hello\n2000-01-02,world\n")
+        with self.assertRaises(TypeError):
+            bio.read_ts_csv(tmp_path)
 
     def test_ts_csv_roundtrip(self):
         """Test that writing and reading back preserves data size for ts_csv."""

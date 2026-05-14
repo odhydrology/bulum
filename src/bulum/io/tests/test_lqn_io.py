@@ -14,6 +14,10 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(df["M_L1#065.01d"].sum(), 53179857.30745)
         self.assertAlmostEqual(df["three"].sum(), 19922893.66192)
 
+    def test_read_iqqm_lqn_output_file_not_found(self):
+        with self.assertRaises(FileNotFoundError):
+            bio.read_iqqm_lqn_output("./nonexistent.01d")
+
     def test_read_iqqm_lqn_output_stochastic_dates(self):
         """Test reading IQQM lqn output with stochastic dates outside numpy datetime64 range.
 

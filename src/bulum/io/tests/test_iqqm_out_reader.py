@@ -20,27 +20,28 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495)
 
     def test_iqqm_out_reader3(self):
-        reader = bio.iqqm_out_reader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
-        reader.require(type=3.1, output=2)
-        reader.require(supertype=8, output=2)
-        reader.require(node=30, output=1)
-        df = reader.read()
-        self.assertEqual(len(df.columns), 14)
-        self.assertEqual(len(df), 43464)
-        self.assertAlmostEqual(df["020_02.d"].sum(), 561119.5652, delta=5)
-        self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495, delta=30)
+        for engine in ["iqqmgui", "python"]:
+            with self.subTest(engine=engine):
+                reader = bio.IqqmOutReader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
+                reader.require(type=3.1, output=2)
+                reader.require(supertype=8, output=2)
+                reader.require(node=30, output=1)
+                df = reader.read(engine=engine)
+                self.assertEqual(len(df.columns), 14)
+                self.assertEqual(len(df), 43464)
+                self.assertAlmostEqual(df["020_02.d"].sum(), 561119.5652, delta=5)
+                self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495, delta=30)
 
-    def test_iqqm_out_reader3_py(self):
-        """As above, with python engine"""
+    def test_num_to_name(self):
         reader = bio.IqqmOutReader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
-        reader.require(type=3.1, output=2)
-        reader.require(supertype=8, output=2)
-        reader.require(node=30, output=1)
-        df = reader.read(engine="python")
-        self.assertEqual(len(df.columns), 14)
-        self.assertEqual(len(df), 43464)
-        self.assertAlmostEqual(df["020_02.d"].sum(), 561119.5652, delta=5)
-        self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495, delta=30)
+        reader.require(node="030", output="01")
+        required_map = reader.num_to_name(which="required")
+        self.assertIn("030", required_map)
+        self.assertIsInstance(required_map["030"], str)
+        available_map = reader.num_to_name(which="available")
+        self.assertGreater(len(available_map), len(required_map))
+        with self.assertRaises(ValueError):
+            reader.num_to_name(which="invalid")
 
 
 if __name__ == "__main__":
