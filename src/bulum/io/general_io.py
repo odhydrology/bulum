@@ -21,7 +21,7 @@ def read(filename: str | os.PathLike, **kwargs) -> utils.TimeseriesDataframe:
     filename_suffix = filename.suffix.lower()
 
     df = None
-    if filename_suffix == ".res.csv":
+    if filename.name.lower().endswith(".res.csv"):
         df = bio.read_res_csv(filename, **kwargs)
         if df is None:
             raise ValueError("Res csv could not be read.")
