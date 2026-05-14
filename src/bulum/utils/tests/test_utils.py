@@ -37,9 +37,13 @@ class Tests(unittest.TestCase):
         df = pd.read_csv("./src/bulum/utils/tests/test_data_missing.csv")
         df["Date"] = utils.standardize_datestring_format(df["Date"].values)
         df.set_index("Date", inplace=True)
-        # The missing value will be read as a string, causing the column to have type "object"
+        # The missing value will be read as a string, causing the column to have type "object" or "str" depending on pandas version
         violations = utils.check_df_format_standards(df)
-        self.assertEqual(violations, [f"Column 'col_1' is not int64 or float64: object"])
+        # Accept either 'object' (pandas <2.x) or 'str' (pandas >=2.x)
+        self.assertIn(violations[0], [
+            "Column 'col_1' is not int64 or float64: object",
+            "Column 'col_1' is not int64 or float64: str"
+        ])
 
     def test_generate_dates(self):
         dates = utils.get_dates(datetime(2000, 1, 1), datetime(2020, 1, 4))
