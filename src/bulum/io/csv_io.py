@@ -22,20 +22,29 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
 
     Parameters
     ----------
-    filename : Union[str, PathLike]
+    filename : str or PathLike
+        Path to the CSV file to read.
     date_format : str, optional
         defaults to "%d/%m/%Y" as per Fors. Other common formats include "%Y-%m-%d", "%Y/%m/%d".
     df : pd.DataFrame, optional
         If provided, the reader will append columns to this dataframe. Defaults to None.
     colprefix : str, optional
-        If provided, the reader will append this prefix to the start of each column name. Defaults to None.
+        If provided, the reader will prepend this to column name. Defaults to None.
     allow_nonnumeric : bool, optional
-        If false, the method will assert that all columns are numerical. Defaults to False.
+        If False, raises if any column is not numeric. Default is False.
     assert_date : bool, optional
-        If true, the method will assert that date index meets "%Y-%m-%d" format. Defaults to True.         
+        If True, asserts the date index conforms to ``"%Y-%m-%d"``. Default is True.
 
-    Returns:
-        pd.DataFrame: Dataframe containing the data from the csv file.
+    Returns
+    -------
+    utils.TimeseriesDataframe
+
+    Raises
+    ------
+    TypeError
+        If a column is not numeric and ``allow_nonnumeric`` is False.
+    ValueError
+        If the new date range does not overlap with ``df``.
     """
     new_df: pd.DataFrame
     new_df = pd.read_csv(filename, na_values=na_values, **kwargs)
@@ -70,8 +79,16 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_ts_csv(df: pd.DataFrame, filename: str,
-                 *args, **kwargs):
-    """Wrapper around ``pandas.DataFrame.to_csv()``."""
-    # TODO update docstring with sphinx link
+def write_ts_csv(df: pd.DataFrame, filename: str, *args, **kwargs) -> None:
+    """Write a dataframe to CSV via :meth:`pandas.DataFrame.to_csv`.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to write.
+    filename : str or PathLike
+        Path to the output CSV file.
+    *args, **kwargs
+        Passed through to :meth:`pandas.DataFrame.to_csv`.
+    """
     df.to_csv(filename, *args, **kwargs)

@@ -10,11 +10,27 @@ from bulum import utils
 
 
 def read(filename: str | os.PathLike, **kwargs) -> utils.TimeseriesDataframe:
-    """
-    Read the input file.
+    """Read a timeseries file, dispatching to the appropriate reader based on file extension.
 
-    It will attempt to determine the filetype and dispatch to the appropriate
-    function in `bulum.io`.
+    Supported formats: ``.res.csv``, ``.csv``, ``.idx``, and IQQM listquan
+    outputs (e.g. ``.01d``).
+
+    Parameters
+    ----------
+    filename : str or PathLike
+        Path to the file to read.
+    **kwargs
+        Passed through to the underlying reader function.
+
+    Returns
+    -------
+    utils.TimeseriesDataframe
+
+    Raises
+    ------
+    ValueError
+        If the file extension is not recognised, or if a ``.res.csv`` file
+        cannot be parsed.
     """
     if not isinstance(filename, Path):
         filename = Path(filename)

@@ -16,18 +16,38 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
                  df: Optional[pd.DataFrame] = None, colprefix=None,
                  allow_nonnumeric=False, use_field_name=False,
                  **kwargs) -> utils.TimeseriesDataframe:
-    """Reads a res csv data file into a DataFrame, and sets the index to the Date.
+    """Read a ``.res.csv`` data file into a DataFrame with a standardized date index.
 
     Parameters
     ----------
-    filename
-    custom_na_values : list of str
-        A list of values to override the automatically-determined missing
-        values. If None, the missing values will include any defined in the
-        .res.csv file as well as:: 
+    filename : str or PathLike
+        Path to the ``.res.csv`` file.
+    custom_na_values : list of str, optional
+        Overrides the automatically-determined missing values. If None, missing
+        values include those declared in the file header plus the defaults::
 
-            ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan'].
+            ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na',
+             'N/A', 'n/a', '#N/A', '#NA', '-NaN', '-nan']
 
+    df : pd.DataFrame, optional
+        If provided, the reader appends columns to this dataframe. Default is None.
+    colprefix : str, optional
+        If provided, prepended to each column name. Default is None.
+    allow_nonnumeric : bool, optional
+        If False, raises if any column is not numeric. Default is False.
+    use_field_name : bool, optional
+        If True, replaces column names with the field names from the file
+        header. Default is False.
+
+    Returns
+    -------
+    utils.TimeseriesDataframe
+
+    Raises
+    ------
+    ValueError
+        If a column is not numeric and ``allow_nonnumeric`` is False, or if
+        the new date range does not overlap with ``df``.
     """
     # Handle custom na values
     if custom_na_values is None:
@@ -107,17 +127,32 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, missing_data_value="", project_name="", source_version="5.30.0.12728", datetime_format=r"%d/%m/%y") -> None:
-    """Writes a dataframe to a res csv.
+def write_res_csv(df: pd.DataFrame, 
+                  filepath: str | Path = "out.res.csv", 
+                  file_version=3, 
+                  missing_data_value="", 
+                  project_name="", 
+                  source_version="5.30.0.12728", 
+                  datetime_format=r"%d/%m/%y") -> None:
+    """Write a dataframe to a ``.res.csv`` file.
 
     Parameters
     ----------
-    df : Dataframe 
-        Dataframe to write to res csv. 
-    filepath
-        Path to output file including extension.
-    missing_data_value : str
-        Identifier for missing data values. Defaults to empty string. 
+    df : pd.DataFrame
+        DataFrame to write. Must have a ``"Date"`` index or a date column as
+        the first column.
+    filepath : str or Path, optional
+        Path to the output file including extension. Default is ``"out.res.csv"``.
+    file_version : int, optional
+        File version number written to the header. Default is 3.
+    missing_data_value : str, optional
+        Value used to represent missing data. Default is ``""``.
+    project_name : str, optional
+        Project name written to the header. Default is ``""``.
+    source_version : str, optional
+        Source version string written to the header. Default is ``"5.30.0.12728"``.
+    datetime_format : str, optional
+        Format string for dates in the output. Default is ``"%d/%m/%y"``.
     """
     # Get metadata
     now = datetime.now().strftime(r"%d/%m/%Y %H:%M")
