@@ -11,6 +11,11 @@ import os
 from typing import Optional
 from bulum import utils
 
+_NA_VALUES: tuple[str, ...] = (
+    '', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan',
+    'NA', 'na', 'N/A', 'n/a', '#N/A', '#NA', '-NaN', '-nan',
+)
+
 
 def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
                  df: Optional[pd.DataFrame] = None, colprefix=None,
@@ -49,10 +54,8 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
         If a column is not numeric and ``allow_nonnumeric`` is False, or if
         the new date range does not overlap with ``df``.
     """
-    # Handle custom na values
     if custom_na_values is None:
-        na_values = ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan',
-                     'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan']
+        na_values = list(_NA_VALUES)
     else:
         na_values = custom_na_values
     # If no df was supplied, instantiate a new one
