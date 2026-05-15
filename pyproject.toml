@@ -3,7 +3,7 @@ name = "bulum"
 dynamic = ["version"]
 description = "Open source python library for assessing hydrologic model results in Queensland"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [
     { name = "Chas Egan", email = "chas@odhydrology.com" }
 ]
@@ -23,11 +23,6 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/odhydrology/bulum"
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-]
-
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -37,3 +32,15 @@ where = ["src"]
 
 [tool.setuptools.dynamic]
 version = { attr = "bulum.version.__version__" }
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:matplotlib",
+    "ignore::DeprecationWarning:PIL",
+    "ignore::PendingDeprecationWarning",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+]
