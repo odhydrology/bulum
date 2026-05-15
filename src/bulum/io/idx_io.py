@@ -87,7 +87,7 @@ def write_area_ts_csv(df: pd.DataFrame, filename: str | Path, units: str = "(mm.
     # ensures dataframe adheres to standards
     utils.assert_df_format_standards(df)
     # convert field names to 12 chars and check for collisions
-    fields = {}
+    fields: dict[str, str] = {}
     for c in df.columns:
         c12 = f"{c[:12]:<12}"
         if c12 in fields:
