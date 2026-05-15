@@ -1,11 +1,12 @@
 import calendar
 import warnings
 from datetime import datetime, timedelta
-from typing import Optional, Union, cast, overload
+from typing import Literal, Optional, Union, cast, overload
 
 from collections.abc import Iterable
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 
 
@@ -167,12 +168,11 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
 
 
 @overload
-def get_wy(dates: str, wy_month: int = 7,
-           *,
-           using_end_year: bool = False) -> int:
-    ...
-
-
+def get_wy(dates: str, wy_month: int = ..., *,
+           using_end_year: bool = ..., as_list: bool = ...) -> int: ...
+@overload
+def get_wy(dates: Union[pd.Index, list[str], list[np.datetime64]], wy_month: int = ..., *,
+           using_end_year: bool = ..., as_list: Literal[True] = ...) -> list[int]: ...
 @overload
 def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
            *,
@@ -181,7 +181,7 @@ def get_wy(dates: pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
 
 
 def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
-           *, using_end_year: bool = False) -> list[int] | int:
+           *, using_end_year: bool = False, as_list: bool = True) -> list[int] | int:
     """
     Returns water years for a given array of dates.
 
@@ -190,8 +190,8 @@ def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: in
 
     Parameters
     ----------
-    dates : pd.Index | list[str] | list[np.datetime64]
-        Array of dates. Assumes consecutive dates.
+    dates : str or pd.Index or list[str] or list[np.datetime64]
+        Date or array of dates. Assumes consecutive dates.
     wy_month : int, default 7
         Water year start month (1=January, 7=July, etc.).
     using_end_year : bool, default False
@@ -203,12 +203,17 @@ def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: in
           labeled based on their end dates. Using the fiscal convention, the 2022
           water year is from 2021-07-01 to 2022-06-30 inclusive.
 
+    as_list : bool, default True
+        If True, coerce the result to a Python ``list[int]``. If False, return
+        the raw :class:`numpy.ndarray` (useful when passing directly to numpy
+        or pandas operations). Ignored when ``dates`` is a single string.
+
     Returns
     -------
     int
-        The water year corresponding to the given date, if dates is a str.
-    list[int]
-        The water years corresponding to the given dates.
+        The water year corresponding to the given date, if ``dates`` is a str.
+    list[int] or NDArray[np.int_]
+        The water years corresponding to the given dates. Type depends on ``as_list``.
 
     Examples
     --------
@@ -226,33 +231,22 @@ def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: in
 
     >>> df.groupby(get_wy(df.index, wy_month=7)).sum().median()
     """
-    _dates_is_str = False
-    if isinstance(dates, str):
-        dates = [dates]
-        _dates_is_str = True
-    # Check if the first values is a string
-    if isinstance(dates[0], str):
-        dates_str = cast(list[str], dates)
-        np_dates = to_np_datetimes64d(dates_str)
-    else:
-        # assume dates are datetime
-        np_dates = np.array(dates, dtype='datetime64[D]')
-    # d.astype('datetime64[Y]').astype(int) + 1970     #<---- this gives the year
-    # d.astype('datetime64[M]').astype(int) % 12 + 1   #<---- this gives the month
-    # TODO: the below implementation was originally written for pd.Timestamp, not np.datetime64d. It may be possible to simplify it.
-    if using_end_year:
-        answer = [(d.astype('datetime64[Y]').astype(int) + 1970)
-                  if (d.astype('datetime64[M]').astype(int) % 12 + 1) < wy_month
-                  else (d.astype('datetime64[Y]').astype(int) + 1970) + 1
-                  for d in np_dates]
-    else:
-        answer = [(d.astype('datetime64[Y]').astype(int) + 1970) - 1
-                  if (d.astype('datetime64[M]').astype(int) % 12 + 1) < wy_month
-                  else (d.astype('datetime64[Y]').astype(int) + 1970)
-                  for d in np_dates]
+    _dates_is_str = isinstance(dates, str)
     if _dates_is_str:
-        return answer[0]
-    return answer
+        dates = [dates]
+    if isinstance(dates[0], str):
+        np_dates = to_np_datetimes64d(cast(list[str], dates))
+    else:
+        np_dates = np.array(dates, dtype='datetime64[D]')
+    years  = np_dates.astype('datetime64[Y]').astype(int) + 1970
+    months = np_dates.astype('datetime64[M]').astype(int) % 12 + 1
+    if using_end_year:
+        answer = np.where(months < wy_month, years, years + 1)
+    else:
+        answer = np.where(months < wy_month, years - 1, years)
+    if _dates_is_str:
+        return int(answer[0])
+    return answer.tolist() if as_list else answer
 
 
 def get_prev_month_end(stringdate: str) -> str:

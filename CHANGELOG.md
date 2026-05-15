@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument
+- utils.get_wy() now accepts `as_list` keyword argument (default True) to return a numpy array instead of a list; implementation vectorised with numpy
 - utils.TimeseriesDataframe.add_tag() now accepts lists of strings as tags
 - utils.TimeseriesDataframe now defines _constructor and _metadata - standard pandas operations will now return a TimeseriesDataframe as opposed to a pandas.DataFrame for most standard operations.
 - utils.DataframeEnsemble - None and bool is now explicitly unsupported as key values - this can be overriden by assigning directly to the underlying ensemble dict but compatibility of methods is not guaranteed
