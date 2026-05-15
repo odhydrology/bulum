@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.get_wy(): now uses `check_dates=False` internally for non-consecutive date support
 - io: consolidated idx_io_native.py into idx_io.py (all IDX I/O now in single file)
 - io.idx_io: updated module docstring to clarify support for reading IQQM .OUT binary files
+- io.read_res_csv() now raises error instead of silently failing
 
 ### Fixed
 - utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.

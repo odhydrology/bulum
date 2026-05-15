@@ -76,7 +76,7 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
                 # e.g. "-9999"
                 na_values.append(new_na_value)
     if not eoh_found:
-        return None  # maybe it's not a .res.csv
+        raise ValueError("File is not a valid .res.csv file")
     col_header_line_number = len(metadata_lines) - 2
     lines_to_skip = list(range(col_header_line_number)) + \
         [col_header_line_number + 1]
@@ -90,7 +90,7 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
     if not allow_nonnumeric:
         for col in temp.columns:
             if not np.issubdtype(temp[col].dtype, np.number):  # type: ignore
-                raise ValueError(f"ERROR: Column '{col}' is not numeric!")
+                raise ValueError(f"Column '{col}' is not numeric")
     # Replace column names with field name if required
     if use_field_name:
         field_count = -2                                         #i'm using this -2 value to mean do nothing
@@ -124,7 +124,7 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
             newdf_ends_before_df_starts = temp.index[0] < df.index[-1]
             df_ends_before_newdf_starts = df.index[-1] < temp.index[0]
             if newdf_ends_before_df_starts or df_ends_before_newdf_starts:
-                raise Exception("ERROR: The dates in the new dataframe do not overlap with the existing dataframe!")
+                raise ValueError("The dates in the new dataframe do not overlap with the existing dataframe!")
         df = df.join(temp, how="outer")
     # utils.assert_df_format_standards(df)
     return utils.TimeseriesDataframe.from_dataframe(df)
