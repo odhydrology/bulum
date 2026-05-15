@@ -131,7 +131,7 @@ class IqqmOutReader:
                     self._clean_up()
             if read_all_availabe:
                 # Remember previous settings
-                self.required = required_memo
+                self.required = required_memo # pyright: ignore[reportPossiblyUnboundVariable]
         elif engine == "python":
             answer = self._py_read_out(read_all=read_all_availabe)
         else:
