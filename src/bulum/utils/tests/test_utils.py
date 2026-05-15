@@ -221,6 +221,29 @@ class Tests(unittest.TestCase):
         wy_fiscal_july = utils.get_wy(["2023-07-01"], wy_month=7, using_end_year=True)
         self.assertEqual(wy_fiscal_july[0], 2024)
 
+    def test_get_wy_as_list_return_type(self):
+        """as_list controls whether the result is a Python list or numpy array."""
+        dates = ["2023-06-30", "2023-07-01"]
+        cases = [
+            ("as_list=True,  using_end_year=False", True,  False, list),
+            ("as_list=True,  using_end_year=True",  True,  True,  list),
+            ("as_list=False, using_end_year=False", False, False, np.ndarray),
+            ("as_list=False, using_end_year=True",  False, True,  np.ndarray),
+        ]
+        for label, as_list, using_end_year, expected_type in cases:
+            with self.subTest(label):
+                result = utils.get_wy(dates, as_list=as_list, using_end_year=using_end_year)
+                self.assertIsInstance(result, expected_type)
+
+    def test_get_wy_as_list_values_unchanged(self):
+        """as_list=False returns the same values as as_list=True."""
+        dates = ["2023-06-30", "2023-07-01"]
+        for using_end_year in (False, True):
+            with self.subTest(using_end_year=using_end_year):
+                as_list = utils.get_wy(dates, using_end_year=using_end_year, as_list=True)
+                as_array = utils.get_wy(dates, using_end_year=using_end_year, as_list=False)
+                self.assertEqual(as_list, as_array.tolist())
+
     def test_get_wy_different_water_year_months(self):
         """Test get_wy with various water year start months"""
         test_date = ["2023-06-15"]

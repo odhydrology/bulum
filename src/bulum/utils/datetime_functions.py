@@ -267,29 +267,39 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
 
 
 @overload
-def get_wy(dates: str, 
-           wy_month: int = ..., 
-           *,
-           using_end_year: bool = ..., 
-           as_list: bool = ...
-           ) -> int: ...
-@overload
-def get_wy(dates: pd.Index | list[str] | list[np.datetime64], 
-           wy_month: int = ..., 
-           *,
-           using_end_year: bool = ..., 
-           as_list: Literal[True] = ...
-           ) -> list[int]: ...
-@overload
-def get_wy(dates: pd.Index | list[str] | list[np.datetime64], 
-           wy_month: int = 7,
-           *,
-           using_end_year: bool = False) -> list[int]:
-    ...
+ def get_wy(
+     dates: str,
+     wy_month: int = ...,
+     *,
+     using_end_year: bool = ...,
+     as_list: bool = ...
+) -> int: ...
 
+@overload
+def get_wy(
+    dates: pd.Index | list[str] | list[np.datetime64],
+    wy_month: int = ...,
+    *,
+    using_end_year: bool = ...,
+    as_list: Literal[True]
+) -> list[int]: ...
 
-def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: int = 7,
-           *, using_end_year: bool = False, as_list: bool = True) -> list[int] | int:
+@overload
+def get_wy(
+    dates: pd.Index | list[str] | list[np.datetime64],
+    wy_month: int = ...,
+    *,
+    using_end_year: bool = ...,
+    as_list: Literal[False]
+) -> NDArray[np.int_]: ...
+
+def get_wy(
+    dates: str | pd.Index | list[str] | list[np.datetime64],
+    wy_month: int = 7,
+    *,
+    using_end_year: bool = False,
+    as_list: bool = True
+) -> int | list[int] | NDArray[np.int_]:
     """
     Returns water years for a given array of dates.
 
@@ -311,17 +321,10 @@ def get_wy(dates: str | pd.Index | list[str] | list[np.datetime64], wy_month: in
           labeled based on their end dates. Using the fiscal convention, the 2022
           water year is from 2021-07-01 to 2022-06-30 inclusive.
 
-    as_list : bool, default True
-        If True, coerce the result to a Python ``list[int]``. If False, return
-        the raw :class:`numpy.ndarray` (useful when passing directly to numpy
-        or pandas operations). Ignored when ``dates`` is a single string.
-
     Returns
     -------
-    int
-        The water year corresponding to the given date, if ``dates`` is a str.
-    list[int] or NDArray[np.int_]
-        The water years corresponding to the given dates. Type depends on ``as_list``.
+    list[int]
+        The water years corresponding to the given dates.
 
     Examples
     --------

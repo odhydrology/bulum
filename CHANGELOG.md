@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iqqm_out_reader: Converted from os.path to pathlib
 - iqqm_out_reader: Improved IQN file parsing robustness by filtering comment lines instead of using hardcoded line indices
 - utils.standardise_datestring_format() as_index argument to coerce to Index
+- utils.get_wy() as_list argument to return coerced list or numpy array (used in calculation).
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument
