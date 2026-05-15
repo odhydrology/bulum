@@ -50,38 +50,46 @@ def get_date_format(date_str: str) -> str:
                      f'Supported formats: {", ".join([r"%Y-%m-%d", r"%d/%m/%Y", r"%d/%m/%Y %H:%M", r"%d/%m/%Y %H:%M:%s"])}')
 
 
-def standardize_datestring_format(values: list[str]) -> list[str]:
-    """
-    Converts a list of date strings into a list of date strings in the format YYYY-MM-DD.
+@overload
+def standardize_datestring_format(values: pd.Index | list[str], *, as_index: Literal[True]) -> pd.Index: ...
+@overload
+def standardize_datestring_format(values: pd.Index | list[str], *, as_index: Literal[False] = ...) -> list[str]: ...
 
-    This function automatically detects the input date format and converts all dates
-    to the standard ISO 8601 format (YYYY-MM-DD). Uses numpy datetime64 for efficient
-    processing and ensures clean YYYY-MM-DD output without timestamp components.
+
+def standardize_datestring_format(values: pd.Index | list[str], *, as_index: bool = False) -> list[str] | pd.Index:
+    """Convert date strings to YYYY-MM-DD format.
+
+    Automatically detects the input date format and converts all dates to ISO
+    8601 (YYYY-MM-DD). Uses numpy datetime64 for efficient processing.
     Tested over the range 0001-01-01 to 9999-12-31.
 
     Parameters
     ----------
-    values : list[str]
-        List of date strings in any supported format.
+    values : pd.Index or list[str]
+        Date strings in any supported format.
+    as_index : bool, optional
+        If True, return a :class:`pandas.Index` instead of a list. Useful
+        when assigning directly to ``df.index``. Default is False.
 
     Returns
     -------
-    list[str]
-        List of date strings in YYYY-MM-DD format.
+    list[str] or pd.Index
+        Date strings in YYYY-MM-DD format. Type depends on ``as_index``.
 
     Examples
     --------
     >>> standardize_datestring_format(["25/12/2023", "26/12/2023"])
     ['2023-12-25', '2023-12-26']
+    >>> standardize_datestring_format(["25/12/2023"], as_index=True)
+    Index(['2023-12-25'], dtype='object')
     """
+    values = list(values)
     date_format = get_date_format(values[0])
 
     try:
-        # Use check_length=False to suppress warnings for non-consecutive dates
         np_dates = to_np_datetimes64d(values, date_fmt=date_format, check_dates=False)
     except ValueError as e:
         if "End date format does not match start date format" in str(e):
-            # Handle mixed date formats by converting end date to match start format
             end_date_format = get_date_format(values[-1])
             placeholder_values = ["" for _ in values]
             placeholder_values[0] = values[0]
@@ -89,14 +97,13 @@ def standardize_datestring_format(values: list[str]) -> list[str]:
             np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format, check_dates=False)
         else:
             raise e
-    # Convert numpy datetime64 to clean YYYY-MM-DD strings by taking first 10 characters
-    # This strips any timestamp component (e.g., "T00:00:00.000000")
-    return [str(t)[:10] for t in np_dates]
+    result = [str(t)[:10] for t in np_dates]
+    return pd.Index(result) if as_index else result
 
 
-def standardise_datestring_format(values):
+def standardise_datestring_format(*args, **kwargs):
     """Australian spelling version of :func:`standardize_datestring_format`."""
-    return standardize_datestring_format(values)
+    return standardize_datestring_format(*args, **kwargs)
 
 
 def _generate_date_range(start_date: datetime, end_date: datetime) -> np.typing.NDArray[np.datetime64]:
@@ -246,14 +253,14 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     # Handle length validation based on check_length mode
     if len(np_dates) != len(values):
         error_msg = (f"Date sequence validation failed: Expected {len(np_dates)} consecutive dates "
-                    f"between {start_date} and {end_date} but found {len(values)} values. "
-                    f"This suggests non-consecutive dates or gaps in the sequence.")
+                     f"between {start_date} and {end_date} but found {len(values)} values. "
+                     f"This suggests non-consecutive dates or gaps in the sequence.")
 
         if check_dates == "strict":
             raise ValueError(error_msg)
         elif check_dates is True or check_dates == "warn":
             warnings.warn(error_msg + " Returning all dates between start and end.",
-                         UserWarning, stacklevel=2)
+                          UserWarning, stacklevel=2)
         # If check_length is False, do nothing
 
     return np_dates

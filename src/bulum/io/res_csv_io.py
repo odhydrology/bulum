@@ -84,7 +84,7 @@ def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
     temp = pd.read_csv(filename, na_values=na_values, skiprows=lines_to_skip)
     # Date index
     temp.set_index(temp.columns[0], inplace=True)
-    temp.index = utils.standardize_datestring_format(temp.index)
+    temp.index = utils.standardize_datestring_format(temp.index, as_index=True)
     temp.index.name = "Date"
     # Check values
     if not allow_nonnumeric:
@@ -165,7 +165,7 @@ def write_res_csv(df: pd.DataFrame,
     df_date_index = df.index.name == "Date"
     if not df_date_index:
         df.set_index(df.columns[0], inplace=True)
-        df.index = utils.standardize_datestring_format(df.index)
+        df.index = utils.standardize_datestring_format(df.index, as_index=True)
         df.index.name = "Date"
 
     utils.convert_index_to_string(df)

@@ -569,6 +569,35 @@ class Tests(unittest.TestCase):
             self.assertNotIn('T', date_str)
             self.assertEqual(len(date_str), 10)
 
+    def test_standardize_datestring_format_as_index_return_type_and_values(self):
+        """as_index controls return type; values are correct for all input/flag combinations."""
+        dates_list = ['25/12/2023', '26/12/2023']
+        dates_index = pd.Index(dates_list)
+        expected = ['2023-12-25', '2023-12-26']
+        cases = [
+            ("list input,  as_index=False", dates_list,  False, list),
+            ("list input,  as_index=True",  dates_list,  True,  pd.Index),
+            ("Index input, as_index=False", dates_index, False, list),
+            ("Index input, as_index=True",  dates_index, True,  pd.Index),
+        ]
+        for label, values, as_index, expected_type in cases:
+            with self.subTest(label):
+                result = utils.standardize_datestring_format(values, as_index=as_index)
+                self.assertIsInstance(result, expected_type)
+                self.assertEqual(list(result), expected)
+
+    def test_standardize_datestring_format_as_index_assignable_to_df_index(self):
+        """Result of as_index=True can be assigned directly to df.index."""
+        cases = [
+            ("list input",  ['25/12/2023', '26/12/2023']),
+            ("Index input", pd.Index(['25/12/2023', '26/12/2023'])),
+        ]
+        for label, values in cases:
+            with self.subTest(label):
+                df = pd.DataFrame({'val': [1, 2]}, index=list(values))
+                df.index = utils.standardize_datestring_format(df.index, as_index=True)
+                self.assertEqual(list(df.index), ['2023-12-25', '2023-12-26'])
+
     # ==== MODE TESTS (GENERATE VS PARSE) ====
 
     def test_to_np_datetimes64d_generate_mode_consecutive(self):

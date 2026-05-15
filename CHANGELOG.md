@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - io: roundtrip tests for all IO reader/writer pairs (idx_io, res_csv_io, csv_io) to detect data size issues
 - iqqm_out_reader: Converted from os.path to pathlib
 - iqqm_out_reader: Improved IQN file parsing robustness by filtering comment lines instead of using hardcoded line indices
+- utils.standardise_datestring_format() as_index argument to coerce to Index
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument

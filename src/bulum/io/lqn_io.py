@@ -63,7 +63,7 @@ def read_iqqm_lqn_output(filename: str | os.PathLike, col_name: str | None = Non
     if dropna:
         temp = temp.dropna()
     temp.set_index(temp.columns[0], inplace=True)
-    temp.index = utils.standardize_datestring_format(temp.index)  # type: ignore
+    temp.index = utils.standardize_datestring_format(temp.index, as_index=True)
     temp.index.name = "Date"  # type: ignore
     temp = temp.replace(r'^\s*$', np.nan, regex=True)
     df = df.join(temp, how="outer").sort_index()

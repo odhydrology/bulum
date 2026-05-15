@@ -51,7 +51,7 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
     # Date index
     new_df.set_index(new_df.columns[0], inplace=True)
     if assert_date:
-        new_df.index = utils.standardize_datestring_format(new_df.index)
+        new_df.index = utils.standardize_datestring_format(new_df.index, as_index=True)
     new_df.index.name = "Date" # type: ignore
     # df = df.replace(r'^\s*$', np.nan, regex=True)
     # Check values
