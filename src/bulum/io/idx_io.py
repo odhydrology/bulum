@@ -220,6 +220,8 @@ def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> 
     if date_flag == 0:
         daily_date_values = utils.datetime_functions.get_dates(
             date_start, end_date=date_end, include_end_date=True)
+    else:
+        raise NotImplementedError(f"Unsupported date interval: {date_flag}")
     # Detection of header bytes
     if skip_header_bytes is None:
         expected_rows = None
