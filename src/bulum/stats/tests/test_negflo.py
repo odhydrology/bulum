@@ -81,7 +81,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(sum(s1), sum(negflo.df_residual["a"]))
 
         s2 = negflo.df_residual["b"]
-        self.assertTrue(all(pd.Series([0.0, 5.0, 4.0, 2.0, 3.0, 6.0]) == s2))
+        # The 2.0 at index 3 is exactly at flow_limit, so it ends the positive period.
+        # [-10] distributes into [8, 6, 2] (sum_above_lim=10, rf=0); [4, 10] untouched.
+        self.assertTrue(all(pd.Series([0.0, 2.0, 2.0, 2.0, 4.0, 10.0]) == s2))
 
     def test_sm3(self):
         """SM3 general test"""

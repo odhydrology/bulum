@@ -235,7 +235,7 @@ class Negflo:
             if residual_val >= self.flow_limit:
                 pos_tracker.add(residual_idx, residual_val)
 
-            is_below_flow_limit = residual_val < self.flow_limit
+            is_below_flow_limit = residual_val <= self.flow_limit
             is_final_value = residual_idx == (len(residual) - 1)
             if ((is_below_flow_limit or is_final_value)
                     and self._has_neg_flow_to_redistribute(neg_acc)
@@ -265,9 +265,9 @@ class Negflo:
                 neg_acc += residual_val
                 residual.iloc[residual_idx] = 0
 
-            is_nonneg = residual_val >= 0
+            is_at_or_above_flow_limit = residual_val >= self.flow_limit
             is_final_value = residual_idx == (len(residual) - 1)
-            if ((is_nonneg or is_final_value)
+            if ((is_at_or_above_flow_limit or is_final_value)
                     and self._has_neg_flow_to_redistribute(neg_acc)
                     and pos_tracker.is_tracking()):
                 # Reached the end of the negative flow period AND there was
@@ -321,7 +321,7 @@ class Negflo:
                 elif residual_val < 0:
                     neg_acc += residual_val
 
-            if ((is_final_value or (residual_val < self.flow_limit
+            if ((is_final_value or (residual_val <= self.flow_limit
                                     and right_tracker.is_member_of_block(residual_idx)))
                     and self._has_neg_flow_to_redistribute(neg_acc)
                     and (left_tracker.is_tracking() or right_tracker.is_tracking())):
@@ -333,7 +333,7 @@ class Negflo:
                 if not carry_negative:
                     neg_acc = 0
 
-            if residual_val >= self.flow_limit:
+            if residual_val > self.flow_limit:
                 right_tracker.add(residual_idx, residual_val)
             elif right_tracker.is_tracking():
                 left_tracker = right_tracker
