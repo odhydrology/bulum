@@ -123,6 +123,32 @@ class Tests(unittest.TestCase):
         negflo.sm4()
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
+    def test_sm4_leading_negative(self):
+        """Leading negatives with no preceding positive must not bleed into the
+        following positive period.
+
+        The leading -1080 has no preceding positive so it carries; the following
+        positive period [60, 80] (sum 140) cannot absorb the carry plus the subsequent
+        -400, so the period is zeroed. The remaining carry distributes into the second
+        positive period [15, 80, 105].
+        """
+        df = pd.DataFrame({
+            "a": [-80.0, -160.0, -240.0, -300.0, -230.0, -40.0, -30.0,  # leading neg
+                  60.0, 80.0,                                              # positive 1
+                  -40.0, -140.0, -160.0, -60.0,                           # neg 2
+                  15.0, 80.0, 105.0,                                       # positive 2
+                  -80.0],                                                  # trailing neg
+        })
+        negflo = Negflo(df, 0)
+        negflo.sm4()
+        s = negflo.df_residual["a"]
+        with self.subTest("positives absorbed to zero when neg exceeds period sum"):
+            for i in range(7, 9):   # positive period 1
+                self.assertEqual(0.0, s.iloc[i])
+        with self.subTest("neg period zeroed"):
+            for i in [0,1,2,3,4,5,6, 9,10,11,12, 16]:
+                self.assertEqual(0.0, s.iloc[i])
+
     def test_sm5_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not
         forward."""

@@ -258,28 +258,38 @@ class Negflo:
     def _sm_backward_series(self, residual: pd.Series, *,
                             carry_negative=True) -> tuple[pd.Series, float]:
         """SM4 & SM5 helper, which operates on pd.Series aka columns of the dataframe."""
-        pos_tracker = helpers.ContiguousIndexTracker()
+        positive_period_tracker = helpers.ContiguousIndexTracker()
         neg_acc = 0
+        prev_was_negative = False
         for residual_idx, residual_val in enumerate(residual):
             if residual_val < 0:
                 neg_acc += residual_val
                 residual.iloc[residual_idx] = 0
+                prev_was_negative = True
 
             is_at_or_above_flow_limit = residual_val >= self.flow_limit
             is_final_value = residual_idx == (len(residual) - 1)
-            if ((is_at_or_above_flow_limit or is_final_value)
+            # Only distribute into the preceding positive period when transitioning
+            # out of a negative period, not on every positive value when neg_acc != 0.
+            exiting_negative = prev_was_negative and is_at_or_above_flow_limit
+            if ((exiting_negative or is_final_value)
                     and self._has_neg_flow_to_redistribute(neg_acc)
-                    and pos_tracker.is_tracking()):
+                    and positive_period_tracker.is_tracking()):
                 # Reached the end of the negative flow period AND there was
                 # previously a positive flow period.
-                neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, pos_tracker.get())
-                for list_idx, df_idx in enumerate(pos_tracker.indices()):
+                neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, positive_period_tracker.get())
+                for list_idx, df_idx in enumerate(positive_period_tracker.indices()):
                     residual.iloc[df_idx] = smoothed_pos_flows[list_idx]
+                positive_period_tracker.reset()
                 if not carry_negative:
                     neg_acc = 0
+            elif exiting_negative and not positive_period_tracker.is_tracking() and not carry_negative:
+                # Negative period had no preceding positive to distribute into.
+                neg_acc = 0
 
             if residual_val >= self.flow_limit:
-                pos_tracker.add(residual_idx, residual_val)
+                prev_was_negative = False
+                positive_period_tracker.add(residual_idx, residual_val)
 
         return residual, neg_acc
 
