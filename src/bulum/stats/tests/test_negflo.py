@@ -221,6 +221,64 @@ class Tests(unittest.TestCase):
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect["a"] == negflo.df_residual["a"]))
 
+    def _make_string_indexed_df(self, data, start="1983-05-24"):
+        dates = pd.date_range(start=start, periods=len(data), freq="D").strftime("%Y-%m-%d").tolist()
+        return pd.DataFrame({"flow": data}, index=dates)
+
+    def test_sm2_string_index_no_extra_rows(self):
+        """sm2 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([280, 40, 100, 49, 27, -50, 10])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm2()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
+    def test_sm2_string_index_neg_zeroed(self):
+        """sm2 with a string date index must zero negatives and carry forward correctly.
+
+        No negative precedes the first positive period, so it must remain unchanged.
+        The negative at index 5 carries forward into index 6 (the next positive period),
+        fully consuming it.
+        """
+        orig = [100.0, 5.0, 10.0, 50.0, 30.0, -70.0, 10.0, -150.0, -200.0]
+        df = self._make_string_indexed_df(orig)
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm2()
+        result = negflo.df_residual["flow"]
+        # Preceding positive period is unchanged (no negative before it)
+        for i in range(5):
+            with self.subTest(i=i):
+                self.assertEqual(result.iloc[i], orig[i])
+        # Negatives and following positive period zeroed by carry-forward
+        self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
+        self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+
+    def test_sm3_string_index_neg_zeroed(self):
+        """sm3 with a string date index must zero negatives at the correct rows."""
+        df = self._make_string_indexed_df([100.0, 5.0, 10.0, 50.0, 30.0, -70.0, 10.0, -150.0, -200.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm3()
+        result = negflo.df_residual["flow"]
+        self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
+        self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+
+    def test_sm4_string_index_no_extra_rows(self):
+        """sm4 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([1.0, -1.0, 3.0, -2.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm4()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
+    def test_sm7_string_index_no_extra_rows(self):
+        """sm7 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([2.0, -1.0, 1.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm7()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
 
 if __name__ == '__main__':
     unittest.main()

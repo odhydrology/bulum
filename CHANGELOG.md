@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.
 - io.write_idx_native(): fixed bug that doubled data size on round-trip by using structured arrays instead of plain numpy arrays
 - io._detect_header_bytes(): fixed incorrect header byte detection for single-column IDX files
+- negflo - longstanding bug with forward/backward implementations creating new rows instead of modifying residual.
+
 
 ## 0.3.2
 

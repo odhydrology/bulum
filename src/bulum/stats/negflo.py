@@ -243,14 +243,14 @@ class Negflo:
                 # Reached the end of the positive flow period.
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, pos_tracker.get())
                 for list_idx, df_idx in enumerate(pos_tracker.indices()):
-                    residual[df_idx] = smoothed_pos_flows[list_idx]
+                    residual.iloc[df_idx] = smoothed_pos_flows[list_idx]
                 pos_tracker.reset()
                 if not carry_negative:
                     neg_acc = 0
 
             if residual_val < 0:
                 neg_acc += residual_val
-                residual[residual_idx] = 0
+                residual.iloc[residual_idx] = 0
 
         return residual, neg_acc
 
@@ -263,7 +263,7 @@ class Negflo:
         for residual_idx, residual_val in enumerate(residual):
             if residual_val < 0:
                 neg_acc += residual_val
-                residual[residual_idx] = 0
+                residual.iloc[residual_idx] = 0
 
             is_nonneg = residual_val >= 0
             is_final_value = residual_idx == (len(residual) - 1)
@@ -274,7 +274,7 @@ class Negflo:
                 # previously a positive flow period.
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, pos_tracker.get())
                 for list_idx, df_idx in enumerate(pos_tracker.indices()):
-                    residual[df_idx] = smoothed_pos_flows[list_idx]
+                    residual.iloc[df_idx] = smoothed_pos_flows[list_idx]
                 if not carry_negative:
                     neg_acc = 0
 
@@ -329,7 +329,7 @@ class Negflo:
 
                 neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, larger_pos_tracker.get())
                 for list_idx, df_idx in enumerate(larger_pos_tracker.indices()):
-                    residual[df_idx] = smoothed_pos_flows[list_idx]
+                    residual.iloc[df_idx] = smoothed_pos_flows[list_idx]
                 if not carry_negative:
                     neg_acc = 0
 
@@ -341,7 +341,7 @@ class Negflo:
 
             if residual_val < 0:
                 neg_acc += residual_val
-                residual[residual_idx] = 0
+                residual.iloc[residual_idx] = 0
 
         return residual, neg_acc
 
