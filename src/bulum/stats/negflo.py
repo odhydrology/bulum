@@ -17,6 +17,7 @@ https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 
 import itertools
 import logging
+import os
 import re
 from collections.abc import MutableSequence
 from typing import Any, Optional, Union
@@ -48,7 +49,7 @@ class Negflo:
         # used to reset the residual df to speed up processes where we need to reset constantly
         self._df_residual_raw = df_residual.copy()
 
-        self.df_residual = df_residual
+        self._df_residual = df_residual
         self.neg_overflows: dict[Any, float] = {}
 
         self.df_name: str | None
@@ -62,18 +63,23 @@ class Negflo:
         self._analysis_type = helpers.NegfloAnalysisType.RAW
 
         self._sm6_num_segments = num_segments
-        self._sm6_segment_boundaries: MutableSequence[tuple[pd.Timestamp, pd.Timestamp]] | None = segments
+        self._sm6_segment_boundaries: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
+
+    @property
+    def df_residual(self) -> pd.DataFrame:
+        """The current working residual dataframe (read-only)."""
+        return self._df_residual
 
     @classmethod
     def _from_config_file(cls, filepath, *, execute=False):
-        """Construct a Negflo analysis from a config file. 
+        """Construct a Negflo analysis from a config file.
 
         .. warning::
             This function is incomplete. It has been marked as private until otherwise.
 
         Parameters
         ----------
-        filepath : path-like 
+        filepath : path-like
             Relative or absolute filepath to the input file
         execute : bool, default=False
             Flag to execute all possible analyses and save to file.
@@ -150,19 +156,34 @@ class Negflo:
     def _reset_residual(self) -> None:
         """Reset the residual to the initial state."""
         self.neg_overflows = {}
-        self.df_residual = self._df_residual_raw.copy()
+        self._df_residual = self._df_residual_raw.copy()
 
-    def rw1(self) -> None:
+    def rw1(self) -> pd.DataFrame:
         """Compute the raw residual i.e. downstream-upstream flows.
 
-        Internally, resets the residual to that stored on initialisation."""
-        self._analysis_type = helpers.NegfloAnalysisType.RAW
-        self._reset_residual()
+        Internally, resets the residual to that stored on initialisation.
 
-    def cl1(self) -> None:
-        """Clip all negative flows to zero."""
+        Returns
+        -------
+        pd.DataFrame
+            The raw residual dataframe.
+        """
+        self._reset_residual()
+        self._analysis_type = helpers.NegfloAnalysisType.RAW
+        return self._df_residual
+
+    def cl1(self) -> pd.DataFrame:
+        """Clip all negative flows to zero.
+
+        Returns
+        -------
+        pd.DataFrame
+            The clipped residual dataframe.
+        """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.CLIPPED
-        self.df_residual[self.df_residual < 0] = 0
+        self._df_residual[self._df_residual < 0] = 0
+        return self._df_residual
 
     @staticmethod
     def _has_neg_flow_to_redistribute(
@@ -355,7 +376,7 @@ class Negflo:
 
         return residual, neg_acc
 
-    def sm1(self) -> None:
+    def sm1(self) -> pd.DataFrame:
         """Redistribute negative flows across all positive flow events.
 
         The negative flows are set to zero and the excess positive flows have
@@ -365,14 +386,16 @@ class Negflo:
 
         Returns
         -------
-        None
-            The results are written to `self.df_residual`.
+        pd.DataFrame
+            The smoothed residual dataframe.
         """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_ALL
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_global_series)
+        self._df_residual = self._df_residual.apply(self._sm_global_series)
+        return self._df_residual
 
-    def sm2(self) -> None:
+    def sm2(self) -> pd.DataFrame:
         """Redistribute negative flows into future positive flow events, with
         carry-over.
 
@@ -396,46 +419,75 @@ class Negflo:
         negative flows. Setting the flow limit to a high flow preserves these
         peaks, but can severely reduce the high flows. It can give a ranked flow
         plot with a notch at the flow limit.
+
+        Returns
+        -------
+        pd.DataFrame
+            The smoothed residual dataframe.
         """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_forward_series)
+        self._df_residual = self._df_residual.apply(self._sm_forward_series)
+        return self._df_residual
 
-    def sm3(self) -> None:
+    def sm3(self) -> pd.DataFrame:
         """Redistribute negative flows into future positive flow events, without
-        carry-over. 
+        carry-over.
+
+        Returns
+        -------
+        pd.DataFrame
+            The smoothed residual dataframe.
 
         See Also
         --------
         * :meth:`sm2`
         """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_forward_series, carry_negative=False)
+        self._df_residual = self._df_residual.apply(self._sm_forward_series, carry_negative=False)
+        return self._df_residual
 
-    def sm4(self) -> None:
+    def sm4(self) -> pd.DataFrame:
         """Redistribute negative flows into past positive flow events, carrying
-        forward negative flow into the future. Refer to :meth:`sm2`."""
+        forward negative flow into the future. Refer to :meth:`sm2`.
+
+        Returns
+        -------
+        pd.DataFrame
+            The smoothed residual dataframe.
+        """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_backward_series)
+        self._df_residual = self._df_residual.apply(self._sm_backward_series)
+        return self._df_residual
 
-    def sm5(self) -> None:
+    def sm5(self) -> pd.DataFrame:
         """Redistribute negative flows into past positive flow events, without
-        carrying negative flows into the future. 
+        carrying negative flows into the future.
+
+        Returns
+        -------
+        pd.DataFrame
+            The smoothed residual dataframe.
 
         See Also
         --------
         * :meth:`sm2`
         * :meth:`sm4`
         """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_backward_series, carry_negative=False)
+        self._df_residual = self._df_residual.apply(self._sm_backward_series, carry_negative=False)
+        return self._df_residual
 
     def sm6(self, *, use_predefined_segments=True,
-            sampling_frequency: pd.DateOffset | None = None,
-            sampling_start_date: pd.Timestamp | None = None) -> None:
+            sampling_frequency: Optional[pd.DateOffset] = None,
+            sampling_start_date: Optional[pd.Timestamp] = None) -> pd.DataFrame:
         """Smooths over the specified segments.
 
         Applies the SM1 smoothing algorithm (ie global smoothing) for flows
@@ -463,21 +515,22 @@ class Negflo:
 
         Returns
         -------
-        None
-            Writes the result to `self.df_residual`.
+        pd.DataFrame
+            The smoothed residual dataframe.
 
         See Also
         --------
         * :meth:`sm1`
         """
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
         # pre-processing to determine segments if non-existent
         if use_predefined_segments and self._sm6_segment_boundaries is not None:
             pass
         else:
             if sampling_start_date is None:
-                sampling_start_date = self.df_residual.index[0]
-            end = self.df_residual.index[-1]
+                sampling_start_date = self._df_residual.index[0]
+            end = self._df_residual.index[-1]
             date = sampling_start_date
 
             if sampling_frequency is None:
@@ -494,21 +547,28 @@ class Negflo:
         for start, end in self._sm6_segment_boundaries:
             start = pd.to_datetime(start)
             end = pd.to_datetime(end)
-            mask = (self.df_residual.index >= start) & (self.df_residual.index <= end)
-            negflo = Negflo(self.df_residual[mask])
-            negflo.sm1()
-            self.df_residual.update(negflo.df_residual)
+            mask = (self._df_residual.index >= start) & (self._df_residual.index <= end)
+            negflo = Negflo(self._df_residual[mask])
+            smoothed = negflo.sm1()
+            self._df_residual.update(smoothed)
             # update overflows
             for k, v in negflo.neg_overflows.items():
                 self.neg_overflows[k] = self.neg_overflows.get(k, 0) + v
 
-    def sm7(self) -> None:
+        return self._df_residual
+
+    def sm7(self) -> pd.DataFrame:
         """Smooths negative flows over the largest adjacent positive flow event.
 
         Note
         ----
         Unlike the reference document, this program does not require the flow
         limit be negative.
+
+        Returns
+        -------
+        pd.DataFrame
+            The smoothed residual dataframe.
 
         See Also
         --------
@@ -517,9 +577,11 @@ class Negflo:
         # TODO edit this documentation; this is not how this particular
         #      implementation of NEGFLO works, and instead we expect a
         #      non-negative flow limit and instead simply call this method.
+        self._reset_residual()
         self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_NEG_LIM
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
-        self.df_residual = self.df_residual.apply(self._sm_bidirectional_series)
+        self._df_residual = self._df_residual.apply(self._sm_bidirectional_series)
+        return self._df_residual
 
     def log(self) -> None:
         """
@@ -535,48 +597,53 @@ class Negflo:
         # TODO
         raise NotImplementedError()
 
-    def run_all(self, filename="./residual"):
-        """Runs all analyses on the residual."""
+    def run_all(self, folder: str = ".") -> None:
+        """Runs all analyses on the residual, saving each to ``folder``."""
         self.rw1()
-        self.df_residual.to_csv(f"{filename}.cl1")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm1()
-        self.df_residual.to_csv(f"{filename}.sm1")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm2()
-        self.df_residual.to_csv(f"{filename}.sm2")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm3()
-        self.df_residual.to_csv(f"{filename}.sm3")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm4()
-        self.df_residual.to_csv(f"{filename}.sm4")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm5()
-        self.df_residual.to_csv(f"{filename}.sm5")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
+        # SM6 is not fully implemented; included for completeness
         self.sm6()
-        self.df_residual.to_csv(f"{filename}.sm6")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.sm7()
-        self.df_residual.to_csv(f"{filename}.sm7")
-        self._reset_residual()
+        self.to_file(folder=folder)
 
         self.log()
 
-    def to_file(self, *, out_filename: str | None = None):
-        """Saves the result dataframe to the output file."""
-        if out_filename is None:  # Automatically determine file name.
+    def to_file(self, *, out_filename: Optional[str] = None, folder: Optional[str] = None) -> None:
+        """Saves the result dataframe to the output file.
+
+        Parameters
+        ----------
+        out_filename : str, optional
+            Explicit output path. If omitted, the filename is derived from
+            ``df_name`` and the current analysis type extension.
+        folder : str, optional
+            Directory in which to place the auto-named file. Ignored when
+            ``out_filename`` is supplied.
+        """
+        if out_filename is None:
             out_filename = (
                 ("result" if self.df_name is None else self.df_name)
                 + self._analysis_type.to_file_extension())
+            if folder is not None:
+                out_filename = os.path.join(folder, out_filename)
         # if extension is not already specified
         elif not re.match(r"\.\w+$", out_filename):
             out_filename += self._analysis_type.to_file_extension()

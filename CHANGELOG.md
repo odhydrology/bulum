@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - iqqm_out_reader: Improved IQN file parsing robustness by filtering comment lines instead of using hardcoded line indices
 - utils.standardise_datestring_format() as_index argument to coerce to Index
 - utils.get_wy() as_list argument to return coerced list or numpy array (used in calculation).
+- negflo `Negflo`: `sm*`, `rw1`, and `cl1` methods now return the resulting `pd.DataFrame`, enabling functional-style usage (e.g. `df = negflo.sm2()`).
+- negflo `Negflo.df_residual`: exposed as a read-only property; direct assignment now raises `AttributeError`.
+- negflo `Negflo.to_file()`: new `folder` keyword parameter to specify the output directory when using auto-named files.
+- negflo `Negflo.run_all()`: new `folder` parameter (replaces the old `filename` prefix parameter) to place all output files in a directory.
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument
@@ -39,6 +43,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - io: consolidated idx_io_native.py into idx_io.py (all IDX I/O now in single file)
 - io.idx_io: updated module docstring to clarify support for reading IQQM .OUT binary files
 - io.read_res_csv() now raises error instead of silently failing
+- negflo `Negflo`: each `sm*`, `rw1`, and `cl1` call now automatically resets from the stored raw residual before computing, so repeated or interleaved calls are independent of one another.
+- negflo `Negflo.run_all()`: parameter renamed from `filename` (string prefix) to `folder` (output directory, default `"."`); file naming is now delegated to `to_file()`.
 
 ### Fixed
 - utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.

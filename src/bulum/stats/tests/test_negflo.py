@@ -307,6 +307,49 @@ class Tests(unittest.TestCase):
         negflo.sm7()
         self.assertEqual(len(df), len(negflo.df_residual))
 
+    def _simple_df(self):
+        return pd.DataFrame({"a": [-1.0, 2.0, -1.0, 3.0]})
+
+    def test_sm_methods_return_dataframe(self):
+        """Each sm* and cl1/rw1 method returns the result as a DataFrame."""
+        df = self._simple_df()
+        for method_name in ("rw1", "cl1", "sm1", "sm2", "sm3", "sm4", "sm5", "sm7"):
+            with self.subTest(method=method_name):
+                negflo = Negflo(df.copy(), 0)
+                result = getattr(negflo, method_name)()
+                self.assertIsInstance(result, pd.DataFrame, f"{method_name} did not return a DataFrame")
+
+    def test_return_value_is_df_residual(self):
+        """The returned DataFrame is the same object as df_residual."""
+        negflo = Negflo(self._simple_df(), 0)
+        result = negflo.sm1()
+        self.assertIs(result, negflo.df_residual)
+
+    def test_df_residual_is_readonly(self):
+        """Assigning to df_residual raises AttributeError."""
+        negflo = Negflo(self._simple_df(), 0)
+        with self.assertRaises(AttributeError):
+            setattr(negflo, "df_residual", pd.DataFrame())
+
+    def test_auto_reset_between_calls(self):
+        """Calling sm2() twice returns the same result (auto-reset proves independence)."""
+        negflo = Negflo(self._simple_df(), 0)
+        result1 = negflo.sm2()
+        result2 = negflo.sm2()
+        self.assertTrue(result1.equals(result2))
+
+    def test_no_chaining_across_methods(self):
+        """sm1() after sm2() gives the sm1 result, not a chained sm2->sm1 result."""
+        df = self._simple_df()
+        negflo = Negflo(df.copy(), 0)
+        standalone_sm1 = negflo.sm1()
+
+        negflo2 = Negflo(df.copy(), 0)
+        negflo2.sm2()
+        after_sm2 = negflo2.sm1()
+
+        self.assertTrue(standalone_sm1.equals(after_sm2))
+
 
 if __name__ == '__main__':
     unittest.main()
