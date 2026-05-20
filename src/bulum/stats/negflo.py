@@ -1,18 +1,15 @@
 """
-Bulum implementation of Negflo and supporting classes.
+Bulum implementation of Negflo.
 
 .. warning::
 
-    This implementation is mildly experimental, insofar as having been written
-    entirely based off the Qld Hydrology page as a "spec". See below. If there
+    This implementation is experimental, insofar as having been written
+    entirely based off the Qld Hydrology page as a "spec". If there
     are bugs/unexpected behaviours please let us know!
-
-    Of note is that there is currently still no reading from negflo config files!
 
 See Also
 --------
-Spec obtained from:
-https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
+Spec obtained from: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 """
 
 import itertools
@@ -20,15 +17,139 @@ import logging
 import os
 import re
 from collections.abc import MutableSequence
-from typing import Any, Optional, Union
+from enum import Enum
+from typing import Any, Callable, Optional
 
 import pandas as pd
 
 from bulum.utils import TimeseriesDataframe
 
-from . import negflo_helpers as helpers
-
 logger = logging.getLogger(__name__)
+
+
+class NegfloFileType(Enum):
+    """Negflo file types. For use in config file setup."""
+    IQQM = 0
+    IQQM_GUI = 1
+    SOURCE_INPUT = 2
+    SOURCE_OUTPUT = 3
+
+
+class NegfloAnalysisType(Enum):
+    """Negflo class keeps track of most recent analysis performed."""
+    RAW = -1
+    CLIPPED = 0
+    SMOOTHED_ALL = 1  # sm1
+    SMOOTHED_FORWARD = 2  # sm2
+    SMOOTHED_FORWARD_NO_CARRY = 3  # sm3
+    SMOOTHED_BACKWARD = 4  # sm4
+    SMOOTHED_BACKWARD_NO_CARRY = 5  # sm5
+    SMOOTHED_SEGMENTS = 6  # sm6
+    SMOOTHED_NEG_LIM = 7  # sm7
+
+    def to_file_extension(self) -> str:
+        """Gives the corresponding file extension for the analysis type."""
+        match self:
+            case NegfloAnalysisType.RAW:
+                return ".rw1"
+            case NegfloAnalysisType.CLIPPED:
+                return ".cl1"
+            case NegfloAnalysisType.SMOOTHED_ALL:
+                return ".sm1"
+            case NegfloAnalysisType.SMOOTHED_FORWARD:
+                return ".sm2"
+            case NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY:
+                return ".sm3"
+            case NegfloAnalysisType.SMOOTHED_BACKWARD:
+                return ".sm4"
+            case NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
+                return ".sm5"
+            case NegfloAnalysisType.SMOOTHED_SEGMENTS:
+                return ".sm6"
+            case NegfloAnalysisType.SMOOTHED_NEG_LIM:
+                return ".sm7"
+            case _:
+                raise ValueError(f"Unhandled/invalid enum, {self}")
+
+
+class ContiguousIndexTracker:
+    """Convenience class to track contiguous blocks of indices."""
+
+    def __init__(self):
+        # tracks start pt of positive period
+        self.start_idx = None
+        # tracks most recent position of positive period
+        self.last_idx = None
+        self.acc = []
+
+    def __len__(self):
+        return len(self.acc)
+
+    def __iter__(self):
+        # This is mostly here to allow sum() to act on this class.
+        return iter(self.acc)
+
+    def indices(self):
+        """Returns a range of indices of the associated collection
+        for which values were tracked."""
+        return range(self.start_idx, self.start_idx + len(self.acc))
+
+    def force_add(self, idx: int, v) -> None:
+        """Be careful with this, as it may invalidate any computations to do
+        with the indices of the values."""
+        if self.start_idx is None:
+            self.start_idx = idx
+        self.last_idx = idx
+        self.acc.append(v)
+
+    def add(self, idx: int, v) -> None:
+        """Adds current index/val pair to tracker."""
+        if not self.is_tracking():          # initialisation case
+            self.reset(idx, [v])
+        elif self.is_member_of_block(idx):  # contiguous case
+            self.last_idx = idx
+            self.acc.append(v)
+        else:                               # non-contiguous case
+            self.reset(idx, [v])
+
+    def get(self) -> list[int]:
+        """Return the list of indices which are currently being tracked."""
+        if not self.is_tracking():
+            raise RuntimeError("ContiguousTracker.get() was called but nothing is being tracked.")
+        return self.acc
+
+    def offset(self, offset_val: Any | Callable[[Any], Any]) -> list[Any]:
+        if callable(offset_val):
+            return list(map(offset_val, self.acc))
+        else:
+            # This performs a shallow copy
+            return list(map(lambda x: x + offset_val, self.acc))
+
+    def sum_and_reset(self):
+        """Returns the sum of the underlying accumulator and resets the trackers."""
+        x = sum(self)
+        self.reset()
+        return x
+
+    def is_tracking(self):
+        """Checks if the tracker is active.
+
+        Note
+        ----
+        If start_idx is not `None` then it is required that last_idx is also not
+        null."""
+        return self.start_idx is not None
+
+    def is_member_of_block(self, idx):
+        """Check if idx is adjacent to the currently tracked block of indices."""
+        return self.is_tracking() and (self.start_idx - 1 <= idx <= self.last_idx + 1)
+
+    def reset(self, /, idx: Optional[int] = None, val: Optional[list] = None):
+        """Resets to default or resets to current index/value (list)."""
+        if val is None:
+            val = []
+        self.start_idx = self.last_idx = idx
+        self.acc = val
 
 
 class Negflo:
@@ -60,7 +181,7 @@ class Negflo:
 
         self.flow_limit = flow_limit
 
-        self._analysis_type = helpers.NegfloAnalysisType.RAW
+        self._analysis_type = NegfloAnalysisType.RAW
 
         self._sm6_num_segments = num_segments
         self._sm6_segment_boundaries: Optional[MutableSequence[tuple[pd.Timestamp, pd.Timestamp]]] = segments
@@ -118,10 +239,10 @@ class Negflo:
             # ! likely don't need to specify this for *this* implementation of negflo so long as the file extensions are correct
             # TODO dynamically determine whether type is supplied or just a file name
             line = file.readline().strip()
-            # file_type1 = helpers.NegfloFileType(int(line))
+            # file_type1 = NegfloFileType(int(line))
             # TODO err handling
             line = file.readline().strip()
-            # file_type2 = helpers.NegfloFileType(int(line))
+            # file_type2 = NegfloFileType(int(line))
 
             flow_limit = float(file.readline().strip())
 
@@ -158,6 +279,11 @@ class Negflo:
         self.neg_overflows = {}
         self._df_residual = self._df_residual_raw.copy()
 
+    def _store_overflow(self, name: Any, value: float) -> None:
+        self.neg_overflows[name] = value
+        if value < 0:
+            logger.warning("Negative flow remaining after execution: %s", value)
+
     def rw1(self) -> pd.DataFrame:
         """Compute the raw residual i.e. downstream-upstream flows.
 
@@ -169,7 +295,7 @@ class Negflo:
             The raw residual dataframe.
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.RAW
+        self._analysis_type = NegfloAnalysisType.RAW
         return self._df_residual
 
     def cl1(self) -> pd.DataFrame:
@@ -181,13 +307,13 @@ class Negflo:
             The clipped residual dataframe.
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.CLIPPED
+        self._analysis_type = NegfloAnalysisType.CLIPPED
         self._df_residual[self._df_residual < 0] = 0
         return self._df_residual
 
     @staticmethod
     def _has_neg_flow_to_redistribute(
-            neg_acc: float, neg_tracker: helpers.ContiguousIndexTracker | None = None) -> bool:
+            neg_acc: float, neg_tracker: Optional[ContiguousIndexTracker] = None) -> bool:
         if neg_tracker is None:
             return neg_acc != 0
         else:
@@ -227,30 +353,21 @@ class Negflo:
                 neg_acc += delta  # reduces the absolute val
         return neg_acc, pos_flow_period_l
 
-    @helpers.dec_sm_helpers_log_neg_rem
-    def _sm_global_series(self, residual: pd.Series) -> tuple[pd.Series, float]:
-        """Smooth the entire input series on aggregate.
-
-        Returns
-        -------
-        pd.Series
-            The smoothed series
-        float
-            The remaining negative flow after smoothing
-        """
+    def _sm_global_series(self, residual: pd.Series) -> pd.Series:
+        """Smooth the entire input series on aggregate."""
         neg_sum = sum(residual[residual < 0])
         residual[residual < 0] = 0
         neg_sum, smoothed_residual = self._smooth_flows(neg_sum, residual)
         assert len(residual) == len(smoothed_residual)
         for i, _ in enumerate(smoothed_residual):
             residual.iloc[i] = smoothed_residual[i]
-        return residual, neg_sum
+        self._store_overflow(residual.name, neg_sum)
+        return residual
 
-    @helpers.dec_sm_helpers_log_neg_rem
     def _sm_forward_series(self, residual: pd.Series, *,
-                           carry_negative=True) -> tuple[pd.Series, float]:
+                           carry_negative=True) -> pd.Series:
         """SM2 & SM3 helper, which operates on pd.Series aka columns of the dataframe."""
-        pos_tracker = helpers.ContiguousIndexTracker()
+        pos_tracker = ContiguousIndexTracker()
         neg_acc = 0
         for residual_idx, residual_val in enumerate(residual):
             if residual_val >= self.flow_limit:
@@ -273,13 +390,13 @@ class Negflo:
                 neg_acc += residual_val
                 residual.iloc[residual_idx] = 0
 
-        return residual, neg_acc
+        self._store_overflow(residual.name, neg_acc)
+        return residual
 
-    @helpers.dec_sm_helpers_log_neg_rem
     def _sm_backward_series(self, residual: pd.Series, *,
-                            carry_negative=True) -> tuple[pd.Series, float]:
+                            carry_negative=True) -> pd.Series:
         """SM4 & SM5 helper, which operates on pd.Series aka columns of the dataframe."""
-        positive_period_tracker = helpers.ContiguousIndexTracker()
+        positive_period_tracker = ContiguousIndexTracker()
         neg_acc = 0
         prev_was_negative = False
         for residual_idx, residual_val in enumerate(residual):
@@ -312,11 +429,11 @@ class Negflo:
                 prev_was_negative = False
                 positive_period_tracker.add(residual_idx, residual_val)
 
-        return residual, neg_acc
+        self._store_overflow(residual.name, neg_acc)
+        return residual
 
-    @helpers.dec_sm_helpers_log_neg_rem
     def _sm_bidirectional_series(self, residual: pd.Series, *,
-                                 carry_negative=True) -> tuple[pd.Series, float]:
+                                 carry_negative=True) -> pd.Series:
         """SM7 (bidirectional, negative flow event based) helper.
 
         Note
@@ -328,13 +445,13 @@ class Negflo:
         # TODO Distribute over other positive flow event if it flattens the
         #      larger? Or if it would flatten one, then flatten both
         #      simultaneously?
-        left_tracker = helpers.ContiguousIndexTracker()
-        right_tracker = helpers.ContiguousIndexTracker()
+        left_tracker = ContiguousIndexTracker()
+        right_tracker = ContiguousIndexTracker()
         neg_acc = 0
 
-        def greater_tracker(left: helpers.ContiguousIndexTracker,
-                            right: helpers.ContiguousIndexTracker
-                            ) -> helpers.ContiguousIndexTracker:
+        def greater_tracker(left: ContiguousIndexTracker,
+                            right: ContiguousIndexTracker
+                            ) -> ContiguousIndexTracker:
             """Returns the tracker that has the greater total flow above the
             flow limit."""
             left_sum = sum(left.offset(-self.flow_limit))
@@ -368,13 +485,14 @@ class Negflo:
                 right_tracker.add(residual_idx, residual_val)
             elif right_tracker.is_tracking():
                 left_tracker = right_tracker
-                right_tracker = helpers.ContiguousIndexTracker()
+                right_tracker = ContiguousIndexTracker()
 
             if residual_val < 0:
                 neg_acc += residual_val
                 residual.iloc[residual_idx] = 0
 
-        return residual, neg_acc
+        self._store_overflow(residual.name, neg_acc)
+        return residual
 
     def sm1(self) -> pd.DataFrame:
         """Redistribute negative flows across all positive flow events.
@@ -390,7 +508,7 @@ class Negflo:
             The smoothed residual dataframe.
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_ALL
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_ALL
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_global_series)
         return self._df_residual
@@ -426,7 +544,7 @@ class Negflo:
             The smoothed residual dataframe.
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_FORWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_forward_series)
         return self._df_residual
@@ -445,7 +563,7 @@ class Negflo:
         * :meth:`sm2`
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_forward_series, carry_negative=False)
         return self._df_residual
@@ -460,7 +578,7 @@ class Negflo:
             The smoothed residual dataframe.
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_BACKWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_backward_series)
         return self._df_residual
@@ -480,7 +598,7 @@ class Negflo:
         * :meth:`sm4`
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_backward_series, carry_negative=False)
         return self._df_residual
@@ -523,7 +641,7 @@ class Negflo:
         * :meth:`sm1`
         """
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_SEGMENTS
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_SEGMENTS
         # pre-processing to determine segments if non-existent
         if use_predefined_segments and self._sm6_segment_boundaries is not None:
             pass
@@ -578,7 +696,7 @@ class Negflo:
         #      implementation of NEGFLO works, and instead we expect a
         #      non-negative flow limit and instead simply call this method.
         self._reset_residual()
-        self._analysis_type = helpers.NegfloAnalysisType.SMOOTHED_NEG_LIM
+        self._analysis_type = NegfloAnalysisType.SMOOTHED_NEG_LIM
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_bidirectional_series)
         return self._df_residual
