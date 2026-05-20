@@ -28,7 +28,7 @@ def _detect_header_bytes(b_data: np.ndarray) -> bool:
     return first_non_zero and rest_zeroes
 
 
-def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.TimeseriesDataframe:
+def read_idx(filename, skip_header_bytes: bool | None = None) -> utils.TimeseriesDataframe:
     """
     Read IDX file.
 
@@ -48,7 +48,7 @@ def read_idx(filename, skip_header_bytes: Optional[bool] = None) -> utils.Timese
     if not os.path.exists(filename):
         raise FileNotFoundError(f"File does not exist: {filename}")
     # Read ".idx" file
-    with open(filename, 'r') as f:
+    with open(filename) as f:
         # Skip line
         stmp = f.readline()
         # Start date, end date, date interval
@@ -120,15 +120,14 @@ def write_idx_native(df: pd.DataFrame, filepath, type="None", units="None") -> N
     # read the data type off the time delta in df.index values As is, I've
     # essentially copied what was done in the reader to flag that this should be
     # implemented at the "same time". Verify valid date_flag
-    match date_flag:
-        case 0:
-            pass  # valid
-        case 1:
-            raise NotImplementedError("Monthly data not yet supported")
-        case 3:
-            raise NotImplementedError("Annual data not yet supported")
-        case _:
-            raise ValueError(f"Unsupported date interval: {date_flag}")
+    if date_flag == 0:
+        pass  # valid
+    elif date_flag == 1:
+        raise NotImplementedError("Monthly data not yet supported")
+    elif date_flag == 3:
+        raise NotImplementedError("Annual data not yet supported")
+    else:
+        raise ValueError(f"Unsupported date interval: {date_flag}")
 
     utils.assert_df_format_standards(df)
     first_date = df.index[0]

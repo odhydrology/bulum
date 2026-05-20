@@ -2,7 +2,7 @@ import unittest
 
 import pandas as pd
 
-import bulum.stats as osta
+import bulum.stats as bsta
 from bulum import io, utils
 from bulum.stats.reliability_stats_class import Reliability
 
@@ -11,48 +11,48 @@ class Tests(unittest.TestCase):
 
     def test_annual_max(self):
         df = io.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        answer_non_complete_wy = osta.annual_max(df, 7, True)["rex_creek_sac_flow"]
+        answer_non_complete_wy = bsta.annual_max(df, 7, True)["rex_creek_sac_flow"]
         self.assertAlmostEqual(answer_non_complete_wy, 6.68182359932205)
 
         # Test not working for some reason
         df = io.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv", r"%Y-%m-%d")
-        answer_complete_wy = osta.annual_max(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
+        answer_complete_wy = bsta.annual_max(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
         self.assertAlmostEqual(answer_complete_wy, 459.819458676998)
 
     def test_annual_min(self):
         df = io.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        answer_non_complete_wy = osta.annual_min(df, 7, True)["rex_creek_sac_flow"]
+        answer_non_complete_wy = bsta.annual_min(df, 7, True)["rex_creek_sac_flow"]
         self.assertAlmostEqual(answer_non_complete_wy, 6.68182359932205)
 
         # Test not working for some reason
         df = io.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv", r"%Y-%m-%d")
-        answer_complete_wy = osta.annual_min(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
+        answer_complete_wy = bsta.annual_min(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
         self.assertAlmostEqual(answer_complete_wy, 452.252343499997)
 
     def test_annual_mean(self):
         df = io.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        answer_non_complete_wy = osta.annual_mean(df, 7, True)["rex_creek_sac_flow"]
+        answer_non_complete_wy = bsta.annual_mean(df, 7, True)["rex_creek_sac_flow"]
         self.assertAlmostEqual(answer_non_complete_wy, 6.68182359932205)
 
         # Test not working for some reason
         df = io.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv", r"%Y-%m-%d")
-        answer_complete_wy = osta.annual_mean(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
+        answer_complete_wy = bsta.annual_mean(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
         self.assertAlmostEqual(answer_complete_wy, 457.095643460864)
 
     def test_annual_median(self):
         df = io.read_ts_csv("./src/bulum/io/tests/test_data.csv")
-        answer_non_complete_wy = osta.annual_median(df, 7, True)["rex_creek_sac_flow"]
+        answer_non_complete_wy = bsta.annual_median(df, 7, True)["rex_creek_sac_flow"]
         self.assertAlmostEqual(answer_non_complete_wy, 6.68182359932205)
 
         # Test not working for some reason
         df = io.read_ts_csv("./src/bulum/stats/tests/test_div_data.csv", r"%Y-%m-%d")
-        answer_complete_wy = osta.annual_median(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
+        answer_complete_wy = bsta.annual_median(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
         self.assertAlmostEqual(answer_complete_wy, 457.233468094998)
 
     def test_monthly_reliability(self):
         # Test timeseries demand input
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp = osta.Reliability(df["Functions\\Functions\\Functions\\Functions@ODH@$f_Irrigator_180day_Unrestricted (ML.day^-1)"],
+        temp = bsta.Reliability(df["Functions\\Functions\\Functions\\Functions@ODH@$f_Irrigator_180day_Unrestricted (ML.day^-1)"],
                                 df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], quiet=True)
 
         answer_non_complete_months = temp.MonthlyReliability(.99, True)
@@ -63,7 +63,7 @@ class Tests(unittest.TestCase):
 
         # Test monthly list of daily demands
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp = osta.Reliability([8.5, 8.5, 8.5, 8.5, 0, 0, 0, 0, 0, 0, 8.5, 8.5],
+        temp = bsta.Reliability([8.5, 8.5, 8.5, 8.5, 0, 0, 0, 0, 0, 0, 8.5, 8.5],
                                 df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], demand_type="daily_constant", quiet=True)
 
         answer_non_complete_months_list = temp.MonthlyReliability(.99, True)
@@ -74,7 +74,7 @@ class Tests(unittest.TestCase):
 
         # Test monthly list of total demands
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_total = osta.Reliability([263.5, 238, 263.5, 255, 0, 0, 0, 0, 0, 0, 255, 263.5],
+        temp_total = bsta.Reliability([263.5, 238, 263.5, 255, 0, 0, 0, 0, 0, 0, 255, 263.5],
                                       df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], demand_type="total", ignore_leap_years=True, quiet=True)
 
         answer_non_complete_months_total_list = temp_total.MonthlyReliability(.99, True)
@@ -85,7 +85,7 @@ class Tests(unittest.TestCase):
 
         # Test daily constant demand
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_day_constant = osta.Reliability(8.5, df["Random 8.5 Supply"], quiet=True)
+        temp_day_constant = bsta.Reliability(8.5, df["Random 8.5 Supply"], quiet=True)
 
         answer_non_complete_months_day_constant = temp_day_constant.MonthlyReliability(0.95, True)
         self.assertAlmostEqual(answer_non_complete_months_day_constant, 0.566945607)
@@ -95,7 +95,7 @@ class Tests(unittest.TestCase):
 
         # Test annual constant demand
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_annual_constant = osta.Reliability(3102.5, df["Random 8.5 Supply"], ignore_leap_years=True, demand_timescale="yearly", demand_type="total", quiet=True)
+        temp_annual_constant = bsta.Reliability(3102.5, df["Random 8.5 Supply"], ignore_leap_years=True, demand_timescale="yearly", demand_type="total", quiet=True)
 
         answer_non_complete_months_annual_constant = temp_annual_constant.MonthlyReliability(0.95, True)
         self.assertAlmostEqual(answer_non_complete_months_annual_constant, 0.566945607)
@@ -105,7 +105,7 @@ class Tests(unittest.TestCase):
 
     def test_annual_reliability(self):
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp = osta.Reliability(df["Functions\\Functions\\Functions\\Functions@ODH@$f_Irrigator_180day_Unrestricted (ML.day^-1)"],
+        temp = bsta.Reliability(df["Functions\\Functions\\Functions\\Functions@ODH@$f_Irrigator_180day_Unrestricted (ML.day^-1)"],
                                 df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], quiet=True)
 
         answer_non_complete_years = temp.AnnualReliability(.99, 7, True)
@@ -115,7 +115,7 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(answer_complete_years, 0.644067797)
 
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp = osta.Reliability([8.5, 8.5, 8.5, 8.5, 0, 0, 0, 0, 0, 0, 8.5, 8.5],
+        temp = bsta.Reliability([8.5, 8.5, 8.5, 8.5, 0, 0, 0, 0, 0, 0, 8.5, 8.5],
                                 df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], demand_type="daily_constant", quiet=True)
 
         answer_non_complete_years_list = temp.AnnualReliability(.99, 7, True)
@@ -125,7 +125,7 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(answer_complete_years_list, 0.644067797)
 
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_total = osta.Reliability([263.5, 238, 263.5, 255, 0, 0, 0, 0, 0, 0, 255, 263.5],
+        temp_total = bsta.Reliability([263.5, 238, 263.5, 255, 0, 0, 0, 0, 0, 0, 255, 263.5],
                                       df["Water User\\Irrigation_Demand(ODH)\\Demand Model\\Demand Model@Ordered Water Supplied (ML)"], demand_type="total", ignore_leap_years=True, quiet=True)
 
         answer_non_complete_years_total_list = temp_total.AnnualReliability(.99, 7, True)
@@ -136,7 +136,7 @@ class Tests(unittest.TestCase):
 
         # Test daily constant demand
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_day_constant = osta.Reliability(8.5, df["Random 8.5 Supply"], quiet=True)
+        temp_day_constant = bsta.Reliability(8.5, df["Random 8.5 Supply"], quiet=True)
 
         answer_non_complete_years_day_constant = temp_day_constant.AnnualReliability(0.95, 7, True)
         self.assertAlmostEqual(answer_non_complete_years_day_constant, 0.591666667)
@@ -146,7 +146,7 @@ class Tests(unittest.TestCase):
 
         # Test annual constant demand
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
-        temp_annual_constant = osta.Reliability(3102.5, df["Random 8.5 Supply"], ignore_leap_years=True, demand_timescale="yearly", demand_type="total", quiet=True)
+        temp_annual_constant = bsta.Reliability(3102.5, df["Random 8.5 Supply"], ignore_leap_years=True, demand_timescale="yearly", demand_type="total", quiet=True)
 
         answer_non_complete_years_annual_constant = temp_annual_constant.AnnualReliability(0.95, 7, True)
         self.assertAlmostEqual(answer_non_complete_years_annual_constant, 0.591666667)
@@ -277,7 +277,7 @@ class Tests(unittest.TestCase):
 
         # Define an SDC
         df = io.read("./src/bulum/stats/tests/da_file/nogr306a.idx")
-        sdc = osta.StochasticDataComparison({"Historical": df.loc[:"2011-06-30", :]})
+        sdc = bsta.StochasticDataComparison({"Historical": df.loc[:"2011-06-30", :]})
 
         # Test distributions
         check_dist_ann = sdc.Distributions["outputs"]["annual"]["7>PPT502Ba.q13>GS130502B Brown River at Brown Lake Part"]["Historical"].dropna().reset_index()
@@ -322,10 +322,10 @@ class Tests(unittest.TestCase):
                          "./src/bulum/stats/tests/scenario_replicates/test_scen1_repl2.csv"]:
             ensemble.add_dataframe(io.read(filename), tag="scen1")
             # ensemble.add_dataframe_from_file(filename, tag="scen1") //TODO: I have replaced this with above until we can unpick the cicrular import issue
-        self.assertEqual(osta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
-        self.assertAlmostEqual(osta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 6.572572150832104)
-        self.assertEqual(osta.cumulative_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
-        self.assertEqual(osta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
+        self.assertEqual(bsta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
+        self.assertAlmostEqual(bsta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 6.572572150832104)
+        self.assertEqual(bsta.cumulative_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
+        self.assertEqual(bsta.cumulative_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
 
     def test_incremental_risk(self):
         ensemble = utils.DataframeEnsemble()
@@ -333,10 +333,10 @@ class Tests(unittest.TestCase):
                          "./src/bulum/stats/tests/scenario_replicates/test_scen1_repl2.csv"]:
             ensemble.add_dataframe(io.read(filename), tag="scen1")
             # ensemble.add_dataframe_from_file(filename, tag="scen1") //TODO: I have replaced this with above until we can unpick the cicrular import issue
-        self.assertEqual(osta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
-        self.assertAlmostEqual(osta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 1.3692858647566883)
-        self.assertEqual(osta.incremental_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
-        self.assertEqual(osta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
+        self.assertEqual(bsta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
+        self.assertAlmostEqual(bsta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 1.3692858647566883)
+        self.assertEqual(bsta.incremental_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
+        self.assertEqual(bsta.incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
 
     def test_annual_incremental_risk(self):
         ensemble = utils.DataframeEnsemble()
@@ -344,10 +344,10 @@ class Tests(unittest.TestCase):
                          "./src/bulum/stats/tests/scenario_replicates/test_scen1_repl2.csv"]:
             ensemble.add_dataframe(io.read(filename), tag="scen1")
             # ensemble.add_dataframe_from_file(filename, tag="scen1") //TODO: I have replaced this with above until we can unpick the cicrular import issue
-        self.assertEqual(osta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
-        self.assertAlmostEqual(osta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 3.8461538461538463)
-        self.assertEqual(osta.annual_incremental_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
-        self.assertEqual(osta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
+        self.assertEqual(bsta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000]).__len__(), 2)
+        self.assertAlmostEqual(bsta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[100000, 64000])["64000"].mean(), 3.8461538461538463)
+        self.assertEqual(bsta.annual_incremental_risk(input=ensemble, variable="Storage", parameters=[64000]).__len__(), 1)
+        self.assertEqual(bsta.annual_incremental_risk(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=64000).__len__(), 1)
 
     def test_percentile_envelope(self):
         ensemble = utils.DataframeEnsemble()
@@ -355,10 +355,10 @@ class Tests(unittest.TestCase):
                          "./src/bulum/stats/tests/scenario_replicates/test_scen1_repl2.csv"]:
             ensemble.add_dataframe(io.read(filename), tag="scen1")
             # ensemble.add_dataframe_from_file(filename, tag="scen1") //TODO: I have replaced this with above until we can unpick the cicrular import issue
-        self.assertEqual(osta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[0, 10, 25, 50]).__len__(), 4)
-        self.assertAlmostEqual(osta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[0, 10, 25, 50])["10"].mean(), 130487.5073260038)
-        self.assertEqual(osta.percentile_envelope(input=ensemble, variable="Storage", parameters=[10]).__len__(), 1)
-        self.assertEqual(osta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=10).__len__(), 1)
+        self.assertEqual(bsta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[0, 10, 25, 50]).__len__(), 4)
+        self.assertAlmostEqual(bsta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=[0, 10, 25, 50])["10"].mean(), 130487.5073260038)
+        self.assertEqual(bsta.percentile_envelope(input=ensemble, variable="Storage", parameters=[10]).__len__(), 1)
+        self.assertEqual(bsta.percentile_envelope(input=ensemble.filter_tag("scen1"), variable="Storage", parameters=10).__len__(), 1)
 
 
 if __name__ == '__main__':

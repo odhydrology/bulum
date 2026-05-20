@@ -2,7 +2,9 @@
 
 import logging
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Optional, Union
+
+from collections.abc import Callable
 import functools
 
 import pandas as pd
@@ -32,27 +34,26 @@ class NegfloAnalysisType(Enum):
 
     def to_file_extension(self) -> str:
         """Gives the corresponding file extension for the analysis type."""
-        match self:
-            case NegfloAnalysisType.RAW:
-                return ".rw1"
-            case NegfloAnalysisType.CLIPPED:
-                return ".cl1"
-            case NegfloAnalysisType.SMOOTHED_ALL:
-                return ".sm1"
-            case NegfloAnalysisType.SMOOTHED_FORWARD:
-                return ".sm2"
-            case NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY:
-                return ".sm3"
-            case NegfloAnalysisType.SMOOTHED_BACKWARD:
-                return ".sm4"
-            case NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
-                return ".sm5"
-            case NegfloAnalysisType.SMOOTHED_SEGMENTS:
-                return ".sm6"
-            case NegfloAnalysisType.SMOOTHED_NEG_LIM:
-                return ".sm7"
-            case _:
-                raise ValueError(f"Unhandled/invalid enum, {self}")
+        if self == NegfloAnalysisType.RAW:
+            return ".rw1"
+        elif self == NegfloAnalysisType.CLIPPED:
+            return ".cl1"
+        elif self == NegfloAnalysisType.SMOOTHED_ALL:
+            return ".sm1"
+        elif self == NegfloAnalysisType.SMOOTHED_FORWARD:
+            return ".sm2"
+        elif self == NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY:
+            return ".sm3"
+        elif self == NegfloAnalysisType.SMOOTHED_BACKWARD:
+            return ".sm4"
+        elif self == NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY:
+            return ".sm5"
+        elif self == NegfloAnalysisType.SMOOTHED_SEGMENTS:
+            return ".sm6"
+        elif self == NegfloAnalysisType.SMOOTHED_NEG_LIM:
+            return ".sm7"
+        else:
+            raise ValueError(f"Unhandled/invalid enum, {self}")
 
 
 class ContiguousIndexTracker:
@@ -127,7 +128,7 @@ class ContiguousIndexTracker:
         """Check if idx is adjacent to the currently tracked block of indices."""
         return self.is_tracking() and (self.start_idx - 1 <= idx <= self.last_idx + 1)
 
-    def reset(self, /, idx: Optional[int] = None, val: Optional[list] = None):
+    def reset(self, /, idx: int | None = None, val: list | None = None):
         """Resets to default or resets to current index/value (list)."""
         if val is None:
             val = []

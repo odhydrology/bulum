@@ -12,7 +12,9 @@ DataframeEnsembles are a way to organise multiple TSDFs, with methods that work
 
 import enum
 import re
-from typing import Any, Iterable, Optional
+from typing import Any, Optional, Union
+
+from collections.abc import Iterable
 
 import pandas as pd
 
@@ -72,7 +74,7 @@ class TimeseriesDataframe(pd.DataFrame):
         print(f"Tags: {self.tags}")
         print(self.describe())
 
-    def has_tag(self, pattern: str | re.Pattern, *, regex: Optional[RegexArg] = None,
+    def has_tag(self, pattern: str | re.Pattern, *, regex: RegexArg | None = None,
                 exact: bool = False) -> bool:
         """Check if the provided tag matches any of the dataframe's tags.
 
@@ -89,23 +91,22 @@ class TimeseriesDataframe(pd.DataFrame):
             ``\\b<regex>\\b``.
 
         """
-        match regex:
-            case None:
-                assert isinstance(pattern, str)
-                if exact:
-                    split_tags = self.tags.split(self.TAG_DELIMITER)
-                    return pattern in split_tags
-                else:
-                    return pattern in self.tags
-            case RegexArg.PATTERN:
-                assert isinstance(pattern, str)
-                return bool(re.search(pattern, self.tags))
-            case RegexArg.OBJECT:
-                assert isinstance(pattern, re.Pattern)
-                return bool(pattern.search(self.tags))
-            case _:
-                raise ValueError("Invalid argument supplied to regex, " +
-                                 f"{regex=} but expected RegexArg")
+        if regex is None:
+            assert isinstance(pattern, str)
+            if exact:
+                split_tags = self.tags.split(self.TAG_DELIMITER)
+                return pattern in split_tags
+            else:
+                return pattern in self.tags
+        elif regex == RegexArg.PATTERN:
+            assert isinstance(pattern, str)
+            return bool(re.search(pattern, self.tags))
+        elif regex == RegexArg.OBJECT:
+            assert isinstance(pattern, re.Pattern)
+            return bool(pattern.search(self.tags))
+        else:
+            raise ValueError("Invalid argument supplied to regex, " +
+                             f"regex={regex} but expected RegexArg")
 
     def add_tag(self, tag: str, check_membership: bool = False) -> None:
         """Add a tag to the TimeseriesDataframe.
@@ -148,7 +149,7 @@ class DataframeEnsemble:
     little attached metadata. All timeseries in the ensemble are expected to
     have the same index, and the same columns."""
 
-    def __init__(self, dfs: Optional[Iterable[TimeseriesDataframe]] = None) -> None:
+    def __init__(self, dfs: Iterable[TimeseriesDataframe] | None = None) -> None:
         """
         Args:
             dfs: A collection of dataframes to add to the ensemble.
@@ -169,7 +170,7 @@ class DataframeEnsemble:
     def __len__(self):
         return len(self.ensemble)
 
-    def get(self, key: Optional[Any] = None) -> TimeseriesDataframe:
+    def get(self, key: Any | None = None) -> TimeseriesDataframe:
         """Return the underlying dataframe if the ensemble is a singleton, or
         the dataframe at the given key."""
         if key is None:
@@ -180,7 +181,7 @@ class DataframeEnsemble:
         else:
             return self.ensemble.get(key)
 
-    def add_dataframe(self, df: pd.DataFrame | TimeseriesDataframe, key: Optional[Any] = None, tag: Optional[str] = None) -> None:
+    def add_dataframe(self, df: pd.DataFrame | TimeseriesDataframe, key: Any | None = None, tag: str | None = None) -> None:
         if not isinstance(df, TimeseriesDataframe):
             df = TimeseriesDataframe.from_dataframe(df)
         if tag is not None:

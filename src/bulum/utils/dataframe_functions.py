@@ -1,5 +1,7 @@
 from datetime import datetime
-from typing import Iterable, Literal, Optional, overload
+from typing import Literal, Optional, Union, overload
+
+from collections.abc import Iterable
 
 import numpy as np
 import pandas as pd
@@ -142,7 +144,7 @@ def check_df_format_standards(df: pd.DataFrame) -> list[str]:
     return []
 
 
-def set_index_dt(df: pd.DataFrame, dt_values: Optional[list] = None, start_dt: Optional[datetime] = None, **kwargs) -> pd.DataFrame:
+def set_index_dt(df: pd.DataFrame, dt_values: list | None = None, start_dt: datetime | None = None, **kwargs) -> pd.DataFrame:
     """
     Returns a dataframe with datetime index. Useful for converting bulum
     dataframes to datetime as needed.
@@ -325,7 +327,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d") -> 
 
 def check_data_equivalence(df1: pd.DataFrame, df2: pd.DataFrame,
                            check_col_order: bool = True, threshold: float = 1e-6,
-                           details: Optional[dict] = None) -> bool:
+                           details: dict | None = None) -> bool:
     """Checks if two numeric dataframes are the same. It checks the names &
     order of the columns, the values of the index, and summary stats on all the
     data columns.
