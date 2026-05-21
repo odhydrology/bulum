@@ -267,12 +267,12 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
 
 
 @overload
- def get_wy(
-     dates: str,
-     wy_month: int = ...,
-     *,
-     using_end_year: bool = ...,
-     as_list: bool = ...
+def get_wy(
+    dates: str,
+    wy_month: int = ...,
+    *,
+    using_end_year: bool = ...,
+    as_list: bool = ...
 ) -> int: ...
 
 @overload
@@ -560,7 +560,6 @@ def get_dates(start_date: datetime,
               end_date: Optional[datetime] = None, days: int = 0, years: int = 1,
               include_end_date: bool = False,
               str_format: Optional[str] = None) -> Union[list[str], list[datetime]]:
-              str_format: str = ...) -> list[str]:
     ...
 
 
