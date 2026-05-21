@@ -10,7 +10,7 @@ from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from bulum import trans, utils
 
 
-def wy_event_heatmap(df=Union[pd.DataFrame, pd.Series], criteria=1, y_title="Series",
+def wy_event_heatmap(df: pd.DataFrame | pd.Series, criteria=1, y_title="Series",
                      pass_label="Pass", fail_label="Fail",
                      pass_colour="white", fail_colour="red",
                      width=None, height=None,
@@ -148,11 +148,11 @@ def pyblo(dflist: list[pd.Series], sites: list, series: list, wy_month=1, site_o
     """
 
     # Check that inputs are the same length
-    if len(set([len(dflist),len(sites),len(series)])) != 1:
+    if len({len(dflist),len(sites),len(series)}) != 1:
         raise Exception("All input lists must be of the same length")
     
     # Check that dflist is a list of pd.Series
-    if (set([type(x) for x in dflist]) != {pd.Series}) or (set([utils.get_date_format(x.index[0]) for x in dflist]) != {r'%Y-%m-%d'}):
+    if ({type(x) for x in dflist} != {pd.Series}) or ({utils.get_date_format(x.index[0]) for x in dflist} != {r'%Y-%m-%d'}):
         raise Exception("All dflist entries must be a single column of a datetime-indexed dataframe (pd.Series)") 
 
     ## Initialise inputs

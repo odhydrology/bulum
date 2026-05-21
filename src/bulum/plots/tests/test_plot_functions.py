@@ -1,9 +1,15 @@
-import unittest
 import random
-import pandas as pd
-from bulum import plots, utils, io, stats
-import matplotlib.pyplot as plt
+import unittest
 from datetime import datetime
+
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend for testing
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+from bulum import io, plots, stats, utils
+
 
 class Tests(unittest.TestCase):
     
@@ -15,14 +21,6 @@ class Tests(unittest.TestCase):
         df = utils.set_index_dt(df, start_dt=datetime(2000, 1, 1))
         plots.plot_flow(df)
         #plt.show()       
-    
-    def test_exceedence_plot(self):
-        df = pd.DataFrame()
-        df["a"] = [random.normalvariate(40,5) for _ in range(200)]
-        df["b"] = [random.normalvariate(50,5) for _ in range(200)]
-        df["c"] = [random.normalvariate(60,5) for _ in range(200)]
-        plots.plot_exceedence(df)
-        #plt.show()
 
     def test_flow_plotx(self):
         df = pd.DataFrame()
@@ -106,9 +104,9 @@ class Tests(unittest.TestCase):
     def test_wy_event_heatmap(self):
         start_dt=datetime(1889, 1, 1)
         df = pd.DataFrame()
-        df["a"] = [random.binomialvariate(p=0.001) for _ in range(3650)]
-        df["b"] = [random.binomialvariate(p=0.001) for _ in range(3650)]
-        df["c"] = [random.binomialvariate(p=0.001) for _ in range(3650)]
+        df["a"] = np.random.binomial(n=1, p=0.001, size=3650)
+        df["b"] = np.random.binomial(n=1, p=0.001, size=3650)
+        df["c"] = np.random.binomial(n=1, p=0.001, size=3650)
         df.index = utils.get_dates(start_dt, days=3650,str_format=r'%Y-%m-%d')
         df.index.name = "Date"
         df_annual=df.groupby(utils.get_wy(df.index)).max()

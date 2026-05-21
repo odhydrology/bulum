@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-import bulum.stats as osta
+import bulum.stats as bsta
 from bulum import io
 
 
@@ -15,7 +15,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Define a SLA at Storm King Dam
         df = io.read_ts_csv("./src/bulum/stats/tests/test_storage_data.csv")
-        sla = osta.StorageLevelAssessment(df[r"Storage\0013 Storm King Dam\Storage Volume (ML)"], [400, 655, 1090, 1530])
+        sla = bsta.StorageLevelAssessment(df[r"Storage\0013 Storm King Dam\Storage Volume (ML)"], [400, 655, 1090, 1530])
 
         # Test if the SLA calculates the correct events (ref "GB_RCP45_2050_01a_StormKingDam.in_Events.csv")
         answer_events = sla.EventsBelowTrigger()
@@ -56,7 +56,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         triggers = [100, 75, 50, 25]
         trigger_names = ["Full Supply", "Level 1", "Level 2", "Critical"]
 
-        sla = osta.StorageLevelAssessment(storage, triggers, trigger_names=trigger_names)
+        sla = bsta.StorageLevelAssessment(storage, triggers, trigger_names=trigger_names)
 
         # Verify trigger_names are stored correctly as dict
         expected_dict = {100: "Full Supply", 75: "Level 1", 50: "Level 2", 25: "Critical"}
@@ -79,7 +79,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Test without trigger names
         triggers = [100, 75, 50, 25]
-        sla = osta.StorageLevelAssessment(storage, triggers)
+        sla = bsta.StorageLevelAssessment(storage, triggers)
 
         # Verify trigger_names is None
         self.assertIsNone(sla.trigger_names)
@@ -94,7 +94,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50])
 
         # Add trigger without name (should work)
         sla.add_trigger(25.0)
@@ -117,7 +117,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
 
         # Add trigger with name (should work)
         sla.add_trigger(25.0, name="Critical")
@@ -140,19 +140,19 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
         # Test duplicate trigger error
-        sla = osta.StorageLevelAssessment(storage, [100, 50])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50])
         with self.assertRaises(ValueError) as cm:
             sla.add_trigger(100.0)  # Duplicate
         self.assertIn("already exists", str(cm.exception))
 
         # Test name required when trigger_names exist
-        sla_named = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+        sla_named = bsta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
         with self.assertRaises(ValueError) as cm:
             sla_named.add_trigger(25.0)  # Missing name
         self.assertIn("name parameter is required", str(cm.exception))
 
         # Test name provided when no trigger_names exist
-        sla_unnamed = osta.StorageLevelAssessment(storage, [100, 50])
+        sla_unnamed = bsta.StorageLevelAssessment(storage, [100, 50])
         with self.assertRaises(ValueError) as cm:
             sla_unnamed.add_trigger(25.0, name="Critical")  # Unexpected name
         self.assertIn("no trigger_names exist", str(cm.exception))
@@ -165,11 +165,11 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Test mismatched lengths
         with self.assertRaises(ValueError) as cm:
-            osta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=["High", "Low"])  # 3 triggers, 2 names
+            bsta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=["High", "Low"])  # 3 triggers, 2 names
         self.assertIn("trigger_names length", str(cm.exception))
 
         # Test valid initialization
-        sla = osta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50], trigger_names=["High", "Low"])
         self.assertEqual(len(sla.triggers), len(sla.trigger_names))
         # Check that names are correctly mapped
         expected = {100: "High", 50: "Low"}
@@ -183,7 +183,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         with self.assertRaises((ValueError, IndexError)):
             # May raise IndexError during processing or ValueError from our check
-            osta.StorageLevelAssessment(empty_storage, [100, 50], allow_part_years=True)
+            bsta.StorageLevelAssessment(empty_storage, [100, 50], allow_part_years=True)
 
     def test_invalid_series_type(self):
         """Test error handling for invalid series type."""
@@ -191,7 +191,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         df = pd.DataFrame({'Storage': [100, 90, 80]})
 
         with self.assertRaises(TypeError) as cm:
-            osta.StorageLevelAssessment(df, [100, 50])
+            bsta.StorageLevelAssessment(df, [100, 50])
         self.assertIn("pd.Series", str(cm.exception))
 
     def test_event_algorithm_edge_cases(self):
@@ -201,7 +201,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Test case: storage below trigger at start and end
         storage = pd.Series([40, 60, 40, 40, 60, 40, 40, 40, 60, 40], index=dates, name='Storage')
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         events = sla.events[50]
         # Should detect multiple events
@@ -224,8 +224,8 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
         # Test different water year start months
-        sla_jul = osta.StorageLevelAssessment(storage, [50], wy_month=7)  # July start
-        sla_jan = osta.StorageLevelAssessment(storage, [50], wy_month=1)  # January start
+        sla_jul = bsta.StorageLevelAssessment(storage, [50], wy_month=7)  # July start
+        sla_jan = bsta.StorageLevelAssessment(storage, [50], wy_month=1)  # January start
 
         # Both should work and produce results
         summary_jul = sla_jul.Summary()
@@ -235,8 +235,8 @@ class TestStorageLevelAssessment(unittest.TestCase):
         self.assertIsInstance(summary_jan, pd.DataFrame)
 
         # Test allow_part_years parameter
-        sla_partial = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
-        sla_complete = osta.StorageLevelAssessment(storage, [50], allow_part_years=False)
+        sla_partial = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla_complete = bsta.StorageLevelAssessment(storage, [50], allow_part_years=False)
 
         # Partial years should have more or equal data points
         self.assertGreaterEqual(len(sla_partial.df), len(sla_complete.df))
@@ -247,7 +247,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50, 25])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50, 25])
 
         # Test single trigger summary
         single_summary = sla.Summary(trigger=50)
@@ -266,7 +266,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = np.random.uniform(30, 100, len(dates))
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [75])
+        sla = bsta.StorageLevelAssessment(storage, [75])
 
         # Add a new trigger and test plotting still works
         sla.add_trigger(50.0)
@@ -287,7 +287,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50, 25])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50, 25])
 
         # Test valid list assignment (converts to dict)
         sla.trigger_names = ["High", "Medium", "Low"]
@@ -331,7 +331,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         unordered_triggers = [100, 25, 75, 50]  # Not sorted
         trigger_names = ["High", "Critical", "Medium", "Low"]  # Names in same order as triggers
 
-        sla = osta.StorageLevelAssessment(storage, unordered_triggers, trigger_names=trigger_names)
+        sla = bsta.StorageLevelAssessment(storage, unordered_triggers, trigger_names=trigger_names)
 
         # Verify that trigger names are correctly mapped to their corresponding trigger levels
         expected_mapping = {100: "High", 25: "Critical", 75: "Medium", 50: "Low"}
@@ -352,7 +352,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Initialize with unordered triggers, no names
         unordered_triggers = [80, 30, 60, 90]
-        sla = osta.StorageLevelAssessment(storage, unordered_triggers)
+        sla = bsta.StorageLevelAssessment(storage, unordered_triggers)
 
         # Set trigger names using list (should map in trigger order, not sorted order)
         names_list = ["Level A", "Level B", "Level C", "Level D"]
@@ -384,7 +384,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         initial_triggers = [70, 20, 90]
         initial_names = ["Medium", "Critical", "High"]
 
-        sla = osta.StorageLevelAssessment(storage, initial_triggers, trigger_names=initial_names)
+        sla = bsta.StorageLevelAssessment(storage, initial_triggers, trigger_names=initial_names)
 
         # Verify initial mapping
         expected_initial = {70: "Medium", 20: "Critical", 90: "High"}
@@ -412,7 +412,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40, 40, 40, 40, 40, 60, 60, 60, 40, 40, 40, 40, 40, 40, 40, 60, 60, 60, 60, 60]
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Calculate mean event lengths
         mean_events = sla.EventsBelowTriggerMean()
@@ -422,7 +422,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         self.assertAlmostEqual(mean_events[50], expected_mean, places=1)
 
         # Test with trigger that has no events
-        sla_no_events = osta.StorageLevelAssessment(storage, [10], allow_part_years=True)
+        sla_no_events = bsta.StorageLevelAssessment(storage, [10], allow_part_years=True)
         mean_no_events = sla_no_events.EventsBelowTriggerMean()
         self.assertTrue(np.isnan(mean_no_events[10]))
 
@@ -432,7 +432,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50])
 
         # Test default behavior (include_mean=False)
         summary_default = sla.Summary()
@@ -450,7 +450,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40, 40, 40, 60, 60, 60, 60, 60, 40, 40, 40, 40, 60, 60, 60]
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50, 75], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50, 75], allow_part_years=True)
 
         # Test with include_mean=True
         summary = sla.Summary(include_mean=True)
@@ -473,7 +473,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40, 40, 60, 40, 40, 40, 60, 60, 40, 60]
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50, 25], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50, 25], allow_part_years=True)
 
         # Test single trigger with include_mean=True
         single_summary = sla.Summary(trigger=50, include_mean=True)
@@ -491,19 +491,19 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Test case 1: Single event
         storage_single = pd.Series([40, 40, 40, 60, 60, 60, 60, 60, 60, 60], index=dates, name='Storage')
-        sla_single = osta.StorageLevelAssessment(storage_single, [50], allow_part_years=True)
+        sla_single = bsta.StorageLevelAssessment(storage_single, [50], allow_part_years=True)
         mean_single = sla_single.EventsBelowTriggerMean()
         self.assertEqual(mean_single[50], 3.0)  # Only one event of length 3
 
         # Test case 2: All values below trigger (entire period is one event)
         storage_all_below = pd.Series([40, 40, 40, 40, 40, 40, 40, 40, 40, 40], index=dates, name='Storage')
-        sla_all_below = osta.StorageLevelAssessment(storage_all_below, [50], allow_part_years=True)
+        sla_all_below = bsta.StorageLevelAssessment(storage_all_below, [50], allow_part_years=True)
         mean_all_below = sla_all_below.EventsBelowTriggerMean()
         self.assertEqual(mean_all_below[50], 10.0)  # One event spanning all 10 days
 
         # Test case 3: No events (all values above trigger)
         storage_no_events = pd.Series([60, 60, 60, 60, 60, 60, 60, 60, 60, 60], index=dates, name='Storage')
-        sla_no_events = osta.StorageLevelAssessment(storage_no_events, [50], allow_part_years=True)
+        sla_no_events = bsta.StorageLevelAssessment(storage_no_events, [50], allow_part_years=True)
         mean_no_events = sla_no_events.EventsBelowTriggerMean()
         self.assertTrue(np.isnan(mean_no_events[50]))
 
@@ -515,7 +515,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
 
         # Test with trigger names and include_mean
         trigger_names = ["High", "Medium", "Low"]
-        sla = osta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=trigger_names)
+        sla = bsta.StorageLevelAssessment(storage, [100, 50, 25], trigger_names=trigger_names)
 
         summary = sla.Summary(include_mean=True)
 
@@ -541,7 +541,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40]*3 + [60]*3 + [40]*7 + [60]*7
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Test default behavior (length=1)
         max_default = sla.EventsBelowTriggerMax()
@@ -562,7 +562,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40]*2 + [60]*3 + [40]*5 + [60]*5 + [40]*10
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Test default behavior (length=1) - events: 2, 5, 10 days
         mean_default = sla.EventsBelowTriggerMean()
@@ -590,7 +590,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40]*1 + [60]*2 + [40]*4 + [60]*3 + [40]*10
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Test default behavior (length=1) with median - events: 1, 4, 10 days
         median_default = sla.EventsBelowTriggerAggregate(np.median)
@@ -616,7 +616,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40]*3 + [60]*3 + [40]*5 + [60]*4
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Test that methods work without length parameter (backward compatibility)
         max_events = sla.EventsBelowTriggerMax()
@@ -648,7 +648,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         storage_values = [40]*2 + [60]*3 + [40]*6 + [60]*4
         storage = pd.Series(storage_values, index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [50], allow_part_years=True)
+        sla = bsta.StorageLevelAssessment(storage, [50], allow_part_years=True)
 
         # Test consistency between different methods for same length filter
         length_filter = 3
@@ -678,7 +678,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
             storage_values.extend(year_data)
 
         storage = pd.Series(storage_values[:len(dates)], index=dates, name='Storage')
-        sla = osta.StorageLevelAssessment(storage, [50])
+        sla = bsta.StorageLevelAssessment(storage, [50])
 
         # Test default behavior (length=1) - should count both water years
         years_default = sla.NumberWaterYearsBelow()
@@ -705,7 +705,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
             storage_values.extend(year_data)
 
         storage = pd.Series(storage_values[:len(dates)], index=dates, name='Storage')
-        sla = osta.StorageLevelAssessment(storage, [50])
+        sla = bsta.StorageLevelAssessment(storage, [50])
 
         # Test default behavior (length=1) - should count all 3 years = 100%
         percent_default = sla.PercentWaterYearsBelow()
@@ -725,7 +725,7 @@ class TestStorageLevelAssessment(unittest.TestCase):
         dates = pd.date_range('2020-01-01', '2021-12-31', freq='D')
         storage = pd.Series(np.random.uniform(10, 120, len(dates)), index=dates, name='Storage')
 
-        sla = osta.StorageLevelAssessment(storage, [100, 50])
+        sla = bsta.StorageLevelAssessment(storage, [100, 50])
 
         # Test that methods work without length parameter (backward compatibility)
         number_years = sla.NumberWaterYearsBelow()

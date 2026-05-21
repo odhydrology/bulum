@@ -8,7 +8,7 @@ exec(open('src/bulum/version.py').read())
 setuptools.setup(
     name="bulum",
     version=__version__,
-    python_requires=">=3.9",
+    python_requires=">=3.11",
     author="Chas Egan",
     author_email="chas@odhydrology.com",
     description="Open source python library for assessing hydrologic model results in Queensland",

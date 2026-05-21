@@ -368,7 +368,7 @@ class StochasticDataComparison:
                 charts[y][x] = {}
                 for ds in self.datasets:
 
-                    subset = self.Correlations["outputs"][y][x][:][ds]
+                    subset = self.Correlations["outputs"].loc[:, (y, x, slice(None), ds)]
 
                     # data preparation
                     pivot_cols = list(subset.index)
