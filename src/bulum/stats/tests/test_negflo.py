@@ -81,7 +81,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(sum(s1), sum(negflo.df_residual["a"]))
 
         s2 = negflo.df_residual["b"]
-        self.assertTrue(all(pd.Series([0.0, 5.0, 4.0, 2.0, 3.0, 6.0]) == s2))
+        # The 2.0 at index 3 is exactly at flow_limit, so it ends the positive period.
+        # [-10] distributes into [8, 6, 2] (sum_above_lim=10, rf=0); [4, 10] untouched.
+        self.assertTrue(all(pd.Series([0.0, 2.0, 2.0, 2.0, 4.0, 10.0]) == s2))
 
     def test_sm3(self):
         """SM3 general test"""
@@ -96,8 +98,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(7, s[len(s) - 2])
 
     def test_sm4(self):
-        """Tests to make sure ordering is correct i.e. smooths backward not
-        forward."""
+        """Tests ordering: smooths backward into preceding positives first.
+        When series ends on a positive with remaining neg_acc, the trailing
+        positive period also absorbs the remainder."""
         df = pd.DataFrame({
             "a": [1, -1],
             "b": [-1, 1]
@@ -107,8 +110,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertEqual(0, np.count_nonzero(negflo.df_residual["a"]))
 
-        self.assertEqual(-1, negflo.neg_overflows["b"])
-        self.assertEqual(1, np.count_nonzero(negflo.df_residual["b"]))
+        # b=[-1, 1]: no preceding positive, but series ends on positive so
+        # the trailing 1 absorbs the -1 at end-of-period.
+        self.assertEqual(0, negflo.neg_overflows["b"])
+        self.assertEqual(0, np.count_nonzero(negflo.df_residual["b"]))
 
     def test_sm4_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not
@@ -120,6 +125,32 @@ class Tests(unittest.TestCase):
         negflo = Negflo(df, 2)
         negflo.sm4()
         self.assertTrue(all(expect == negflo.df_residual["a"]))
+
+    def test_sm4_leading_negative(self):
+        """Leading negatives with no preceding positive must not bleed into the
+        following positive period.
+
+        The leading -1080 has no preceding positive so it carries; the following
+        positive period [60, 80] (sum 140) cannot absorb the carry plus the subsequent
+        -400, so the period is zeroed. The remaining carry distributes into the second
+        positive period [15, 80, 105].
+        """
+        df = pd.DataFrame({
+            "a": [-80.0, -160.0, -240.0, -300.0, -230.0, -40.0, -30.0,  # leading neg
+                  60.0, 80.0,                                              # positive 1
+                  -40.0, -140.0, -160.0, -60.0,                           # neg 2
+                  15.0, 80.0, 105.0,                                       # positive 2
+                  -80.0],                                                  # trailing neg
+        })
+        negflo = Negflo(df, 0)
+        negflo.sm4()
+        s = negflo.df_residual["a"]
+        with self.subTest("positives absorbed to zero when neg exceeds period sum"):
+            for i in range(7, 9):   # positive period 1
+                self.assertEqual(0.0, s.iloc[i])
+        with self.subTest("neg period zeroed"):
+            for i in [0,1,2,3,4,5,6, 9,10,11,12, 16]:
+                self.assertEqual(0.0, s.iloc[i])
 
     def test_sm5_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not
@@ -220,6 +251,108 @@ class Tests(unittest.TestCase):
         negflo.sm7()
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertTrue(all(expect["a"] == negflo.df_residual["a"]))
+
+    def _make_string_indexed_df(self, data, start="1983-05-24"):
+        dates = pd.date_range(start=start, periods=len(data), freq="D").strftime("%Y-%m-%d").tolist()
+        return pd.DataFrame({"flow": data}, index=dates)
+
+    def test_sm2_string_index_no_extra_rows(self):
+        """sm2 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([280, 40, 100, 49, 27, -50, 10])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm2()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
+    def test_sm2_string_index_neg_zeroed(self):
+        """sm2 with a string date index must zero negatives and carry forward correctly.
+
+        No negative precedes the first positive period, so it must remain unchanged.
+        The negative at index 5 carries forward into index 6 (the next positive period),
+        fully consuming it.
+        """
+        orig = [100.0, 5.0, 10.0, 50.0, 30.0, -70.0, 10.0, -150.0, -200.0]
+        df = self._make_string_indexed_df(orig)
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm2()
+        result = negflo.df_residual["flow"]
+        # Preceding positive period is unchanged (no negative before it)
+        for i in range(5):
+            with self.subTest(i=i):
+                self.assertEqual(result.iloc[i], orig[i])
+        # Negatives and following positive period zeroed by carry-forward
+        self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
+        self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+
+    def test_sm3_string_index_neg_zeroed(self):
+        """sm3 with a string date index must zero negatives at the correct rows."""
+        df = self._make_string_indexed_df([100.0, 5.0, 10.0, 50.0, 30.0, -70.0, 10.0, -150.0, -200.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm3()
+        result = negflo.df_residual["flow"]
+        self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
+        self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+
+    def test_sm4_string_index_no_extra_rows(self):
+        """sm4 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([1.0, -1.0, 3.0, -2.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm4()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
+    def test_sm7_string_index_no_extra_rows(self):
+        """sm7 with a string date index must not create extra integer-keyed rows."""
+        df = self._make_string_indexed_df([2.0, -1.0, 1.0])
+        negflo = Negflo(df, flow_limit=0)
+        negflo.sm7()
+        self.assertEqual(len(df), len(negflo.df_residual))
+
+    def _simple_df(self):
+        return pd.DataFrame({"a": [-1.0, 2.0, -1.0, 3.0]})
+
+    def test_sm_methods_return_dataframe(self):
+        """Each sm* and cl1/rw1 method returns the result as a DataFrame."""
+        df = self._simple_df()
+        for method_name in ("rw1", "cl1", "sm1", "sm2", "sm3", "sm4", "sm5", "sm7"):
+            with self.subTest(method=method_name):
+                negflo = Negflo(df.copy(), 0)
+                result = getattr(negflo, method_name)()
+                self.assertIsInstance(result, pd.DataFrame, f"{method_name} did not return a DataFrame")
+
+    def test_return_value_equals_df_residual(self):
+        """The returned DataFrame is a copy equal in value to df_residual."""
+        negflo = Negflo(self._simple_df(), 0)
+        result = negflo.sm1()
+        self.assertIsNot(result, negflo.df_residual)
+        self.assertTrue(result.equals(negflo.df_residual))
+
+    def test_df_residual_is_readonly(self):
+        """Assigning to df_residual raises AttributeError."""
+        negflo = Negflo(self._simple_df(), 0)
+        with self.assertRaises(AttributeError):
+            setattr(negflo, "df_residual", pd.DataFrame())
+
+    def test_auto_reset_between_calls(self):
+        """Calling sm2() twice returns the same result (auto-reset proves independence)."""
+        negflo = Negflo(self._simple_df(), 0)
+        result1 = negflo.sm2()
+        result2 = negflo.sm2()
+        self.assertTrue(result1.equals(result2))
+
+    def test_no_chaining_across_methods(self):
+        """sm1() after sm2() gives the sm1 result, not a chained sm2->sm1 result."""
+        df = self._simple_df()
+        negflo = Negflo(df.copy(), 0)
+        standalone_sm1 = negflo.sm1()
+
+        negflo2 = Negflo(df.copy(), 0)
+        negflo2.sm2()
+        after_sm2 = negflo2.sm1()
+
+        self.assertTrue(standalone_sm1.equals(after_sm2))
 
 
 if __name__ == '__main__':
