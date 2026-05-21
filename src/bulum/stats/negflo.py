@@ -618,6 +618,11 @@ class Negflo:
             sampling_start_date: Optional[pd.Timestamp] = None) -> pd.DataFrame:
         """Smooths over the specified segments.
 
+        .. warning::
+            Not fully tested/implemented. If this doesn't work, let us know 
+            and you should be able to manually chunk data and apply sm1().
+            See e.g. utils.get_wy().
+
         Applies the SM1 smoothing algorithm (ie global smoothing) for flows
         across the specified periods. If no segments are defined or `method` is
         set to `sample`, then it will partition the full period on an annual
