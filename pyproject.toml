@@ -44,4 +44,7 @@ filterwarnings = [
 dev = [
     "pytest>=9.0.3",
     "tox>=4.54.0",
+    "sphinx>=8.0",
+    "myst-parser>=4.0",
+    "sphinx-rtd-theme>=3.0",
 ]
