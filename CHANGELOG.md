@@ -44,6 +44,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - io.idx_io: updated module docstring to clarify support for reading IQQM .OUT binary files
 - io.read_res_csv() now raises error instead of silently failing
 - negflo `Negflo`: each `sm*`, `rw1`, and `cl1` call now automatically resets from the stored raw residual before computing, so repeated or interleaved calls are independent of one another.
+- negflo `Negflo`: `sm*`, `rw1`, and `cl1` now return a copy of the residual dataframe, so multiple results held simultaneously are independent of each other and of `df_residual`.
+- negflo `Negflo.df_residual`: property now returns a copy, making the read-only guarantee meaningful.
 - negflo `Negflo.run_all()`: parameter renamed from `filename` (string prefix) to `folder` (output directory, default `"."`); file naming is now delegated to `to_file()`.
 
 ### Fixed
@@ -51,6 +53,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - io.write_idx_native(): fixed bug that doubled data size on round-trip by using structured arrays instead of plain numpy arrays
 - io._detect_header_bytes(): fixed incorrect header byte detection for single-column IDX files
 - negflo - longstanding bug with forward/backward implementations creating new rows instead of modifying residual.
+- negflo `Negflo` SM4/SM5: when the series ends on a positive value with `carry_negative=True`, remaining negative accumulation is now distributed into the trailing positive period rather than going to overflow.
 
 
 ## 0.3.2
