@@ -7,7 +7,6 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-
 from bulum import utils
 
 na_values = ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan']
@@ -23,33 +22,43 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
 
     Parameters
     ----------
-    filename : Union[str, PathLike]
+    filename : str or PathLike
+        Path to the CSV file to read.
     date_format : str, optional
         defaults to "%d/%m/%Y" as per Fors. Other common formats include "%Y-%m-%d", "%Y/%m/%d".
     df : pd.DataFrame, optional
         If provided, the reader will append columns to this dataframe. Defaults to None.
     colprefix : str, optional
-        If provided, the reader will append this prefix to the start of each column name. Defaults to None.
+        If provided, the reader will prepend this to column name. Defaults to None.
     allow_nonnumeric : bool, optional
-        If false, the method will assert that all columns are numerical. Defaults to False.
+        If False, raises if any column is not numeric. Default is False.
     assert_date : bool, optional
-        If true, the method will assert that date index meets "%Y-%m-%d" format. Defaults to True.         
+        If True, asserts the date index conforms to ``"%Y-%m-%d"``. Default is True.
 
-    Returns:
-        pd.DataFrame: Dataframe containing the data from the csv file.
+    Returns
+    -------
+    utils.TimeseriesDataframe
+
+    Raises
+    ------
+    TypeError
+        If a column is not numeric and ``allow_nonnumeric`` is False.
+    ValueError
+        If the new date range does not overlap with ``df``.
     """
+    new_df: pd.DataFrame
     new_df = pd.read_csv(filename, na_values=na_values, **kwargs)
     # Date index
     new_df.set_index(new_df.columns[0], inplace=True)
     if assert_date:
-        new_df.index = utils.standardize_datestring_format(new_df.index)
-    new_df.index.name = "Date"
+        new_df.index = utils.standardize_datestring_format(new_df.index, as_index=True)
+    new_df.index.name = "Date" # type: ignore
     # df = df.replace(r'^\s*$', np.nan, regex=True)
     # Check values
     if not allow_nonnumeric:
         for col in new_df.columns:
-            if not np.issubdtype(new_df[col].dtype, np.number):
-                raise Exception(f"ERROR: Column '{col}' is not numeric!")
+            if not np.issubdtype(new_df[col].dtype, np.number):  # type: ignore
+                raise TypeError(f"ERROR: Column '{col}' is not numeric!")
     # Rename columns if required
     if colprefix is not None:
         for c in new_df.columns:
@@ -58,17 +67,28 @@ def read_ts_csv(filename: str | os.PathLike, date_format=None,
     if df is None:
         df = new_df
     else:
+        assert isinstance(df, pd.DataFrame), f"Dataframe {df=} is not a dataframe!"
         if len(df) > 0:
             # Check that the dates overlap
             newdf_ends_before_df_starts = new_df.index[0] < df.index[-1]
             df_ends_before_newdf_starts = df.index[-1] < new_df.index[0]
             if newdf_ends_before_df_starts or df_ends_before_newdf_starts:
-                raise Exception("ERROR: The dates in the new dataframe do not overlap with the existing dataframe!")
+                raise ValueError("ERROR: The dates in the new dataframe do not"
+                                 " overlap with the existing dataframe!")
         df = df.join(new_df, how="outer")
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_ts_csv(df: pd.DataFrame, filename: str,
-                 *args, **kwargs):
-    """Wrapper around ``pandas.DataFrame.to_csv()``."""
+def write_ts_csv(df: pd.DataFrame, filename: str, *args, **kwargs) -> None:
+    """Write a dataframe to CSV via :meth:`pandas.DataFrame.to_csv`.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to write.
+    filename : str or PathLike
+        Path to the output CSV file.
+    *args, **kwargs
+        Passed through to :meth:`pandas.DataFrame.to_csv`.
+    """
     df.to_csv(filename, *args, **kwargs)

@@ -14,6 +14,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.DataframeEnsemble.map() - apply function over all dataframes in ensemble. Note this is distinct to the inbuilt `map` as it returns a new DataframeEnsemble.
 - utils.TimeseriesDataframe.tsdf_apply() which does not clobber metadata - see also changes in Changed subsection.
 - utils.TimeseriesDataframe and utils.DataframeEnsemble - serialisation and deserialisation methods with unzipped folder, zip folder, pickle and json save formats.
+- utils.to_np_datetimes64d(): added `mode` parameter with "generate" (default) and "parse" options
+  - "generate" mode: Creates all dates between first and last date (default behavior)
+  - "parse" mode: Individually parses each date string, preserving gaps and non-consecutive dates
+- utils.to_np_datetimes64d(): added `check_dates` parameter with three validation modes
+  - `False`: No validation (suppress all warnings/errors)
+  - `True` or `"warn"`: Issue UserWarning if lengths don't match (default, backward compatible)
+  - `"strict"`: Raise ValueError if lengths don't match
+- io: roundtrip tests for all IO reader/writer pairs (idx_io, res_csv_io, csv_io) to detect data size issues
+- iqqm_out_reader: Converted from os.path to pathlib
+- iqqm_out_reader: Improved IQN file parsing robustness by filtering comment lines instead of using hardcoded line indices
+- utils.standardise_datestring_format() as_index argument to coerce to Index
+- utils.get_wy() as_list argument to return coerced list or numpy array (used in calculation).
 
 ### Changed
 - utils.get_wy(using_end_year) is now a keyword argument
@@ -21,10 +33,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - utils.TimeseriesDataframe.add_tag() now accepts lists of strings as tags
 - utils.TimeseriesDataframe now defines _constructor and _metadata - standard pandas operations will now return a TimeseriesDataframe as opposed to a pandas.DataFrame for most standard operations.
 - utils.DataframeEnsemble - None and bool is now explicitly unsupported as key values - this can be overriden by assigning directly to the underlying ensemble dict but compatibility of methods is not guaranteed
+- utils.to_np_datetimes64d(): `check_dates` parameter only applies in "generate" mode (ignored in "parse" mode, default behaviour checks dates)
+- utils.standardize_datestring_format(): now uses `check_dates=False` internally for non-consecutive date support
+- utils.get_wy(): now uses `check_dates=False` internally for non-consecutive date support
+- io: consolidated idx_io_native.py into idx_io.py (all IDX I/O now in single file)
+- io.idx_io: updated module docstring to clarify support for reading IQQM .OUT binary files
+- io.read_res_csv() now raises error instead of silently failing
 
 ### Fixed
 - utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.
-
+- io.write_idx_native(): fixed bug that doubled data size on round-trip by using structured arrays instead of plain numpy arrays
+- io._detect_header_bytes(): fixed incorrect header byte detection for single-column IDX files
 
 ## 0.3.2
 
