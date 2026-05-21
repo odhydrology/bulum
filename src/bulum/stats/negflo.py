@@ -189,7 +189,7 @@ class Negflo:
     @property
     def df_residual(self) -> pd.DataFrame:
         """The current working residual dataframe (read-only)."""
-        return self._df_residual
+        return self._df_residual.copy()
 
     @classmethod
     def _from_config_file(cls, filepath, *, execute=False):
@@ -296,7 +296,7 @@ class Negflo:
         """
         self._reset_residual()
         self._analysis_type = NegfloAnalysisType.RAW
-        return self._df_residual
+        return self._df_residual.copy()
 
     def cl1(self) -> pd.DataFrame:
         """Clip all negative flows to zero.
@@ -309,7 +309,7 @@ class Negflo:
         self._reset_residual()
         self._analysis_type = NegfloAnalysisType.CLIPPED
         self._df_residual[self._df_residual < 0] = 0
-        return self._df_residual
+        return self._df_residual.copy()
 
     @staticmethod
     def _has_neg_flow_to_redistribute(
@@ -521,7 +521,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_ALL
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_global_series)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm2(self) -> pd.DataFrame:
         """Redistribute negative flows into future positive flow events, with
@@ -557,7 +557,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_FORWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_forward_series)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm3(self) -> pd.DataFrame:
         """Redistribute negative flows into future positive flow events, without
@@ -576,7 +576,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_FORWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_forward_series, carry_negative=False)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm4(self) -> pd.DataFrame:
         """Redistribute negative flows into past positive flow events, carrying
@@ -591,7 +591,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_BACKWARD
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_backward_series)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm5(self) -> pd.DataFrame:
         """Redistribute negative flows into past positive flow events, without
@@ -611,7 +611,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_BACKWARD_NO_CARRY
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_backward_series, carry_negative=False)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm6(self, *, use_predefined_segments=True,
             sampling_frequency: Optional[pd.DateOffset] = None,
@@ -683,7 +683,7 @@ class Negflo:
             for k, v in negflo.neg_overflows.items():
                 self.neg_overflows[k] = self.neg_overflows.get(k, 0) + v
 
-        return self._df_residual
+        return self._df_residual.copy()
 
     def sm7(self) -> pd.DataFrame:
         """Smooths negative flows over the largest adjacent positive flow event.
@@ -709,7 +709,7 @@ class Negflo:
         self._analysis_type = NegfloAnalysisType.SMOOTHED_NEG_LIM
         assert self.flow_limit >= 0, f"Expected non-negative flow limit, got {self.flow_limit}."
         self._df_residual = self._df_residual.apply(self._sm_bidirectional_series)
-        return self._df_residual
+        return self._df_residual.copy()
 
     def log(self) -> None:
         """

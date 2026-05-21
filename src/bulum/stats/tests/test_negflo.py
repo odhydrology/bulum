@@ -322,11 +322,12 @@ class Tests(unittest.TestCase):
                 result = getattr(negflo, method_name)()
                 self.assertIsInstance(result, pd.DataFrame, f"{method_name} did not return a DataFrame")
 
-    def test_return_value_is_df_residual(self):
-        """The returned DataFrame is the same object as df_residual."""
+    def test_return_value_equals_df_residual(self):
+        """The returned DataFrame is a copy equal in value to df_residual."""
         negflo = Negflo(self._simple_df(), 0)
         result = negflo.sm1()
-        self.assertIs(result, negflo.df_residual)
+        self.assertIsNot(result, negflo.df_residual)
+        self.assertTrue(result.equals(negflo.df_residual))
 
     def test_df_residual_is_readonly(self):
         """Assigning to df_residual raises AttributeError."""
