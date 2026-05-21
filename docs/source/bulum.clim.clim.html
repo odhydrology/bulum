@@ -89,80 +89,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-bulum.clim.clim">
-<span id="bulum-clim-clim-module"></span><h1>bulum.clim.clim module<a class="headerlink" href="#module-bulum.clim.clim" title="Link to this heading"></a></h1>
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.clim.clim.apply_transformation_curves">
-<span class="sig-name descname"><span class="pre">apply_transformation_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tranformation_curves</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span><a class="headerlink" href="#bulum.clim.clim.apply_transformation_curves" title="Link to this definition"></a></dt>
-<dd><p>Applies seasonal transformation curves to an input series.
-Refer to the function <cite>derive_transformation_curves</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>tranformation_curves</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>)</p></li>
-<li><p><strong>series</strong> (<em>pd.Series</em>)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.Series</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.clim.clim.apply_transformation_factors">
-<span class="sig-name descname"><span class="pre">apply_transformation_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transformation_factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">series</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></span><a class="headerlink" href="#bulum.clim.clim.apply_transformation_factors" title="Link to this definition"></a></dt>
-<dd><p>Applies seasonal transformation factors to an input series.
-Refer to the function <cite>derive_transformation_curves</cite>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>transformation_curves</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a>)</p></li>
-<li><p><strong>series</strong> (<em>pd.Series</em>)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.clim.clim.derive_transformation_curves">
-<span class="sig-name descname"><span class="pre">derive_transformation_curves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">augmented_ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">season_start_months</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.clim.clim.derive_transformation_curves" title="Link to this definition"></a></dt>
-<dd><p>Returns a dictionary of exceedence-based transformation curves - one for
-each season with the season’s start month as the key. These are tables that
-map from exceedance (cunnane plotting position as a fraction) to a scaling
-factor. These are intended to be used to effectively summarise
-climate-change adjustments, and allow them to be transported from one
-timeseries to another.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>original_ts</strong> (<em>pd.Series</em>)</p></li>
-<li><p><strong>augmented_ts</strong> (<em>pd.Series</em>)</p></li>
-<li><p><strong>season_start_months</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – Defaults to [1,2,3,4,5,6,7,8,9,10,11,12].</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.clim.clim.derive_transformation_factors">
-<span class="sig-name descname"><span class="pre">derive_transformation_factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">original_ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">augmented_ts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Series.html#pandas.Series" title="(in pandas v2.3.3)"><span class="pre">Series</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">season_start_months</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a></span></span><a class="headerlink" href="#bulum.clim.clim.derive_transformation_factors" title="Link to this definition"></a></dt>
-<dd><p>Returns a dictionary of transformation factors - one for each season
-with the season’s start month as the key. These scaling factors are intended to
-be used to effectively summarise climate-change adjustments, and allow them to be
-transported from one timeseries to another.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>original_ts</strong> (<em>pd.Series</em>)</p></li>
-<li><p><strong>augmented_ts</strong> (<em>pd.Series</em>)</p></li>
-<li><p><strong>season_start_months</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em>, </em><em>optional</em>) – [1,2,3,4,5,6,7,8,9,10,11,12].</p></li>
-<li><p><strong>epsilon</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Threshold below which values are treated as zero, and the associated factor defaults to 1.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="bulum-clim-clim-module">
+<h1>bulum.clim.clim module<a class="headerlink" href="#bulum-clim-clim-module" title="Link to this heading"></a></h1>
 </section>
 
 

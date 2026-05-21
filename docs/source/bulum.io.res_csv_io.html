@@ -89,44 +89,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-bulum.io.res_csv_io">
-<span id="bulum-io-res-csv-io-module"></span><h1>bulum.io.res_csv_io module<a class="headerlink" href="#module-bulum.io.res_csv_io" title="Link to this heading"></a></h1>
-<p>IO functions for reading and writing .res.csv files.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.io.res_csv_io.read_res_csv">
-<span class="sig-name descname"><span class="pre">read_res_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_na_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colprefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_nonnumeric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_field_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.res_csv_io.read_res_csv" title="Link to this definition"></a></dt>
-<dd><p>Reads a res csv data file into a DataFrame, and sets the index to the Date.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong></p></li>
-<li><p><strong>custom_na_values</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – <p>: A list of values to override the automatically-determined missing
-values. If None, the missing values will include any defined in the
-.res.csv file as well as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;null&#39;</span><span class="p">,</span> <span class="s1">&#39;NULL&#39;</span><span class="p">,</span> <span class="s1">&#39;NAN&#39;</span><span class="p">,</span> <span class="s1">&#39;NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;nan&#39;</span><span class="p">,</span> <span class="s1">&#39;NA&#39;</span><span class="p">,</span> <span class="s1">&#39;na&#39;</span><span class="p">,</span> <span class="s1">&#39;N/A&#39;</span> <span class="s1">&#39;n/a&#39;</span><span class="p">,</span> <span class="s1">&#39;#N/A&#39;</span><span class="p">,</span> <span class="s1">&#39;#NA&#39;</span><span class="p">,</span> <span class="s1">&#39;-NaN&#39;</span><span class="p">,</span> <span class="s1">&#39;-nan&#39;</span><span class="p">]</span><span class="o">.</span>
-</pre></div>
-</div>
-</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="bulum.io.res_csv_io.write_res_csv">
-<span class="sig-name descname"><span class="pre">write_res_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.3.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'out.res.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_data_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'5.30.0.12728'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datetime_format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%d/%m/%y'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.res_csv_io.write_res_csv" title="Link to this definition"></a></dt>
-<dd><p>Writes a dataframe to a res csv.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>Dataframe</em>) – Dataframe to write to res csv.</p></li>
-<li><p><strong>filepath</strong> – Path to output file including extension.</p></li>
-<li><p><strong>missing_data_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Identifier for missing data values. Defaults to empty string.</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
+  <section id="bulum-io-res-csv-io-module">
+<h1>bulum.io.res_csv_io module<a class="headerlink" href="#bulum-io-res-csv-io-module" title="Link to this heading"></a></h1>
 </section>
 
 
