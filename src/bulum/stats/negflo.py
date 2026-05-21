@@ -421,7 +421,9 @@ class Negflo:
                 positive_period_tracker.reset()
                 if not carry_negative:
                     neg_acc = 0
-            elif exiting_negative and not positive_period_tracker.is_tracking() and not carry_negative:
+            elif (exiting_negative
+                  and not positive_period_tracker.is_tracking()
+                  and not carry_negative):
                 # Negative period had no preceding positive to distribute into.
                 neg_acc = 0
 
