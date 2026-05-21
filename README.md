@@ -53,7 +53,38 @@ Where can I find the API token password? Chas has it in his emails. It is also h
 
 How do I make a new API token? Go to your PyPi account settings, and click on "API tokens". Then click on "Add API token", and give it a name. The token will be displayed on the next screen.
 
+Alternatively, 
+```bash
+uv build
+uv publish --token XXXXX
+```
+
 ## Unit Tests
+
+For development testing, first sync with extras=dev via
+```bash
+uv sync --extra dev
+```
+
+To run tests with the current or a particular version of python, from the project root run pytest via (for example):
+```bash
+uv run pytest
+uv run 
+uv run tox -e py312 # to run a particular version
+```
+
+Before publishing, check the library is functional across all supported versions of python via (one of):
+```bash
+uv run tox
+uv run tox -p auto # This is run in parallel
+```
+
+Note: if you are missing python versions, install via (e.g.) 
+```bash
+uv python install 3.12
+```
+
+### Legacy
 
 WARNING: Run unit tests from an anaconda environment with compatible dependencies!
 

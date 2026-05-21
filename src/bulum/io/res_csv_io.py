@@ -3,35 +3,59 @@ IO functions for reading and writing .res.csv files.
 """
 
 from datetime import datetime
-from typing import Optional
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
+import os
+from typing import Optional
 from bulum import utils
 
+_NA_VALUES: tuple[str, ...] = (
+    '', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan',
+    'NA', 'na', 'N/A', 'n/a', '#N/A', '#NA', '-NaN', '-nan',
+)
 
-def read_res_csv(filename, custom_na_values=None,
-                 df=None, colprefix=None,
+
+def read_res_csv(filename: str | os.PathLike, custom_na_values=None,
+                 df: Optional[pd.DataFrame] = None, colprefix=None,
                  allow_nonnumeric=False, use_field_name=False,
                  **kwargs) -> utils.TimeseriesDataframe:
-    """Reads a res csv data file into a DataFrame, and sets the index to the Date.
+    """Read a ``.res.csv`` data file into a DataFrame with a standardized date index.
 
     Parameters
     ----------
-    filename
-    custom_na_values : list of str
-        : A list of values to override the automatically-determined missing
-        values. If None, the missing values will include any defined in the
-        .res.csv file as well as:: 
+    filename : str or PathLike
+        Path to the ``.res.csv`` file.
+    custom_na_values : list of str, optional
+        Overrides the automatically-determined missing values. If None, missing
+        values include those declared in the file header plus the defaults::
 
-            ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan'].
+            ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan', 'NA', 'na',
+             'N/A', 'n/a', '#N/A', '#NA', '-NaN', '-nan']
 
+    df : pd.DataFrame, optional
+        If provided, the reader appends columns to this dataframe. Default is None.
+    colprefix : str, optional
+        If provided, prepended to each column name. Default is None.
+    allow_nonnumeric : bool, optional
+        If False, raises if any column is not numeric. Default is False.
+    use_field_name : bool, optional
+        If True, replaces column names with the field names from the file
+        header. Default is False.
+
+    Returns
+    -------
+    utils.TimeseriesDataframe
+
+    Raises
+    ------
+    ValueError
+        If a column is not numeric and ``allow_nonnumeric`` is False, or if
+        the new date range does not overlap with ``df``.
     """
-    # Handle custom na values
     if custom_na_values is None:
-        na_values = ['', ' ', 'null', 'NULL', 'NAN', 'NaN', 'nan',
-                     'NA', 'na', 'N/A' 'n/a', '#N/A', '#NA', '-NaN', '-nan']
+        na_values = list(_NA_VALUES)
     else:
         na_values = custom_na_values
     # If no df was supplied, instantiate a new one
@@ -40,7 +64,7 @@ def read_res_csv(filename, custom_na_values=None,
     # Scrape through the header
     metadata_lines = []
     eoh_found = False
-    with open(filename) as f:
+    with open(filename, encoding='UTF-8') as f:
         line = ""
         for line in f:
             metadata_lines.append(line)
@@ -52,7 +76,7 @@ def read_res_csv(filename, custom_na_values=None,
                 # e.g. "-9999"
                 na_values.append(new_na_value)
     if not eoh_found:
-        return None  # maybe it's not a .res.csv
+        raise ValueError("File is not a valid .res.csv file")
     col_header_line_number = len(metadata_lines) - 2
     lines_to_skip = list(range(col_header_line_number)) + \
         [col_header_line_number + 1]
@@ -60,13 +84,13 @@ def read_res_csv(filename, custom_na_values=None,
     temp = pd.read_csv(filename, na_values=na_values, skiprows=lines_to_skip)
     # Date index
     temp.set_index(temp.columns[0], inplace=True)
-    temp.index = utils.standardize_datestring_format(temp.index)
+    temp.index = utils.standardize_datestring_format(temp.index, as_index=True)
     temp.index.name = "Date"
     # Check values
     if not allow_nonnumeric:
         for col in temp.columns:
-            if not np.issubdtype(temp[col].dtype, np.number):
-                raise Exception(f"ERROR: Column '{col}' is not numeric!")
+            if not np.issubdtype(temp[col].dtype, np.number):  # type: ignore
+                raise ValueError(f"Column '{col}' is not numeric")
     # Replace column names with field name if required
     if use_field_name:
         field_count = -2                                         #i'm using this -2 value to mean do nothing
@@ -100,23 +124,38 @@ def read_res_csv(filename, custom_na_values=None,
             newdf_ends_before_df_starts = temp.index[0] < df.index[-1]
             df_ends_before_newdf_starts = df.index[-1] < temp.index[0]
             if newdf_ends_before_df_starts or df_ends_before_newdf_starts:
-                raise Exception("ERROR: The dates in the new dataframe do not overlap with the existing dataframe!")
+                raise ValueError("The dates in the new dataframe do not overlap with the existing dataframe!")
         df = df.join(temp, how="outer")
     # utils.assert_df_format_standards(df)
     return utils.TimeseriesDataframe.from_dataframe(df)
 
 
-def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, missing_data_value="", project_name="", source_version="5.30.0.12728", datetime_format=r"%d/%m/%y") -> None:
-    """Writes a dataframe to a res csv.
+def write_res_csv(df: pd.DataFrame, 
+                  filepath: str | Path = "out.res.csv", 
+                  file_version=3, 
+                  missing_data_value="", 
+                  project_name="", 
+                  source_version="5.30.0.12728", 
+                  datetime_format=r"%d/%m/%y") -> None:
+    """Write a dataframe to a ``.res.csv`` file.
 
     Parameters
     ----------
-    df : Dataframe 
-        Dataframe to write to res csv. 
-    filepath
-        Path to output file including extension.
-    missing_data_value : str
-        Identifier for missing data values. Defaults to empty string. 
+    df : pd.DataFrame
+        DataFrame to write. Must have a ``"Date"`` index or a date column as
+        the first column.
+    filepath : str or Path, optional
+        Path to the output file including extension. Default is ``"out.res.csv"``.
+    file_version : int, optional
+        File version number written to the header. Default is 3.
+    missing_data_value : str, optional
+        Value used to represent missing data. Default is ``""``.
+    project_name : str, optional
+        Project name written to the header. Default is ``""``.
+    source_version : str, optional
+        Source version string written to the header. Default is ``"5.30.0.12728"``.
+    datetime_format : str, optional
+        Format string for dates in the output. Default is ``"%d/%m/%y"``.
     """
     # Get metadata
     now = datetime.now().strftime(r"%d/%m/%Y %H:%M")
@@ -126,14 +165,14 @@ def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, miss
     df_date_index = df.index.name == "Date"
     if not df_date_index:
         df.set_index(df.columns[0], inplace=True)
-        df.index = utils.standardize_datestring_format(df.index)
+        df.index = utils.standardize_datestring_format(df.index, as_index=True)
         df.index.name = "Date"
 
     utils.convert_index_to_string(df)
     first_date: datetime = df.index[0]
     last_date: datetime = df.index[-1]
 
-    with open(filepath, 'w') as f:
+    with open(filepath, 'w', encoding="UTF-8") as f:
         f.write(f"File version,{file_version}\n")
         f.write(f"Missing data value,{missing_data_value}\n")
         f.write("EOM\n")
@@ -141,7 +180,7 @@ def write_res_csv(df: pd.DataFrame, filepath="out.res.csv", file_version=3, miss
         f.write(f"Source version,{source_version}\n")
         f.write(f"Latest result run time,{now}\n")
         f.write(f"Simulation time,{first_date} - {last_date}\n")
-        f.write("Field,Units,RunName,ScenarioName,ScenarioInputSetName,Name,Site,ElementName,WaterFeatureType,ElementType,Structure,Custom" + '\n')
+        f.write("Field,Units,RunName,ScenarioName,ScenarioInputSetName,Name,Site,ElementName,WaterFeatureType,ElementType,Structure,Custom\n")
         f.write("EOC\n")
         f.write(f"{num_fields}\n")
         for idx, column_name in enumerate(df.columns):

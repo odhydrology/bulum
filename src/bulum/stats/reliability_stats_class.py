@@ -14,7 +14,7 @@ class Reliability:
     water supply against demand for different timescales (monthly, annual).
     """
 
-    def __init__(self, demand: Union[pd.Series, list, float, int], supply: pd.Series,
+    def __init__(self, demand: pd.Series | list | float | int, supply: pd.Series,
                  demand_timescale: Literal["daily", "monthly", "yearly"] = "daily",
                  demand_type: Literal["total", "daily_constant"] = "total",
                  ignore_leap_years=False, quiet=False) -> None:

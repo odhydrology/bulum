@@ -37,9 +37,13 @@ class Tests(unittest.TestCase):
         df = pd.read_csv("./src/bulum/utils/tests/test_data_missing.csv")
         df["Date"] = utils.standardize_datestring_format(df["Date"].values)
         df.set_index("Date", inplace=True)
-        # The missing value will be read as a string, causing the column to have type "object"
+        # The missing value will be read as a string, causing the column to have type "object" or "str" depending on pandas version
         violations = utils.check_df_format_standards(df)
-        self.assertEqual(violations, [f"Column 'col_1' is not int64 or float64: object"])
+        # Accept either 'object' (pandas <2.x) or 'str' (pandas >=2.x)
+        self.assertIn(violations[0], [
+            "Column 'col_1' is not int64 or float64: object",
+            "Column 'col_1' is not int64 or float64: str"
+        ])
 
     def test_generate_dates(self):
         dates = utils.get_dates(datetime(2000, 1, 1), datetime(2020, 1, 4))
@@ -217,6 +221,29 @@ class Tests(unittest.TestCase):
         wy_fiscal_july = utils.get_wy(["2023-07-01"], wy_month=7, using_end_year=True)
         self.assertEqual(wy_fiscal_july[0], 2024)
 
+    def test_get_wy_as_list_return_type(self):
+        """as_list controls whether the result is a Python list or numpy array."""
+        dates = ["2023-06-30", "2023-07-01"]
+        cases = [
+            ("as_list=True,  using_end_year=False", True,  False, list),
+            ("as_list=True,  using_end_year=True",  True,  True,  list),
+            ("as_list=False, using_end_year=False", False, False, np.ndarray),
+            ("as_list=False, using_end_year=True",  False, True,  np.ndarray),
+        ]
+        for label, as_list, using_end_year, expected_type in cases:
+            with self.subTest(label):
+                result = utils.get_wy(dates, as_list=as_list, using_end_year=using_end_year)
+                self.assertIsInstance(result, expected_type)
+
+    def test_get_wy_as_list_values_unchanged(self):
+        """as_list=False returns the same values as as_list=True."""
+        dates = ["2023-06-30", "2023-07-01"]
+        for using_end_year in (False, True):
+            with self.subTest(using_end_year=using_end_year):
+                as_list = utils.get_wy(dates, using_end_year=using_end_year, as_list=True)
+                as_array = utils.get_wy(dates, using_end_year=using_end_year, as_list=False)
+                self.assertEqual(as_list, as_array.tolist())
+
     def test_get_wy_different_water_year_months(self):
         """Test get_wy with various water year start months"""
         test_date = ["2023-06-15"]
@@ -252,20 +279,20 @@ class Tests(unittest.TestCase):
 
         # Test invalid type (integer) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(20231225)
+            utils.datetime_functions._parse_date_components(20231225)  # type: ignore
         self.assertIn("Expected str or datetime, got int", str(cm.exception))
 
         # Test invalid type (None) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(None)
+            utils.datetime_functions._parse_date_components(None)  # type: ignore
         self.assertIn("Expected str or datetime, got NoneType", str(cm.exception))
 
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(["2023-01-01"])
+            utils.datetime_functions._parse_date_components(["2023-01-01"])  # type: ignore
 
         # Test invalid type (float) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(2023.0)
+            utils.datetime_functions._parse_date_components(2023.0)  # type: ignore
         self.assertIn("Expected str or datetime, got float", str(cm.exception))
 
     def test_get_date_format_edge_cases(self):
@@ -300,15 +327,10 @@ class Tests(unittest.TestCase):
         # numpy datetime64 includes time component when converted to string
         self.assertTrue(str(np_dates[-1]).startswith("9999-12-31"))
 
-        # Test non-consecutive dates should give warning (not error)
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            np_dates = utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"])  # Missing 2023-01-02
-            # Should have warned
-            self.assertEqual(len(w), 1)
-            self.assertIn("Date sequence validation", str(w[0].message))
-            # But still returns all 3 dates (fills in missing dates)
-            self.assertEqual(len(np_dates), 3)
+        # Test non-consecutive dates should raise error with strict mode
+        with self.assertRaises(ValueError) as cm:
+            utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"], check_dates="strict")  # Missing 2023-01-02
+        self.assertIn("Date sequence validation failed", str(cm.exception))
 
     def test_get_dates_error_handling(self):
         """Test get_dates with invalid parameters"""
@@ -376,6 +398,107 @@ class Tests(unittest.TestCase):
         # Test with empty list
         empty_result = utils.get_year_and_month([])
         self.assertEqual(empty_result, [])
+
+    # ==== CHECK_DATES MODE TESTS ====
+
+    def test_to_np_datetimes64d_check_dates_off(self):
+        """Test to_np_datetimes64d with check_dates=False (no warnings or errors)."""
+        # Non-consecutive dates should not warn or error
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            np_dates = utils.to_np_datetimes64d(["2023-01-01", "2023-01-05"], check_dates=False)
+            # Should not have warned
+            self.assertEqual(len(w), 0)
+            # Returns all 5 dates (fills in missing dates)
+            self.assertEqual(len(np_dates), 5)
+            self.assertTrue(str(np_dates[0]).startswith("2023-01-01"))
+            self.assertTrue(str(np_dates[-1]).startswith("2023-01-05"))
+
+    def test_to_np_datetimes64d_check_dates_warn(self):
+        """Test to_np_datetimes64d with check_dates='warn' (warning mode)."""
+        # Non-consecutive dates should warn but not error
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            np_dates = utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"], check_dates="warn")
+            # Should have warned
+            self.assertEqual(len(w), 1)
+            self.assertIn("Date sequence validation failed", str(w[0].message))
+            self.assertIn("Returning all dates", str(w[0].message))
+            # But still returns all 3 dates (fills in missing dates)
+            self.assertEqual(len(np_dates), 3)
+
+    def test_to_np_datetimes64d_check_dates_true(self):
+        """Test to_np_datetimes64d with check_dates=True (backward compatible warning mode)."""
+        # check_dates=True should behave same as "warn"
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            np_dates = utils.to_np_datetimes64d(["2023-01-01", "2023-01-10"], check_dates=True)
+            # Should have warned
+            self.assertEqual(len(w), 1)
+            self.assertIn("Date sequence validation failed", str(w[0].message))
+            # Returns all 10 dates
+            self.assertEqual(len(np_dates), 10)
+
+    def test_to_np_datetimes64d_check_dates_strict(self):
+        """Test to_np_datetimes64d with check_dates='strict' (error mode)."""
+        # Non-consecutive dates should raise ValueError
+        with self.assertRaises(ValueError) as cm:
+            utils.to_np_datetimes64d(["2023-01-01", "2023-01-03"], check_dates="strict")
+        self.assertIn("Date sequence validation failed", str(cm.exception))
+        self.assertIn("Expected 3 consecutive dates", str(cm.exception))
+        self.assertIn("found 2 values", str(cm.exception))
+
+    def test_to_np_datetimes64d_check_dates_consecutive(self):
+        """Test to_np_datetimes64d with consecutive dates (no warnings in any mode)."""
+        # Consecutive dates should not warn in any mode
+        consecutive_dates = ["2023-01-01", "2023-01-02", "2023-01-03"]
+
+        for mode in [False, True, "warn", "strict"]:
+            with warnings.catch_warnings(record=True) as w:
+                warnings.simplefilter("always")
+                np_dates = utils.to_np_datetimes64d(consecutive_dates, check_dates=mode)
+                # Should not warn for consecutive dates
+                self.assertEqual(len(w), 0, f"Unexpected warning for mode={mode}")
+                self.assertEqual(len(np_dates), 3)
+
+    def test_to_np_datetimes64d_pandas_series_with_check_dates(self):
+        """Test to_np_datetimes64d handles pandas Series with different check_dates modes."""
+        dates_series = pd.Series(["2023-01-01", "2023-01-02", "2023-01-03"])
+
+        # Test with different modes
+        for mode in [False, "warn", "strict"]:
+            np_dates = utils.to_np_datetimes64d(dates_series, check_dates=mode)
+            self.assertEqual(len(np_dates), 3)
+
+    def test_standardize_datestring_format_no_timestamps(self):
+        """Test that standardize_datestring_format returns clean YYYY-MM-DD format without timestamps."""
+        # Test single date
+        result = utils.standardize_datestring_format(['01/01/2000'])
+        self.assertEqual(result, ['2000-01-01'])
+        self.assertNotIn('T', result[0])
+        self.assertEqual(len(result[0]), 10)
+
+        # Test multiple dates
+        result = utils.standardize_datestring_format(['25/12/2023', '26/12/2023', '27/12/2023'])
+        self.assertEqual(result, ['2023-12-25', '2023-12-26', '2023-12-27'])
+        for date_str in result:
+            self.assertNotIn('T', date_str)
+            self.assertEqual(len(date_str), 10)
+            self.assertIsInstance(date_str, str)
+
+    def test_standardize_datestring_format_stochastic_dates(self):
+        """Test standardize_datestring_format with stochastic date ranges (years 0002-9999)."""
+        # Test early dates (year 0002)
+        early_dates = ["01/01/0002", "02/01/0002", "03/01/0002"]
+        result = utils.standardize_datestring_format(early_dates)
+        self.assertEqual(result, ["0002-01-01", "0002-01-02", "0002-01-03"])
+        self.assertTrue(all(len(d) == 10 for d in result))
+
+        # Test late dates (year 9999)
+        late_dates = ["29/12/9999", "30/12/9999", "31/12/9999"]
+        result = utils.standardize_datestring_format(late_dates)
+        self.assertEqual(result, ["9999-12-29", "9999-12-30", "9999-12-31"])
+        self.assertTrue(all(len(d) == 10 for d in result))
 
     def test_standardize_datestring_format_stochastic_early_dates(self):
         """Test standardize_datestring_format with dates before 1677 (outside numpy datetime64 range).
@@ -468,3 +591,111 @@ class Tests(unittest.TestCase):
         for date_str in result:
             self.assertNotIn('T', date_str)
             self.assertEqual(len(date_str), 10)
+
+    def test_standardize_datestring_format_as_index_return_type_and_values(self):
+        """as_index controls return type; values are correct for all input/flag combinations."""
+        dates_list = ['25/12/2023', '26/12/2023']
+        dates_index = pd.Index(dates_list)
+        expected = ['2023-12-25', '2023-12-26']
+        cases = [
+            ("list input,  as_index=False", dates_list,  False, list),
+            ("list input,  as_index=True",  dates_list,  True,  pd.Index),
+            ("Index input, as_index=False", dates_index, False, list),
+            ("Index input, as_index=True",  dates_index, True,  pd.Index),
+        ]
+        for label, values, as_index, expected_type in cases:
+            with self.subTest(label):
+                result = utils.standardize_datestring_format(values, as_index=as_index)
+                self.assertIsInstance(result, expected_type)
+                self.assertEqual(list(result), expected)
+
+    def test_standardize_datestring_format_as_index_assignable_to_df_index(self):
+        """Result of as_index=True can be assigned directly to df.index."""
+        cases = [
+            ("list input",  ['25/12/2023', '26/12/2023']),
+            ("Index input", pd.Index(['25/12/2023', '26/12/2023'])),
+        ]
+        for label, values in cases:
+            with self.subTest(label):
+                df = pd.DataFrame({'val': [1, 2]}, index=list(values))
+                df.index = utils.standardize_datestring_format(df.index, as_index=True)
+                self.assertEqual(list(df.index), ['2023-12-25', '2023-12-26'])
+
+    # ==== MODE TESTS (GENERATE VS PARSE) ====
+
+    def test_to_np_datetimes64d_generate_mode_consecutive(self):
+        """Test to_np_datetimes64d in generate mode with consecutive dates."""
+        dates = ["2023-01-01", "2023-01-02", "2023-01-03"]
+        result = utils.to_np_datetimes64d(dates, mode="generate")
+        self.assertEqual(len(result), 3)
+        self.assertTrue(str(result[0]).startswith("2023-01-01"))
+        self.assertTrue(str(result[-1]).startswith("2023-01-03"))
+
+    def test_to_np_datetimes64d_generate_mode_with_gaps(self):
+        """Test to_np_datetimes64d in generate mode fills gaps."""
+        dates = ["2023-01-01", "2023-01-05"]
+        result = utils.to_np_datetimes64d(dates, mode="generate", check_dates=False)
+        # Should generate all 5 dates
+        self.assertEqual(len(result), 5)
+        self.assertTrue(str(result[0]).startswith("2023-01-01"))
+        self.assertTrue(str(result[2]).startswith("2023-01-03"))
+        self.assertTrue(str(result[-1]).startswith("2023-01-05"))
+
+    def test_to_np_datetimes64d_parse_mode_consecutive(self):
+        """Test to_np_datetimes64d in parse mode with consecutive dates."""
+        dates = ["2023-01-01", "2023-01-02", "2023-01-03"]
+        result = utils.to_np_datetimes64d(dates, mode="parse")
+        self.assertEqual(len(result), 3)
+        self.assertTrue(str(result[0]).startswith("2023-01-01"))
+        self.assertTrue(str(result[-1]).startswith("2023-01-03"))
+
+    def test_to_np_datetimes64d_parse_mode_preserves_gaps(self):
+        """Test to_np_datetimes64d in parse mode preserves gaps."""
+        dates = ["2023-01-01", "2023-01-05"]
+        result = utils.to_np_datetimes64d(dates, mode="parse")
+        # Should only have the 2 dates provided
+        self.assertEqual(len(result), 2)
+        self.assertTrue(str(result[0]).startswith("2023-01-01"))
+        self.assertTrue(str(result[1]).startswith("2023-01-05"))
+
+    def test_to_np_datetimes64d_parse_mode_random_dates(self):
+        """Test to_np_datetimes64d in parse mode with non-consecutive dates."""
+        dates = ["2023-01-15", "2023-03-20", "2023-02-10", "2023-12-25"]
+        result = utils.to_np_datetimes64d(dates, mode="parse")
+        # Should have exactly 4 dates in the order provided
+        self.assertEqual(len(result), 4)
+        self.assertTrue(str(result[0]).startswith("2023-01-15"))
+        self.assertTrue(str(result[1]).startswith("2023-03-20"))
+        self.assertTrue(str(result[2]).startswith("2023-02-10"))
+        self.assertTrue(str(result[3]).startswith("2023-12-25"))
+
+    def test_to_np_datetimes64d_parse_mode_ignores_check_dates(self):
+        """Test that parse mode ignores check_dates parameter."""
+        dates = ["2023-01-01", "2023-01-10"]
+        # check_dates should have no effect in parse mode (no warnings or errors)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            result = utils.to_np_datetimes64d(dates, mode="parse", check_dates="strict")
+            self.assertEqual(len(w), 0)
+            self.assertEqual(len(result), 2)
+
+    def test_to_np_datetimes64d_generate_vs_parse_comparison(self):
+        """Compare generate and parse modes with non-consecutive dates."""
+        dates = ["2023-01-01", "2023-01-03", "2023-01-07"]
+
+        # Generate mode fills gaps
+        generate_result = utils.to_np_datetimes64d(dates, mode="generate", check_dates=False)
+        self.assertEqual(len(generate_result), 7)  # Jan 1-7
+
+        # Parse mode preserves original dates
+        parse_result = utils.to_np_datetimes64d(dates, mode="parse")
+        self.assertEqual(len(parse_result), 3)  # Only Jan 1, 3, 7
+
+    def test_to_np_datetimes64d_parse_mode_stochastic_dates(self):
+        """Test parse mode with stochastic date ranges (non-consecutive years)."""
+        dates = ["0002-01-01", "0005-06-15", "9999-12-31"]
+        result = utils.to_np_datetimes64d(dates, mode="parse")
+        self.assertEqual(len(result), 3)
+        self.assertTrue(str(result[0]).startswith("0002-01-01"))
+        self.assertTrue(str(result[1]).startswith("0005-06-15"))
+        self.assertTrue(str(result[2]).startswith("9999-12-31"))

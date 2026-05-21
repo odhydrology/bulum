@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
+## 0.3.3
+
+!! IMPORTANT !! - This repo no longer supports Python 3.9 (end of life). The new minimum tested python version is 3.11.
+
+### Added
+- utils.get_wy() now accepts a single string argument, returning a single integer
+- utils.DataframeEnsemble.map() - apply function over all dataframes in ensemble. Note this is distinct to the inbuilt `map` as it returns a new DataframeEnsemble.
+- utils.TimeseriesDataframe.tsdf_apply() which does not clobber metadata - see also changes in Changed subsection.
+- utils.TimeseriesDataframe and utils.DataframeEnsemble - serialisation and deserialisation methods with unzipped folder, zip folder, pickle and json save formats.
+- utils.to_np_datetimes64d(): added `mode` parameter with "generate" (default) and "parse" options
+  - "generate" mode: Creates all dates between first and last date (default behavior)
+  - "parse" mode: Individually parses each date string, preserving gaps and non-consecutive dates
+- utils.to_np_datetimes64d(): added `check_dates` parameter with three validation modes
+  - `False`: No validation (suppress all warnings/errors)
+  - `True` or `"warn"`: Issue UserWarning if lengths don't match (default, backward compatible)
+  - `"strict"`: Raise ValueError if lengths don't match
+- io: roundtrip tests for all IO reader/writer pairs (idx_io, res_csv_io, csv_io) to detect data size issues
+- iqqm_out_reader: Converted from os.path to pathlib
+- iqqm_out_reader: Improved IQN file parsing robustness by filtering comment lines instead of using hardcoded line indices
+- utils.standardise_datestring_format() as_index argument to coerce to Index
+- utils.get_wy() as_list argument to return coerced list or numpy array (used in calculation).
+- negflo `Negflo`: `sm*`, `rw1`, and `cl1` methods now return the resulting `pd.DataFrame`, enabling functional-style usage (e.g. `df = negflo.sm2()`).
+- negflo `Negflo.df_residual`: exposed as a read-only property; direct assignment now raises `AttributeError`.
+- negflo `Negflo.to_file()`: new `folder` keyword parameter to specify the output directory when using auto-named files.
+- negflo `Negflo.run_all()`: new `folder` parameter (replaces the old `filename` prefix parameter) to place all output files in a directory.
+
+### Changed
+- utils.get_wy(using_end_year) is now a keyword argument
+- utils.get_wy() now accepts `as_list` keyword argument (default True) to return a numpy array instead of a list; implementation vectorised with numpy
+- utils.TimeseriesDataframe.add_tag() now accepts lists of strings as tags
+- utils.TimeseriesDataframe now defines _constructor and _metadata - standard pandas operations will now return a TimeseriesDataframe as opposed to a pandas.DataFrame for most standard operations.
+- utils.DataframeEnsemble - None and bool is now explicitly unsupported as key values - this can be overriden by assigning directly to the underlying ensemble dict but compatibility of methods is not guaranteed
+- utils.to_np_datetimes64d(): `check_dates` parameter only applies in "generate" mode (ignored in "parse" mode, default behaviour checks dates)
+- utils.standardize_datestring_format(): now uses `check_dates=False` internally for non-consecutive date support
+- utils.get_wy(): now uses `check_dates=False` internally for non-consecutive date support
+- io: consolidated idx_io_native.py into idx_io.py (all IDX I/O now in single file)
+- io.idx_io: updated module docstring to clarify support for reading IQQM .OUT binary files
+- io.read_res_csv() now raises error instead of silently failing
+- negflo `Negflo`: each `sm*`, `rw1`, and `cl1` call now automatically resets from the stored raw residual before computing, so repeated or interleaved calls are independent of one another.
+- negflo `Negflo`: `sm*`, `rw1`, and `cl1` now return a copy of the residual dataframe, so multiple results held simultaneously are independent of each other and of `df_residual`.
+- negflo `Negflo.df_residual`: property now returns a copy, making the read-only guarantee meaningful.
+- negflo `Negflo.run_all()`: parameter renamed from `filename` (string prefix) to `folder` (output directory, default `"."`); file naming is now delegated to `to_file()`.
+
+### Fixed
+- utils.TimeseriesDataframe: arithmetic operations with pandas Series (e.g., `tsdf - tsdf.mean()`) now correctly preserve metadata. Overridden arithmetic operators (`__add__`, `__sub__`, `__mul__`, `__truediv__`, etc.) ensure metadata is preserved for operations with scalars and Series. Note: binary operations between two TimeseriesDataframes have no guarantees about which operand's metadata is preserved.
+- io.write_idx_native(): fixed bug that doubled data size on round-trip by using structured arrays instead of plain numpy arrays
+- io._detect_header_bytes(): fixed incorrect header byte detection for single-column IDX files
+- negflo - longstanding bug with forward/backward implementations creating new rows instead of modifying residual.
+- negflo `Negflo` SM4/SM5: when the series ends on a positive value with `carry_negative=True`, remaining negative accumulation is now distributed into the trailing positive period rather than going to overflow.
+
+
 ## 0.3.2
 
 ### Fixes
