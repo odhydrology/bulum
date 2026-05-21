@@ -98,8 +98,9 @@ class Tests(unittest.TestCase):
         self.assertEqual(7, s[len(s) - 2])
 
     def test_sm4(self):
-        """Tests to make sure ordering is correct i.e. smooths backward not
-        forward."""
+        """Tests ordering: smooths backward into preceding positives first.
+        When series ends on a positive with remaining neg_acc, the trailing
+        positive period also absorbs the remainder."""
         df = pd.DataFrame({
             "a": [1, -1],
             "b": [-1, 1]
@@ -109,8 +110,10 @@ class Tests(unittest.TestCase):
         self.assertEqual(0, negflo.neg_overflows["a"])
         self.assertEqual(0, np.count_nonzero(negflo.df_residual["a"]))
 
-        self.assertEqual(-1, negflo.neg_overflows["b"])
-        self.assertEqual(1, np.count_nonzero(negflo.df_residual["b"]))
+        # b=[-1, 1]: no preceding positive, but series ends on positive so
+        # the trailing 1 absorbs the -1 at end-of-period.
+        self.assertEqual(0, negflo.neg_overflows["b"])
+        self.assertEqual(0, np.count_nonzero(negflo.df_residual["b"]))
 
     def test_sm4_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not

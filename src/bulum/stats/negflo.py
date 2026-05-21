@@ -429,6 +429,14 @@ class Negflo:
                 prev_was_negative = False
                 positive_period_tracker.add(residual_idx, residual_val)
 
+        if (self._has_neg_flow_to_redistribute(neg_acc)
+                and positive_period_tracker.is_tracking()):
+            neg_acc, smoothed_pos_flows = self._smooth_flows(neg_acc, positive_period_tracker.get())
+            for list_idx, df_idx in enumerate(positive_period_tracker.indices()):
+                residual.iloc[df_idx] = smoothed_pos_flows[list_idx]
+            if not carry_negative:
+                neg_acc = 0
+
         self._store_overflow(residual.name, neg_acc)
         return residual
 
