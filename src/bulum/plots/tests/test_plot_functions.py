@@ -2,6 +2,8 @@ import random
 import unittest
 from datetime import datetime
 
+import matplotlib
+matplotlib.use('Agg')  # Set non-interactive backend for testing
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
