@@ -131,6 +131,9 @@ dmypy.json
 # VSCode
 .vscode/
 
+# Temp files
+*.tmp.*
+
 ################################################### CHAS
 test_outputs/
 *.gitignore.*

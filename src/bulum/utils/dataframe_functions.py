@@ -74,25 +74,36 @@ def assert_df_format_standards(df: pd.DataFrame) -> None:
                          '\n'.join(violations))
 
 
+@overload
 def crop_to_wy(df: pd.DataFrame, wy_month: int = 7) -> pd.DataFrame:
+    ...
+
+
+@overload
+def crop_to_wy(df: pd.Series, wy_month: int = 7) -> pd.Series:
+    ...
+
+
+def crop_to_wy(df: pd.DataFrame | pd.Series, wy_month: int = 7) -> pd.DataFrame | pd.Series:
     """
-    Crop dataframe to complete water years only.
+    Crop dataframe or series to complete water years only.
 
     This function removes partial water years from the beginning and end of the
-    dataframe, keeping only complete water years based on the specified water
-    year start month.
+    dataframe or series, keeping only complete water years based on the specified
+    water year start month.
 
     Parameters
     ----------
-    df : :class:`~pandas.DataFrame`
-        Input dataframe with date index.
+    df : :class:`~pandas.DataFrame` or :class:`~pandas.Series`
+        Input dataframe or series with date index.
     wy_month : int, optional
         Water year start month (1=January, 7=July, etc.). Defaults to 7.
 
     Returns
     -------
-    :class:`~pandas.DataFrame`
-        Cropped dataframe containing only complete water years.
+    :class:`~pandas.DataFrame` or :class:`~pandas.Series`
+        Cropped dataframe or series containing only complete water years.
+        Returns the same type as the input.
     """
     start_date = utils.get_wy_start_date(df, wy_month)
     end_date = utils.get_wy_end_date(df, wy_month)
@@ -103,7 +114,6 @@ def crop_to_wy(df: pd.DataFrame, wy_month: int = 7) -> pd.DataFrame:
 
 
 def check_df_format_standards(df: pd.DataFrame) -> list[str]:
-    # TODO: return optional str instead
     """
     Checks if a given dataframe meets standards generally required by
     bulum functions. These standards include:
@@ -293,7 +303,6 @@ def convert_index_to_datetime(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     elif isinstance(df.index[0], str):
         # Try to convert strings to datetimes.
         # df.index = pd.to_datetime(df.index, **kwargs)
-        # TODO 
         df.index = strings_to_datetimes(df.index, **kwargs)
     else:
         raise TypeError("The index is not strings or datetimes. "

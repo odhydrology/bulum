@@ -8,6 +8,9 @@ import pandas as pd
 import bulum.io as bio
 from bulum import utils
 
+# pylint: disable=protected-access
+# For testing _parse_date_components
+
 
 class Tests(unittest.TestCase):
 
@@ -256,20 +259,20 @@ class Tests(unittest.TestCase):
 
         # Test invalid type (integer) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(20231225)
+            utils.datetime_functions._parse_date_components(20231225)  # type: ignore
         self.assertIn("Expected str or datetime, got int", str(cm.exception))
 
         # Test invalid type (None) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(None)
+            utils.datetime_functions._parse_date_components(None)  # type: ignore
         self.assertIn("Expected str or datetime, got NoneType", str(cm.exception))
 
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(["2023-01-01"])
+            utils.datetime_functions._parse_date_components(["2023-01-01"])  # type: ignore
 
         # Test invalid type (float) - should raise TypeError
         with self.assertRaises(TypeError) as cm:
-            utils.datetime_functions._parse_date_components(2023.0)
+            utils.datetime_functions._parse_date_components(2023.0)  # type: ignore
         self.assertIn("Expected str or datetime, got float", str(cm.exception))
 
     def test_get_date_format_edge_cases(self):
@@ -472,3 +475,157 @@ class Tests(unittest.TestCase):
         for date_str in result:
             self.assertNotIn('T', date_str)
             self.assertEqual(len(date_str), 10)
+
+    # ==== TESTS FOR SINGLE STRING INPUT TO get_wy ====
+
+    def test_get_wy_single_string_basic(self):
+        """Test get_wy with single string input returns single integer."""
+        # Test default water year (July start)
+        wy = utils.get_wy("2023-06-30")
+        self.assertIsInstance(wy, (int, np.integer))
+        self.assertEqual(wy, 2022)
+
+        wy = utils.get_wy("2023-07-01")
+        self.assertIsInstance(wy, (int, np.integer))
+        self.assertEqual(wy, 2023)
+
+    def test_get_wy_single_string_different_months(self):
+        """Test get_wy with single string for different water year start months."""
+        # Test with January start (wy_month=1)
+        wy_jan = utils.get_wy("2023-06-15", wy_month=1)
+        self.assertIsInstance(wy_jan, (int, np.integer))
+        self.assertEqual(wy_jan, 2023)
+
+        # Test with October start (wy_month=10)
+        wy_oct_before = utils.get_wy("2023-09-30", wy_month=10)
+        self.assertEqual(wy_oct_before, 2022)
+
+        wy_oct_after = utils.get_wy("2023-10-01", wy_month=10)
+        self.assertEqual(wy_oct_after, 2023)
+
+    def test_get_wy_single_string_using_end_year(self):
+        """Test get_wy with single string using fiscal year convention."""
+        # Standard convention (using_end_year=False)
+        wy_std = utils.get_wy("2023-06-30", wy_month=7, using_end_year=False)
+        self.assertIsInstance(wy_std, (int, np.integer))
+        self.assertEqual(wy_std, 2022)
+
+        # Fiscal convention (using_end_year=True)
+        wy_fiscal = utils.get_wy("2023-06-30", wy_month=7, using_end_year=True)
+        self.assertIsInstance(wy_fiscal, (int, np.integer))
+        self.assertEqual(wy_fiscal, 2023)
+
+        # Compare before and after water year boundary
+        wy_fiscal_before = utils.get_wy("2024-06-30", wy_month=7, using_end_year=True)
+        self.assertEqual(wy_fiscal_before, 2024)
+
+        wy_fiscal_after = utils.get_wy("2024-07-01", wy_month=7, using_end_year=True)
+        self.assertEqual(wy_fiscal_after, 2025)
+
+    def test_get_wy_single_string_boundary_dates(self):
+        """Test get_wy with single string at water year boundaries."""
+        # Test last day of water year
+        wy_last = utils.get_wy("2023-06-30", wy_month=7)
+        self.assertEqual(wy_last, 2022)
+
+        # Test first day of water year
+        wy_first = utils.get_wy("2023-07-01", wy_month=7)
+        self.assertEqual(wy_first, 2023)
+
+        # Test middle of water year
+        wy_mid = utils.get_wy("2023-12-15", wy_month=7)
+        self.assertEqual(wy_mid, 2023)
+
+    def test_get_wy_single_string_leap_year(self):
+        """Test get_wy with single string on leap year dates."""
+        # Leap year February 29th with March start
+        wy_leap = utils.get_wy("2020-02-29", wy_month=3)
+        self.assertIsInstance(wy_leap, (int, np.integer))
+        self.assertEqual(wy_leap, 2019)
+
+        # Non-leap year February 28th
+        wy_non_leap = utils.get_wy("2021-02-28", wy_month=3)
+        self.assertEqual(wy_non_leap, 2020)
+
+    def test_get_wy_single_string_edge_year_values(self):
+        """Test get_wy with single string for extreme year values."""
+        # Early year (year 100)
+        wy_early = utils.get_wy("0100-07-01", wy_month=7)
+        self.assertIsInstance(wy_early, (int, np.integer))
+        self.assertEqual(wy_early, 100)
+
+        # Late year
+        wy_late = utils.get_wy("9999-06-30", wy_month=7)
+        self.assertIsInstance(wy_late, (int, np.integer))
+        self.assertEqual(wy_late, 9998)
+
+        wy_late = utils.get_wy("9999-07-01", wy_month=7)
+        self.assertIsInstance(wy_late, (int, np.integer))
+        self.assertEqual(wy_late, 9999)
+
+        # Year boundary for early year
+        wy_early_before = utils.get_wy("0100-06-30", wy_month=7)
+        self.assertEqual(wy_early_before, 99)
+
+    def test_get_wy_single_vs_list_consistency(self):
+        """Test that single string input produces same result as single-element list."""
+        test_date = "2023-08-15"
+
+        # Get result with single string
+        wy_single = utils.get_wy(test_date)
+
+        # Get result with list containing one element
+        wy_list = utils.get_wy([test_date])
+
+        # They should be equivalent
+        self.assertEqual(wy_single, wy_list[0])
+        self.assertIsInstance(wy_single, (int, np.integer))
+        self.assertIsInstance(wy_list[0], (int, np.integer))
+
+    def test_get_wy_single_string_all_months(self):
+        """Test get_wy with single string for all 12 possible water year start months."""
+        # Test a date in the middle of the year for all possible wy_month values
+        test_date = "2023-06-15"
+
+        for wy_month in range(1, 13):
+            wy = utils.get_wy(test_date, wy_month=wy_month)
+            self.assertIsInstance(wy, (int, np.integer))
+            # June 15 should be in different water years depending on start month
+            if wy_month <= 6:
+                # If WY starts before or in June, June 15 is in current calendar year
+                self.assertEqual(wy, 2023)
+            else:
+                # If WY starts after June, June 15 is in previous water year
+                self.assertEqual(wy, 2022)
+
+    def test_get_wy_single_string_type_guarantee(self):
+        """Test that single string input always returns int/np.integer, never list."""
+        dates_to_test = [
+            "2023-01-01",
+            "2023-06-30",
+            "2023-07-01",
+            "2023-12-31",
+            "2020-02-29",  # Leap year
+        ]
+
+        for date_str in dates_to_test:
+            wy = utils.get_wy(date_str)
+            self.assertIsInstance(wy, (int, np.integer), f"Expected int/np.integer for date {date_str}, got {type(wy)}")
+            self.assertNotIsInstance(wy, list, "Should not return list for single string")
+
+    def test_get_wy_single_string_multiple_calls(self):
+        """Test multiple independent calls with single strings produce correct results."""
+        # Multiple independent calls should each return a single integer
+        wy1 = utils.get_wy("2023-01-15")
+        wy2 = utils.get_wy("2023-06-15")
+        wy3 = utils.get_wy("2023-07-15")
+        wy4 = utils.get_wy("2023-12-15")
+
+        self.assertEqual(wy1, 2022)  # January is in WY 2022 (July start)
+        self.assertEqual(wy2, 2022)  # June is in WY 2022
+        self.assertEqual(wy3, 2023)  # July is in WY 2023
+        self.assertEqual(wy4, 2023)  # December is in WY 2023
+
+        # All should be integers
+        for wy in [wy1, wy2, wy3, wy4]:
+            self.assertIsInstance(wy, (int, np.integer))
