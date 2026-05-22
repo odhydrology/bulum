@@ -8,10 +8,19 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
+import os
+import datetime
+year = str(datetime.datetime.now().year)
+
 project = 'Bulum'
-copyright = '2025, OD Hydrology'
+copyright = f'{year}, OD Hydrology'
 author = 'OD Hydrology'
-release = '0.3.2'
+try:
+    exec(open('../src/bulum/version.py').read())
+    release = __version__  # noqa: F821
+except FileNotFoundError as e:
+    print(f"cwd={os.getcwd()}")
+    raise
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -19,9 +28,9 @@ release = '0.3.2'
 extensions = [
     "sphinx.ext.githubpages",
     # "sphinx.ext.apidoc",
-    'sphinx.ext.napoleon',
+    'sphinx.ext.napoleon',  # converts docstrings to sphinx compatible reST format
     "myst_parser",
-    "sphinx.ext.intersphinx",
+    "sphinx.ext.intersphinx",  # allows linking to e.g. pandas, numpy
 ]
 
 templates_path = ['_templates']
@@ -32,25 +41,6 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 add_module_names = False
 
 # -- Extension configuration -------------------------------------------------
-
-apidoc_modules = [
-    {
-        'path': '../src/bulum',
-        'destination': 'source/',
-        'exclude_patterns': ['**/test*',
-                             '*.gitignore.*'],
-        # 'max_depth': 4,
-        'follow_links': False,
-        'separate_modules': True,
-        'include_private': False,
-        'no_headings': False,
-        'module_first': False,
-        'implicit_namespaces': False,
-        'automodule_options': {
-            'members', 'show-inheritance', 'undoc-members'
-        },
-    },
-]
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
@@ -63,4 +53,3 @@ intersphinx_mapping = {
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'sphinx_rtd_theme'
-html_static_path = ['_static']
