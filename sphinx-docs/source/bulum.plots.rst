@@ -1,6 +1,11 @@
 bulum.plots package
 ===================
 
+.. automodule:: bulum.plots
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Submodules
 ----------
 

@@ -1,6 +1,11 @@
 bulum.stoch package
 ===================
 
+.. automodule:: bulum.stoch
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Submodules
 ----------
 
