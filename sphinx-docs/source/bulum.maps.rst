@@ -1,6 +1,11 @@
 bulum.maps package
 ==================
 
+.. automodule:: bulum.maps
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Submodules
 ----------
 
