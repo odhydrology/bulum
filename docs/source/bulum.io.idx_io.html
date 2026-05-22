@@ -6,21 +6,21 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.io.idx_io module &mdash; Bulum 0.3.2 documentation</title>
+  <title>bulum.io.idx_io module &mdash; Bulum 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="bulum.io.idx_io_native module" href="bulum.io.idx_io_native.html" />
-    <link rel="prev" title="bulum.io.res_csv_io module" href="bulum.io.res_csv_io.html" /> 
+    <link rel="next" title="bulum.io.iqqm_out_reader module" href="bulum.io.iqqm_out_reader.html" />
+    <link rel="prev" title="bulum.io.general_io module" href="bulum.io.general_io.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -89,22 +89,153 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bulum-io-idx-io-module">
-<h1>bulum.io.idx_io module<a class="headerlink" href="#bulum-io-idx-io-module" title="Link to this heading"></a></h1>
+  <section id="module-bulum.io.idx_io">
+<span id="bulum-io-idx-io-module"></span><h1>bulum.io.idx_io module<a class="headerlink" href="#module-bulum.io.idx_io" title="Link to this heading"></a></h1>
+<p>IO functions for IDX files and IQQM .OUT files.</p>
+<p>This module provides functions for reading and writing IDX files (both the text
+index files and their corresponding binary .OUT data files) used by the IQQM
+hydrological model. Functions include both native Python implementations and
+utilities that rely on external tools like csvidx.exe.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.io.idx_io.read_idx">
+<span class="sig-name descname"><span class="pre">read_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">skip_header_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io.read_idx" title="Link to this definition"></a></dt>
+<dd><p>Read IDX file and corresponding IQQM .OUT binary file.</p>
+<p>This function reads an IQQM .IDX index file and its corresponding .OUT binary
+data file, returning the data as a DataFrame. Currently only supports daily
+data (date_flag=0).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – Path to the IDX file. The corresponding .OUT file is expected to be in
+the same directory with the same base name.</p></li>
+<li><p><strong>skip_header_bytes</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to skip header bytes in the corresponding .OUT file. Some versions
+of IQQM compiled with older compilers include metadata/junk data as a
+header row. If None (default), attempts automatic detection based on file
+structure.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataFrame with datetime index and columns named as
+“{num}&gt;{source_file}&gt;{description}”.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>utils.TimeseriesDataframe</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If the IDX file or corresponding OUT file does not exist.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.14)"><strong>NotImplementedError</strong></a> – If the file contains monthly (date_flag=1) or annual (date_flag=3) data.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the date_flag in the file is not 0, 1, or 3.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.io.idx_io.write_area_ts_csv">
+<span class="sig-name descname"><span class="pre">write_area_ts_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'(mm.d^-1)'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io.write_area_ts_csv" title="Link to this definition"></a></dt>
+<dd><p>Write timeseries data to area-weighted CSV format for use with csvidx.</p>
+<p>This function writes a DataFrame to a CSV file in a specific format used by
+the csvidx tool, with column names truncated to 12 characters and a header
+row containing catchment area information (defaulting to 1.0 km^2 for all
+columns).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – DataFrame with datetime index to write.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – Path to the output CSV file.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;</em><em>(</em><em>mm.d^-1</em><em>)</em><em>&quot;</em>) – Units string to write in the header row.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If column names clash when truncated to 12 characters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.io.idx_io.write_idx">
+<span class="sig-name descname"><span class="pre">write_idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleanup_tempfile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exist_ok</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io.write_idx" title="Link to this definition"></a></dt>
+<dd><p>Write IDX file from dataframe using csvidx.exe.</p>
+<p>This function creates both an .IDX index file and a corresponding .OUT binary
+file by first writing a temporary CSV file and then calling the external
+csvidx.exe utility.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>DataFrame</em>) – DataFrame with datetime index to write.</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – Path to the IDX file to write. Will overwrite any existing file if
+<cite>exist_ok</cite> is <cite>True</cite>.</p></li>
+<li><p><strong>cleanup_tempfile</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – Whether to remove the temporary CSV file after conversion.</p></li>
+<li><p><strong>exist_ok</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default=True</em>) – If False, raise FileExistsError if the file already exists. If True,
+allow overwriting existing files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileExistsError" title="(in Python v3.14)"><strong>FileExistsError</strong></a> – If <cite>exist_ok</cite> is <cite>False</cite> and <cite>filename</cite> already exists.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If csvidx.exe is not found on path.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.io.idx_io.write_idx_native">
+<span class="sig-name descname"><span class="pre">write_idx_native</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'None'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'None'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.io.idx_io.write_idx_native" title="Link to this definition"></a></dt>
+<dd><p>Write IDX and OUT binary files using pure Python (no external tools).</p>
+<p>This function writes both an .IDX index file and a corresponding .OUT binary
+file using native Python, without requiring external tools like csvidx.exe.
+Currently only supports daily data (date_flag=0), matching the capabilities
+of <a class="reference internal" href="#bulum.io.idx_io.read_idx" title="bulum.io.idx_io.read_idx"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_idx()</span></code></a>.</p>
+<p>The function assumes all columns in the DataFrame share the same units and
+data type (e.g., all Precipitation in mm, or all Flow in ML/d).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame with datetime index containing the data to write. Should
+follow the same format as output from <a class="reference internal" href="#bulum.io.idx_io.read_idx" title="bulum.io.idx_io.read_idx"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_idx()</span></code></a>.</p></li>
+<li><p><strong>filepath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><em>Path</em>) – Path to the IDX file to write (including .IDX extension). The
+corresponding .OUT file will be created with the same base name.</p></li>
+<li><p><strong>type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;None&quot;</em>) – Data type specifier for all columns in df, e.g., “Gauged Flow”,
+“Precipitation”, “Evaporation”, etc.</p></li>
+<li><p><strong>units</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>default=&quot;None&quot;</em>) – Units for all data in df, e.g., “mm”, “ML/d”, “mm/day”, etc.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><p>The first line of the IDX file contains version/timestamp metadata
+(currently a placeholder copied from reference files).</p></li>
+<li><p>Column names in the output are truncated/padded to fit the IDX format
+specifications (12 chars for source, 40 for description, etc.).</p></li>
+<li><p>The .OUT file is written in binary format as 32-bit floats (float32).</p></li>
+</ul>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#bulum.io.idx_io.read_idx" title="bulum.io.idx_io.read_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_idx</span></code></a></dt><dd><p>Read IDX and OUT files.</p>
+</dd>
+<dt><a class="reference internal" href="#bulum.io.idx_io.write_idx" title="bulum.io.idx_io.write_idx"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_idx</span></code></a></dt><dd><p>Write IDX files using the external csvidx.exe tool.</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="bulum.io.res_csv_io.html" class="btn btn-neutral float-left" title="bulum.io.res_csv_io module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="bulum.io.idx_io_native.html" class="btn btn-neutral float-right" title="bulum.io.idx_io_native module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="bulum.io.general_io.html" class="btn btn-neutral float-left" title="bulum.io.general_io module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bulum.io.iqqm_out_reader.html" class="btn btn-neutral float-right" title="bulum.io.iqqm_out_reader module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, OD Hydrology.</p>
+    <p>&#169; Copyright 2026, OD Hydrology.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

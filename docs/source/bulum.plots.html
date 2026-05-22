@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.plots package &mdash; Bulum 0.3.2 documentation</title>
+  <title>bulum.plots package &mdash; Bulum 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -88,16 +88,35 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bulum-plots-package">
-<h1>bulum.plots package<a class="headerlink" href="#bulum-plots-package" title="Link to this heading"></a></h1>
+  <section id="module-bulum.plots">
+<span id="bulum-plots-package"></span><h1>bulum.plots package<a class="headerlink" href="#module-bulum.plots" title="Link to this heading"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="bulum.plots.altair_plots.html">bulum.plots.altair_plots module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.plots.ensemble_altair_plots.html">bulum.plots.ensemble_altair_plots module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.plots.altair_plots.html">bulum.plots.altair_plots module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.annual_demand_supply_plot"><code class="docutils literal notranslate"><span class="pre">annual_demand_supply_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.annual_plot"><code class="docutils literal notranslate"><span class="pre">annual_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.daily_plot"><code class="docutils literal notranslate"><span class="pre">daily_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.exceedance_plot"><code class="docutils literal notranslate"><span class="pre">exceedance_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.exceedence_plot"><code class="docutils literal notranslate"><span class="pre">exceedence_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.pyblo"><code class="docutils literal notranslate"><span class="pre">pyblo()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.residual_mass_curve"><code class="docutils literal notranslate"><span class="pre">residual_mass_curve()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.storage_plot"><code class="docutils literal notranslate"><span class="pre">storage_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.wy_event_heatmap"><code class="docutils literal notranslate"><span class="pre">wy_event_heatmap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.plots.ensemble_altair_plots.html">bulum.plots.ensemble_altair_plots module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.ensemble_altair_plots.html#bulum.plots.ensemble_altair_plots.ensemble_probability_plot"><code class="docutils literal notranslate"><span class="pre">ensemble_probability_plot()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="bulum.plots.node_diagrams.html">bulum.plots.node_diagrams module</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.plots.plot_functions.html">bulum.plots.plot_functions module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.plots.plot_functions.html">bulum.plots.plot_functions module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_exceedence"><code class="docutils literal notranslate"><span class="pre">plot_exceedence()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_flow"><code class="docutils literal notranslate"><span class="pre">plot_flow()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_flowx"><code class="docutils literal notranslate"><span class="pre">plot_flowx()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="bulum.plots.plotly_helpers.html">bulum.plots.plotly_helpers module</a></li>
 </ul>
 </div>
@@ -115,7 +134,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, OD Hydrology.</p>
+    <p>&#169; Copyright 2026, OD Hydrology.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

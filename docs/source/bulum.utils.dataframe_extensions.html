@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.3.2 documentation</title>
+  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,8 +89,440 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bulum-utils-dataframe-extensions-module">
-<h1>bulum.utils.dataframe_extensions module<a class="headerlink" href="#bulum-utils-dataframe-extensions-module" title="Link to this heading"></a></h1>
+  <section id="module-bulum.utils.dataframe_extensions">
+<span id="bulum-utils-dataframe-extensions-module"></span><h1>bulum.utils.dataframe_extensions module<a class="headerlink" href="#module-bulum.utils.dataframe_extensions" title="Link to this heading"></a></h1>
+<p>Provides extensions to dataframes which facilitates tracking and bulk analysis.</p>
+<p>TimeseriesDataframes (TSDF) are a wrapper around pandas dataframes, with extra
+fields (tags, name, source, …) and methods that facilitate working with these
+fields.</p>
+<p>DataframeEnsembles are a way to organise multiple TSDFs, with methods that work
+(at present) primarily with the tags associated with TSDFs.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">DataframeEnsemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A DataframeEnsemble is an collection of bulum-style timeseries
+dataframes, which might represent collected results from a set of model
+runs. Each timeseries dataframe is stored in an internal object, with a
+little attached metadata. All timeseries in the ensemble are expected to
+have the same index, and the same columns.</p>
+<p>While the class exposes the ensemble property as a dict, you should
+generally use the provided methods to interact with the ensemble, viz.
+.add_dataframe(), and .get().</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.add_dataframe">
+<span class="sig-name descname"><span class="pre">add_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.add_dataframe" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.add_tag">
+<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.add_tag" title="Link to this definition"></a></dt>
+<dd><p>Add a tag to all member dataframes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.assert_df_shape_matches_ensemble">
+<span class="sig-name descname"><span class="pre">assert_df_shape_matches_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.assert_df_shape_matches_ensemble" title="Link to this definition"></a></dt>
+<dd><p>Internal function to verify new dfs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.df_shape_matches_ensemble">
+<span class="sig-name descname"><span class="pre">df_shape_matches_ensemble</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.df_shape_matches_ensemble" title="Link to this definition"></a></dt>
+<dd><p>Internal function to verify new dfs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.filter_tag">
+<span class="sig-name descname"><span class="pre">filter_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.filter_tag" title="Link to this definition"></a></dt>
+<dd><p>Return a new ensemble containing dataframes filtered by tag.</p>
+<p>By default, it will include all dataframes whose tags partially match
+the provided tag.</p>
+<p>This function delegates to <cite>TSDF.has_tag()</cite>, refer to that function for
+keyword arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tag</strong> – The tag to match. String, regex pattern, or compiled regex pattern.
+(Regex requires regex argument to be set, c.f. <cite>TSDF.has_tag()</cite>)</p></li>
+<li><p><strong>exclude</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – If True, it will <em>filter out</em> all dataframes which match the tag.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.get" title="Link to this definition"></a></dt>
+<dd><p>Return the underlying dataframe if the ensemble is a singleton, or
+the dataframe at the given key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.load">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_override</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pickle'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'folder'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pickle_safety_lock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.load" title="Link to this definition"></a></dt>
+<dd><p>Load (deserialise) a DataframeEnsemble from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>Path</em>) – Path to the file or folder to load</p></li>
+<li><p><strong>format_override</strong> (<em>{&quot;json&quot;</em><em>, </em><em>&quot;pickle&quot;</em><em>, </em><em>&quot;folder&quot;}</em><em>, </em><em>optional</em>) – Override automatic format detection from file extension/type</p></li>
+<li><p><strong>pickle_safety_lock</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Safety lock for pickle format. If True (default), raises ValueError when
+attempting to load pickle files. Set to False to allow pickle loading.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loaded DataframeEnsemble with all member dataframes and metadata restored</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble">DataframeEnsemble</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If the specified file or folder doesn’t exist</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the file format is unsupported or data is malformed, or if attempting
+    to load pickle with safety lock enabled</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.json&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">)</span>  <span class="c1"># Auto-detects folder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.zip&quot;</span><span class="p">)</span>  <span class="c1"># Auto-extracts zip</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.pkl&quot;</span><span class="p">,</span> <span class="n">pickle_safety_lock</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Unsafe!</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.map">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.map" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">map</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.DataframeEnsemble" title="bulum.utils.dataframe_extensions.DataframeEnsemble"><span class="pre">DataframeEnsemble</span></a></span></span></dt>
+<dd><p>Apply a function to all dataframes in the ensemble, returning a new
+ensemble with the results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – Univariate function on dataframes.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.print_summary">
+<span class="sig-name descname"><span class="pre">print_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.print_summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.DataframeEnsemble.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'pickle'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'folder'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'zip'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'zip-folder'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.DataframeEnsemble.save" title="Link to this definition"></a></dt>
+<dd><p>Save (serialise) this DataframeEnsemble to disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>Path</em>) – Path to save the file/folder (extension added automatically for some formats)</p></li>
+<li><p><strong>save_format</strong> (<em>{&quot;json&quot;</em><em>, </em><em>&quot;pickle&quot;</em><em>, </em><em>&quot;folder&quot;</em><em>, </em><em>&quot;zip&quot;</em><em>, </em><em>&quot;zip-folder&quot;}</em><em>, </em><em>default &quot;json&quot;</em>) – <p>Format to save the ensemble in:</p>
+<ul>
+<li><p>json: Save as a single JSON file with all data</p></li>
+<li><p>pickle: Save as a pickle file (warning: pickle has security implications)</p></li>
+<li><p>folder: Save as a directory with CSV files and metadata.json</p></li>
+<li><p>zip: Save as a zip archive (creates folder, zips it, removes folder)</p></li>
+<li><p>zip-folder: Save as both a zip archive and keep the folder</p></li>
+</ul>
+</p></li>
+<li><p><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, overwrite existing files/folders. If False, raise FileExistsError.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If save_format is not supported</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#TypeError" title="(in Python v3.14)"><strong>TypeError</strong></a> – If ensemble contains keys with unsupported types (only int, str, float supported)</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileExistsError" title="(in Python v3.14)"><strong>FileExistsError</strong></a> – If file/folder exists and overwrite=False</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">add_dataframe</span><span class="p">(</span><span class="n">tsdf1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;folder&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
+<p>Specifies the type of argument supplied to filtering functions in TSDF
+and DataframeEnsemble.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg.OBJECT">
+<span class="sig-name descname"><span class="pre">OBJECT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg.OBJECT" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg.PATTERN">
+<span class="sig-name descname"><span class="pre">PATTERN</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg.PATTERN" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">TimeseriesDataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataFrame</span></code></a></p>
+<p>A TimeseriesDataframe is thinly extended pd.Dataframe. Abbreviated casually
+as TSDF throughout the documentation. It adds the following fields:</p>
+<ul class="simple">
+<li><p>name (str)</p></li>
+<li><p>source (str)</p></li>
+<li><p>description (str)</p></li>
+<li><p>a string of tags (str)</p></li>
+</ul>
+<section id="metadata-preservation">
+<h2>Metadata Preservation<a class="headerlink" href="#metadata-preservation" title="Link to this heading"></a></h2>
+<p>TimeseriesDataframe uses pandas’ <code class="docutils literal notranslate"><span class="pre">_metadata</span></code> and <code class="docutils literal notranslate"><span class="pre">_constructor</span></code>
+mechanisms to automatically preserve metadata across most operations:</p>
+<ul class="simple">
+<li><p><strong>Preserved</strong>: slicing, arithmetic with scalars/Series, fillna, apply,
+copy, transpose, rank, reset_index, and most other standard pandas operations</p></li>
+<li><p><strong>Not preserved</strong>: rolling window operations, <a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.concat.html#pandas.concat" title="(in pandas v3.0.3)"><code class="xref py py-func docutils literal notranslate"><span class="pre">pandas.concat()</span></code></a></p></li>
+<li><p><strong>No guarantees</strong>: Binary operations between two TimeseriesDataframes
+(e.g., <code class="docutils literal notranslate"><span class="pre">tsdf1</span> <span class="pre">+</span> <span class="pre">tsdf2</span></code>) may preserve metadata from either operand
+depending on pandas internals</p></li>
+</ul>
+<p>For operations that don’t preserve metadata, use the <a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply" title="bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tsdf_apply()</span></code></a> method.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file.csv&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;raw,validated&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Metadata preserved automatically in most operations:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># &quot;raw,validated&quot;</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># For rolling operations, use tsdf_apply:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply" title="bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeseriesDataframe.tsdf_apply</span></code></a></dt><dd><p>Apply functions while preserving metadata</p>
+</dd>
+<dt><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeseriesDataframe.from_dataframe</span></code></a></dt><dd><p>Create from existing DataFrame</p>
+</dd>
+</dl>
+</div>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.TAG_DELIMITER">
+<span class="sig-name descname"><span class="pre">TAG_DELIMITER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">','</span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.TAG_DELIMITER" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.add_tag">
+<span class="sig-name descname"><span class="pre">add_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.14)"><span class="pre">Iterable</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_membership</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.add_tag" title="Link to this definition"></a></dt>
+<dd><p>Add a tag to the TimeseriesDataframe.</p>
+<p>This is the canonical way to add tags to a TimeseriesDataframe. It can
+add multiple tags separated by the designated tag delimiter (by default,
+a comma ,).</p>
+<p class="rubric">Examples</p>
+<p>The <cite>check_membership</cite> flag will ensure that <cite>tag</cite> does not match with
+existing tags, but will not (at present) check the other way around. For
+example, the following will not raise an error:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;01a&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.count_tags">
+<span class="sig-name descname"><span class="pre">count_tags</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.count_tags" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_dataframe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe" title="Link to this definition"></a></dt>
+<dd><p>Create a TimeseriesDataframe from an existing DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to convert</p></li>
+<li><p><strong>**kwargs</strong> – Metadata fields (name, source, description)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New instance with data from df and metadata from kwargs</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe">TimeseriesDataframe</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.has_tag">
+<span class="sig-name descname"><span class="pre">has_tag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/re.html#re.Pattern" title="(in Python v3.14)"><span class="pre">Pattern</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">regex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#bulum.utils.dataframe_extensions.RegexArg" title="bulum.utils.dataframe_extensions.RegexArg"><span class="pre">RegexArg</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exact</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.has_tag" title="Link to this definition"></a></dt>
+<dd><p>Check if the provided tag matches any of the dataframe’s tags.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> (<a class="reference internal" href="#bulum.utils.dataframe_extensions.RegexArg" title="bulum.utils.dataframe_extensions.RegexArg"><em>RegexArg</em></a><em>, </em><em>optional</em><em>, </em><em>keyword-only</em><em>)</em>) – <ul>
+<li><p>None: Uses python <cite>in</cite> operation to check for membership; expects
+a string to be supplied to pattern.</p></li>
+<li><p><cite>RegexArg</cite>: Uses the regex engine to search for the tag.</p></li>
+</ul>
+</p></li>
+<li><p><strong>exact</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a>) – Whether we require an exact match of the tag.
+This argument is superceded by a non-None <cite>regex</cite> argument, and
+may be accomplished (depending on the particulars) via regex by
+<code class="docutils literal notranslate"><span class="pre">\b&lt;regex&gt;\b</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.load">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">format_override</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'csv'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.load" title="Link to this definition"></a></dt>
+<dd><p>Load (deserialise) a TimeseriesDataframe from a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>Path</em>) – Path to the file to load</p></li>
+<li><p><strong>format_override</strong> (<em>{&quot;json&quot;</em><em>, </em><em>&quot;csv&quot;}</em><em>, </em><em>optional</em>) – Override automatic format detection from file extension. If csv,
+will attempt to find &lt;file&gt;.json (where filename=&lt;file&gt;.csv) and
+vice versa (i.e. via suffix replacement).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loaded TimeseriesDataframe with all metadata restored</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe">TimeseriesDataframe</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;output.csv&quot;</span><span class="p">)</span> <span class="c1"># will attempt to locate metadata JSON file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;data.dat&quot;</span><span class="p">,</span> <span class="n">format_override</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.metadata_fields">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">metadata_fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.metadata_fields" title="Link to this definition"></a></dt>
+<dd><p>Return the list of metadata fields defined for this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.print_summary">
+<span class="sig-name descname"><span class="pre">print_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.print_summary" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">save_format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.14)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'csv'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.save" title="Link to this definition"></a></dt>
+<dd><p>Save (serialise) this TimeseriesDataframe to a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><em>Path</em>) – Path to save the file (extension will be added automatically)</p></li>
+<li><p><strong>save_format</strong> (<em>{&quot;json&quot;</em><em>, </em><em>&quot;csv&quot;}</em><em>, </em><em>default &quot;json&quot;</em>) – <p>Format to save the file in:</p>
+<ul>
+<li><p>json: Save as JSON with all metadata</p></li>
+<li><p>csv: Save as CSV file with separate metadata.json</p></li>
+</ul>
+</p></li>
+<li><p><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default False</em>) – If True, overwrite existing files. If False, raise FileExistsError.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;data.csv&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;validated&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>  <span class="c1"># Creates output.json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>   <span class="c1"># Creates output.csv + output.metadata.json</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply">
+<span class="sig-name descname"><span class="pre">tsdf_apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></span><a class="headerlink" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply" title="Link to this definition"></a></dt>
+<dd><p>Apply a function to the underlying dataframe, returning a new
+TimeseriesDataframe with the results. The metadata fields are copied
+over.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Most pandas operations automatically preserve
+metadata via the <code class="docutils literal notranslate"><span class="pre">_constructor</span></code> property, including:</p>
+<ul class="simple">
+<li><p>Standard <code class="docutils literal notranslate"><span class="pre">.apply()</span></code>: <code class="docutils literal notranslate"><span class="pre">tsdf.apply(lambda</span> <span class="pre">x:</span> <span class="pre">x</span> <span class="pre">*</span> <span class="pre">2)</span></code> preserves metadata</p></li>
+<li><p>Arithmetic, slicing, fillna, copy, transpose, etc.</p></li>
+</ul>
+<p><strong>Use tsdf_apply() only when</strong> the operation bypasses <code class="docutils literal notranslate"><span class="pre">_constructor</span></code>:</p>
+<ul class="simple">
+<li><p>Rolling window operations: <code class="docutils literal notranslate"><span class="pre">tsdf.rolling(window=2).mean()</span></code></p></li>
+<li><p>Concatenation: <code class="docutils literal notranslate"><span class="pre">pd.concat([tsdf1,</span> <span class="pre">tsdf2])</span></code></p></li>
+<li><p>Creating new DataFrames from scratch: <code class="docutils literal notranslate"><span class="pre">pd.DataFrame(tsdf.mean())</span></code></p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>[</em><em>pd.DataFrame</em><em>]</em><em>, </em><em>pd.DataFrame</em><em>]</em>) – Function that takes a DataFrame and returns a DataFrame</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New TimeseriesDataframe with the result of func(self) and all
+metadata fields (name, source, description, tags) copied from self</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe">TimeseriesDataframe</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;data.csv&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Pandas .apply() preserves metadata automatically (no need for tsdf_apply):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved!</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use tsdf_apply for rolling operations (metadata would be lost otherwise):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use tsdf_apply when creating new DataFrames from scratch:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># &quot;raw&quot; - metadata preserved</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe.from_dataframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TimeseriesDataframe.from_dataframe</span></code></a></dt><dd><p>Create TSDF from regular DataFrame</p>
+</dd>
+<dt><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.apply.html#pandas.DataFrame.apply" title="(in pandas v3.0.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pandas.DataFrame.apply</span></code></a></dt><dd><p>Standard pandas apply (preserves metadata for TSDF)</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+</section>
+</dd></dl>
+
 </section>
 
 
@@ -104,7 +536,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, OD Hydrology.</p>
+    <p>&#169; Copyright 2026, OD Hydrology.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

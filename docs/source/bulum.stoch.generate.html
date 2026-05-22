@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.stoch.generate module &mdash; Bulum 0.3.2 documentation</title>
+  <title>bulum.stoch.generate module &mdash; Bulum 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -89,8 +89,67 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bulum-stoch-generate-module">
-<h1>bulum.stoch.generate module<a class="headerlink" href="#bulum-stoch-generate-module" title="Link to this heading"></a></h1>
+  <section id="module-bulum.stoch.generate">
+<span id="bulum-stoch-generate-module"></span><h1>bulum.stoch.generate module<a class="headerlink" href="#module-bulum.stoch.generate" title="Link to this heading"></a></h1>
+<p>Generate stochastic data.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="bulum.stoch.generate.from_pattern">
+<span class="sig-name descname"><span class="pre">from_pattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.14)"><span class="pre">datetime</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">daily_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monthly_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annual_pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stoch.generate.from_pattern" title="Link to this definition"></a></dt>
+<dd><p>Generate a list of daily values from either a daily, monthly, or annual pattern.</p>
+<p>The behaviour depends on what type of pattern is supplied.
+- Annual pattern =&gt;</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>annual totals are disaggregated to daily by dividing by 365 or 366 as
+appropriate.</p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><dl class="simple">
+<dt>Monthly pattern =&gt;</dt><dd><ul>
+<li><p>if 1 value is provided, it is used for every month and disaggregated
+to daily by dividing by the days in the month;</p></li>
+<li><p>if 12 values are provided, each month has its own total and which is
+disaggregated to daily by dividing by the days in the month.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Daily pattern =&gt;</dt><dd><ul>
+<li><p>if 1 value is provided, it is used for every day;</p></li>
+<li><p>if 7 values are provided, they are taken to represent a week and are
+repeated accordingly;</p></li>
+<li><p>if 366 values are provided, they will be taken to represent days in
+the calendar year and the last value ignored in non-leap-years.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Annual patterns are preferred to monthly are preferred to daily.
+Default behaviour is to fill with <cite>1</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dates</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><em>datetime</em>)</p></li>
+<li><p><strong>daily_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [1].</p></li>
+<li><p><strong>monthly_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [].</p></li>
+<li><p><strong>annual_pattern</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><em>list</em></a><em> of </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Defaults to [].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – Invalid number of arguments provided for pattern</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Disaggregated pattern as daily values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 
 
@@ -104,7 +163,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, OD Hydrology.</p>
+    <p>&#169; Copyright 2026, OD Hydrology.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

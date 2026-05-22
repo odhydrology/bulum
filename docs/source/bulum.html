@@ -6,16 +6,16 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum package &mdash; Bulum 0.3.2 documentation</title>
+  <title>bulum package &mdash; Bulum 0.3.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=71d9d8e6"></script>
-      <script src="../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -84,20 +84,219 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bulum-package">
-<h1>bulum package<a class="headerlink" href="#bulum-package" title="Link to this heading"></a></h1>
+  <section id="module-bulum">
+<span id="bulum-package"></span><h1>bulum package<a class="headerlink" href="#module-bulum" title="Link to this heading"></a></h1>
 <section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.io.html">bulum.io package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.clim.html">bulum.clim package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.clim.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.clim.clim.html">bulum.clim.clim module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.clim.clim.html#bulum.clim.clim.apply_transformation_curves"><code class="docutils literal notranslate"><span class="pre">apply_transformation_curves()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.clim.clim.html#bulum.clim.clim.apply_transformation_factors"><code class="docutils literal notranslate"><span class="pre">apply_transformation_factors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.clim.clim.html#bulum.clim.clim.derive_transformation_curves"><code class="docutils literal notranslate"><span class="pre">derive_transformation_curves()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.clim.clim.html#bulum.clim.clim.derive_transformation_factors"><code class="docutils literal notranslate"><span class="pre">derive_transformation_factors()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.io.html">bulum.io package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.io.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.csv_io.html">bulum.io.csv_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.csv_io.html#bulum.io.csv_io.read_ts_csv"><code class="docutils literal notranslate"><span class="pre">read_ts_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.csv_io.html#bulum.io.csv_io.write_ts_csv"><code class="docutils literal notranslate"><span class="pre">write_ts_csv()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.general_io.html">bulum.io.general_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.general_io.html#bulum.io.general_io.read"><code class="docutils literal notranslate"><span class="pre">read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.idx_io.html">bulum.io.idx_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.idx_io.html#bulum.io.idx_io.read_idx"><code class="docutils literal notranslate"><span class="pre">read_idx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.idx_io.html#bulum.io.idx_io.write_area_ts_csv"><code class="docutils literal notranslate"><span class="pre">write_area_ts_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.idx_io.html#bulum.io.idx_io.write_idx"><code class="docutils literal notranslate"><span class="pre">write_idx()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.idx_io.html#bulum.io.idx_io.write_idx_native"><code class="docutils literal notranslate"><span class="pre">write_idx_native()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.iqqm_out_reader.html">bulum.io.iqqm_out_reader module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.iqqm_out_reader.html#bulum.io.iqqm_out_reader.IqqmOutReader"><code class="docutils literal notranslate"><span class="pre">IqqmOutReader</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.iqqm_out_reader.html#bulum.io.iqqm_out_reader.iqqm_out_reader"><code class="docutils literal notranslate"><span class="pre">iqqm_out_reader</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.lqn_io.html">bulum.io.lqn_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.lqn_io.html#bulum.io.lqn_io.read_iqqm_lqn_output"><code class="docutils literal notranslate"><span class="pre">read_iqqm_lqn_output()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.io.res_csv_io.html">bulum.io.res_csv_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.res_csv_io.html#bulum.io.res_csv_io.read_res_csv"><code class="docutils literal notranslate"><span class="pre">read_res_csv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.io.res_csv_io.html#bulum.io.res_csv_io.write_res_csv"><code class="docutils literal notranslate"><span class="pre">write_res_csv()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.maps.html">bulum.maps package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.maps.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.maps.station_maps.html">bulum.maps.station_maps module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.maps.station_maps.html#bulum.maps.station_maps.simple_station_map"><code class="docutils literal notranslate"><span class="pre">simple_station_map()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.maps.station_maps.html#bulum.maps.station_maps.station_map_plots"><code class="docutils literal notranslate"><span class="pre">station_map_plots()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.plots.html">bulum.plots package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.plots.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.altair_plots.html">bulum.plots.altair_plots module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.annual_demand_supply_plot"><code class="docutils literal notranslate"><span class="pre">annual_demand_supply_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.annual_plot"><code class="docutils literal notranslate"><span class="pre">annual_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.daily_plot"><code class="docutils literal notranslate"><span class="pre">daily_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.exceedance_plot"><code class="docutils literal notranslate"><span class="pre">exceedance_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.exceedence_plot"><code class="docutils literal notranslate"><span class="pre">exceedence_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.pyblo"><code class="docutils literal notranslate"><span class="pre">pyblo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.residual_mass_curve"><code class="docutils literal notranslate"><span class="pre">residual_mass_curve()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.storage_plot"><code class="docutils literal notranslate"><span class="pre">storage_plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.altair_plots.html#bulum.plots.altair_plots.wy_event_heatmap"><code class="docutils literal notranslate"><span class="pre">wy_event_heatmap()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.ensemble_altair_plots.html">bulum.plots.ensemble_altair_plots module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.ensemble_altair_plots.html#bulum.plots.ensemble_altair_plots.ensemble_probability_plot"><code class="docutils literal notranslate"><span class="pre">ensemble_probability_plot()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.node_diagrams.html">bulum.plots.node_diagrams module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.plot_functions.html">bulum.plots.plot_functions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_exceedence"><code class="docutils literal notranslate"><span class="pre">plot_exceedence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_flow"><code class="docutils literal notranslate"><span class="pre">plot_flow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.plots.plot_functions.html#bulum.plots.plot_functions.plot_flowx"><code class="docutils literal notranslate"><span class="pre">plot_flowx()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.plots.plotly_helpers.html">bulum.plots.plotly_helpers module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stats.html">bulum.stats package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.swflo2s.html">bulum.stats.swflo2s package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.swflo2s.html#submodules">Submodules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stats.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.aggregate_stats.html">bulum.stats.aggregate_stats module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_max"><code class="docutils literal notranslate"><span class="pre">annual_max()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_mean"><code class="docutils literal notranslate"><span class="pre">annual_mean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_median"><code class="docutils literal notranslate"><span class="pre">annual_median()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_min"><code class="docutils literal notranslate"><span class="pre">annual_min()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_percentile"><code class="docutils literal notranslate"><span class="pre">annual_percentile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.aggregate_stats.html#bulum.stats.aggregate_stats.annual_sum"><code class="docutils literal notranslate"><span class="pre">annual_sum()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.ensemble_stats.html">bulum.stats.ensemble_stats module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.annual_incremental_risk"><code class="docutils literal notranslate"><span class="pre">annual_incremental_risk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.cumulative_risk"><code class="docutils literal notranslate"><span class="pre">cumulative_risk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.incremental_risk"><code class="docutils literal notranslate"><span class="pre">incremental_risk()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.ensemble_stats.html#bulum.stats.ensemble_stats.percentile_envelope"><code class="docutils literal notranslate"><span class="pre">percentile_envelope()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.negflo.html">bulum.stats.negflo module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.ContiguousIndexTracker"><code class="docutils literal notranslate"><span class="pre">ContiguousIndexTracker</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.Negflo"><code class="docutils literal notranslate"><span class="pre">Negflo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.NegfloAnalysisType"><code class="docutils literal notranslate"><span class="pre">NegfloAnalysisType</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.negflo.html#bulum.stats.negflo.NegfloFileType"><code class="docutils literal notranslate"><span class="pre">NegfloFileType</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.reliability_stats_class.html">bulum.stats.reliability_stats_class module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.reliability_stats_class.html#bulum.stats.reliability_stats_class.Reliability"><code class="docutils literal notranslate"><span class="pre">Reliability</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.stochastic_data_check.html">bulum.stats.stochastic_data_check module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.stochastic_data_check.html#bulum.stats.stochastic_data_check.StochasticDataComparison"><code class="docutils literal notranslate"><span class="pre">StochasticDataComparison</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stats.storage_level_assessment.html">bulum.stats.storage_level_assessment module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stats.storage_level_assessment.html#bulum.stats.storage_level_assessment.StorageLevelAssessment"><code class="docutils literal notranslate"><span class="pre">StorageLevelAssessment</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.stoch.html">bulum.stoch package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.stoch.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.analyse.html">bulum.stoch.analyse module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.stoch.generate.html">bulum.stoch.generate module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.stoch.generate.html#bulum.stoch.generate.from_pattern"><code class="docutils literal notranslate"><span class="pre">from_pattern()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.trans.html">bulum.trans package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.trans.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.trans.transformers.html">bulum.trans.transformers module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.trans.transformers.html#bulum.trans.transformers.get_exceedence"><code class="docutils literal notranslate"><span class="pre">get_exceedence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.trans.transformers.html#bulum.trans.transformers.get_exceedence_plotting_position"><code class="docutils literal notranslate"><span class="pre">get_exceedence_plotting_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.trans.transformers.html#bulum.trans.transformers.join_on_dates"><code class="docutils literal notranslate"><span class="pre">join_on_dates()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bulum.utils.html">bulum.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bulum.utils.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.dataframe_extensions.html">bulum.utils.dataframe_extensions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.DataframeEnsemble"><code class="docutils literal notranslate"><span class="pre">DataframeEnsemble</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.RegexArg"><code class="docutils literal notranslate"><span class="pre">RegexArg</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe"><code class="docutils literal notranslate"><span class="pre">TimeseriesDataframe</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.dataframe_functions.html">bulum.utils.dataframe_functions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.assert_df_format_standards"><code class="docutils literal notranslate"><span class="pre">assert_df_format_standards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.assert_df_has_one_column"><code class="docutils literal notranslate"><span class="pre">assert_df_has_one_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.check_data_equivalence"><code class="docutils literal notranslate"><span class="pre">check_data_equivalence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.check_df_format_standards"><code class="docutils literal notranslate"><span class="pre">check_df_format_standards()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.convert_index_to_datetime"><code class="docutils literal notranslate"><span class="pre">convert_index_to_datetime()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.convert_index_to_string"><code class="docutils literal notranslate"><span class="pre">convert_index_to_string()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.crop_to_wy"><code class="docutils literal notranslate"><span class="pre">crop_to_wy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.datetimes_to_strings"><code class="docutils literal notranslate"><span class="pre">datetimes_to_strings()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.find_col"><code class="docutils literal notranslate"><span class="pre">find_col()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.set_index_dt"><code class="docutils literal notranslate"><span class="pre">set_index_dt()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.dataframe_functions.html#bulum.utils.dataframe_functions.strings_to_datetimes"><code class="docutils literal notranslate"><span class="pre">strings_to_datetimes()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.datetime_functions.html">bulum.utils.datetime_functions module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_date_format"><code class="docutils literal notranslate"><span class="pre">get_date_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_dates"><code class="docutils literal notranslate"><span class="pre">get_dates()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_month"><code class="docutils literal notranslate"><span class="pre">get_month()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_next_month_start"><code class="docutils literal notranslate"><span class="pre">get_next_month_start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_prev_month_end"><code class="docutils literal notranslate"><span class="pre">get_prev_month_end()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_this_month_end"><code class="docutils literal notranslate"><span class="pre">get_this_month_end()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_wy"><code class="docutils literal notranslate"><span class="pre">get_wy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_wy_end_date"><code class="docutils literal notranslate"><span class="pre">get_wy_end_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_wy_start_date"><code class="docutils literal notranslate"><span class="pre">get_wy_start_date()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.get_year_and_month"><code class="docutils literal notranslate"><span class="pre">get_year_and_month()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.standardise_datestring_format"><code class="docutils literal notranslate"><span class="pre">standardise_datestring_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.standardize_datestring_format"><code class="docutils literal notranslate"><span class="pre">standardize_datestring_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.datetime_functions.html#bulum.utils.datetime_functions.to_np_datetimes64d"><code class="docutils literal notranslate"><span class="pre">to_np_datetimes64d()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bulum.utils.interpolation.html">bulum.utils.interpolation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bulum.utils.interpolation.html#bulum.utils.interpolation.interp"><code class="docutils literal notranslate"><span class="pre">interp()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -114,7 +313,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2025, OD Hydrology.</p>
+    <p>&#169; Copyright 2026, OD Hydrology.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -1,6 +1,11 @@
 bulum.stats package
 ===================
 
+.. automodule:: bulum.stats
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Subpackages
 -----------
 
