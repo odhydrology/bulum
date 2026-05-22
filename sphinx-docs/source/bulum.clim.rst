@@ -1,6 +1,11 @@
 bulum.clim package
 ==================
 
+.. automodule:: bulum.clim
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
 Submodules
 ----------
 
