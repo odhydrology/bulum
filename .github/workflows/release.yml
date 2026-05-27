@@ -44,6 +44,7 @@ jobs:
   publish:
     name: Publish to PyPI
     needs: build
+    if: ${{ !contains(github.ref_name, 'dev') }}
     runs-on: ubuntu-latest
     environment:
       name: pypi
