@@ -41,25 +41,25 @@ jobs:
           name: dist
           path: dist/
 
-  publish:
-    name: Publish to PyPI
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: pypi
-      url: https://pypi.org/project/bulum/
-    permissions:
-      id-token: write
+  # publish:
+  #   name: Publish to PyPI
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: pypi
+  #     url: https://pypi.org/project/bulum/
+  #   permissions:
+  #     id-token: write
 
-    steps:
-      - name: Download distributions
-        uses: actions/download-artifact@v4
-        with:
-          name: dist
-          path: dist/
+  #   steps:
+  #     - name: Download distributions
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: dist
+  #         path: dist/
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  #     - name: Publish to PyPI
+  #       uses: pypa/gh-action-pypi-publish@release/v1
 
   build-docs:
     name: Build documentation on 'docs' branch
