@@ -10,13 +10,15 @@
 
 import os
 import datetime
+from pathlib import Path
 year = str(datetime.datetime.now().year)
 
 project = 'Bulum'
 copyright = f'{year}, OD Hydrology'
 author = 'OD Hydrology'
 try:
-    exec(open('../src/bulum/version.py').read())
+    _version_file = Path(__file__).parent / '..' / 'src' / 'bulum' / 'version.py'
+    exec(open(_version_file).read())
     release = __version__  # noqa: F821
 except FileNotFoundError as e:
     print(f"cwd={os.getcwd()}")
