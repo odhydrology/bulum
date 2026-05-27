@@ -89,7 +89,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install Sphinx dependencies
-        run: pip install sphinx>=8.0 sphinx-rtd-theme>=3.0
+        run: pip install sphinx>=8.0 sphinx-rtd-theme>=3.0 myst-parser
 
       - name: Build docs
         run: sphinx-build sphinx-docs docs
