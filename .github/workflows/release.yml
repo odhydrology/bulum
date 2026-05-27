@@ -60,3 +60,39 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  build-docs:
+    name: Build documentation on 'docs' branch
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout docs branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge main branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main --no-edit
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Sphinx dependencies
+        run: pip install sphinx>=8.0 sphinx-rtd-theme>=3.0
+
+      - name: Build docs
+        run: sphinx-build sphinx-docs docs
+
+      - name: Push to docs branch
+        run: git push origin docs
