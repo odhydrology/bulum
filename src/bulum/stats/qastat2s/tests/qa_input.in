@@ -1,0 +1,16 @@
+1
+*                       //Automatically determined date range
+*                       //Automatically determined percentiles
+10                      //10 lags
+0                       //0 flow bands
+4                       //4 seasons
+0 3 6 9
+0 0 0                   //Percentiles for each of the 12 seasons
+3 0                     //CSV format for observed data in column 0
+146012A.csv
+Heading
+3 0                     //CSV format for modelled data in column 0
+result_flow.csv
+3 0                     //CSV format for rainfall data in column 0
+058067.infilled.csv
+1 1 1 1 1 10            //All outputs
