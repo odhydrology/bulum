@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
+## Unreleased
+
+### Added
+- negflo `Negflo.from_flows()`: construct from measured and modelled flows; the residual is missing wherever either input is missing.
+- negflo `Negflo.segments`: public attribute holding the SM6 segments.
+
+### Changed
+- negflo `Negflo`: reimplemented around a single event-based algorithm, verified against NEGFLO6 rebuilt from its C source. Missing data (NaN) is now handled consistently by every method: missing days contribute nothing to any total, break flow events, stay missing in the results, and negatives are carried across them. NEGFLO6's other known bugs are not reproduced (see the module documentation).
+- negflo `Negflo.neg_overflows`: now reports, for every method, all negative volume that was not redistributed (including volume discarded by SM3/SM5 and negatives outside SM6 segments), so that `sum(result) == sum(residual) - overflow`.
+- negflo `Negflo` SM2-SM5/SM7: flows equal to the flow limit no longer form part of a flow event (matching NEGFLO6).
+- negflo `Negflo.sm1()`: the flow limit is no longer used, matching the NEGFLO6 documentation and making SM6 equivalent to SM1 within each segment.
+- negflo `Negflo.sm6()`: negative flows outside every segment are now set to zero; generated segments are no longer stored on the instance.
+- negflo `Negflo.sm7()`: an event can absorb negative flows from both sides.
+- negflo `Negflo`: unredistributed negative flow is logged at INFO rather than WARNING level.
+- negflo `Negflo`: `segments` is now keyword-only, and a negative `flow_limit` raises `ValueError`.
+
+### Removed
+- negflo `ContiguousIndexTracker`, `NegfloFileType`, `Negflo.log()`, the unfinished private `Negflo._from_config_file()`, and the unused `num_segments` parameter.
+
+### Fixed
+- negflo `Negflo.sm1()`: a single missing value no longer sets the whole series to zero.
+- negflo `Negflo` SM2/SM4: a positive period followed by a gap is no longer discarded without being smoothed.
+- negflo `Negflo.run_all()`: now includes CL1 and no longer raises `NotImplementedError` at the end.
+- negflo `Negflo.to_file()`: an `out_filename` with an extension no longer has a second extension appended.
+
 ## 0.3.3
 
 !! IMPORTANT !! - This repo no longer supports Python 3.9 (end of life). The new minimum tested python version is 3.11.
