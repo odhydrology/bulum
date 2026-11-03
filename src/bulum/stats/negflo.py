@@ -19,12 +19,12 @@ Absorbing
     ``1 - negative volume / total excess``. Flows are never reduced below the
     flow limit. If the event's total excess is too small, all its flows are set
     to the flow limit and the remainder is left over.
-Overflow
+Unallocated negatives
     Negative volume that was not absorbed by any event. It is reported (as a
-    negative number) per column in :attr:`Negflo.neg_overflows`, so that for
-    every method::
+    negative number) per column in :attr:`Negflo.unallocated_negatives`, so
+    that for every method::
 
-        sum(result) == sum(positive residuals) + sum(negative residuals) - overflow
+        sum(result) == sum(positive residuals) + sum(negative residuals) - unallocated negatives
 
 Missing data
     Missing days (NaN) contribute nothing to any total, break flow events,
@@ -43,9 +43,9 @@ This implementation follows the NEGFLO6 documentation and C source, except:
   flow).
 * The flow limit is applied. NEGFLO6 silently ignored positive flow limits.
 * Results are not rounded to whole numbers.
-* SM4 carries negatives with no preceding event (i.e. before the first event)
-  forward into the first event. NEGFLO6 discarded them, and also had a typo
-  in its carry-over calculation.
+* SM4's carry-over is calculated correctly. NEGFLO6 had a typo that reduced
+  each event by the wrong negative total, and reused the previous event's
+  total for an event still open at the end of the series.
 * SM7 is a method in its own right using a non-negative flow limit, rather than
   being triggered by a negative flow limit. Negatives after the last event are
   absorbed by the last event, and an event may absorb negative volumes from both
@@ -180,12 +180,13 @@ def _smooth_forward(x: np.ndarray, flow_limit: float, carry: bool) -> float:
 def _smooth_backward(x: np.ndarray, flow_limit: float, carry: bool) -> float:
     """SM4/SM5: each event absorbs the negative volume following it.
 
-    With `carry`, whatever an event cannot absorb (and any negatives before the
-    first event) is carried forward to the next event.
+    With `carry`, whatever an event cannot absorb is carried forward to the
+    next event. Negatives before the first event have no preceding event, so
+    they are not redistributed.
     """
     events = _find_events(x, flow_limit)
     volumes = _negative_volumes(x, events)
-    carried, lost = (volumes[0], 0.0) if carry else (0.0, volumes[0])
+    carried, lost = 0.0, volumes[0]
     for event, volume in zip(events, volumes[1:]):
         leftover = _absorb(x, event, carried + volume, flow_limit)
         if carry:
@@ -256,7 +257,7 @@ class Negflo:
         Flows at or below this limit never absorb negative flow (SM2-SM5, SM7).
     segments : list of (start, end) tuples, optional
         Inclusive date ranges used by :meth:`sm6`.
-    neg_overflows : dict
+    unallocated_negatives : dict
         Negative volume (as a negative number) that the most recent analysis
         could not redistribute, per column.
     df_name : str or None
@@ -284,7 +285,7 @@ class Negflo:
             df_residual.name if isinstance(df_residual, TimeseriesDataframe) else None)
         self.flow_limit = flow_limit
         self.segments = segments
-        self.neg_overflows: dict = {}
+        self.unallocated_negatives: dict = {}
         self._df_residual_raw = df_residual.astype(float)
         self._df_residual = self._df_residual_raw.copy()
         self._analysis_type = NegfloAnalysisType.RAW
@@ -323,19 +324,19 @@ class Negflo:
     def _run(self, analysis_type: NegfloAnalysisType,
              smooth: Callable[[np.ndarray], float]) -> pd.DataFrame:
         """Apply `smooth` to each column of the raw residual, set remaining
-        negatives to zero, and record overflows."""
+        negatives to zero, and record the unallocated negatives."""
         self._analysis_type = analysis_type
-        self.neg_overflows = {}
+        self.unallocated_negatives = {}
         result = self._df_residual_raw.copy()
         for i, column in enumerate(result.columns):
             x = result.iloc[:, i].to_numpy(dtype=float, copy=True)
-            lost = smooth(x)
+            unallocated = smooth(x)
             x[x < 0] = 0.0
             result.iloc[:, i] = x
-            self.neg_overflows[column] = -lost if lost else 0.0
-            if lost:
+            self.unallocated_negatives[column] = -unallocated if unallocated else 0.0
+            if unallocated:
                 logger.info("%s: %s of negative flow could not be redistributed in %s.",
-                            column, lost, analysis_type.name)
+                            column, unallocated, analysis_type.name)
         self._df_residual = result
         return result.copy()
 
@@ -348,7 +349,7 @@ class Negflo:
             The raw residual dataframe.
         """
         self._analysis_type = NegfloAnalysisType.RAW
-        self.neg_overflows = dict.fromkeys(self._df_residual_raw.columns, 0.0)
+        self.unallocated_negatives = dict.fromkeys(self._df_residual_raw.columns, 0.0)
         self._df_residual = self._df_residual_raw.copy()
         return self._df_residual.copy()
 
@@ -425,9 +426,10 @@ class Negflo:
         carry-over.
 
         As :meth:`sm2`, except each event absorbs the negative flows following
-        it. Negative flow an event cannot absorb, and negative flow before the
-        first event, is carried over to the next event. This is most useful if
-        the negative flows mainly occur on the falling limb of the hydrograph.
+        it. Negative flow an event cannot absorb is carried over to the next
+        event. Negative flow before the first event has no preceding event, so
+        it is not redistributed (as in NEGFLO6). This is most useful if the
+        negative flows mainly occur on the falling limb of the hydrograph.
 
         Returns
         -------

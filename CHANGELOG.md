@@ -13,8 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - negflo `Negflo`: reimplemented around a single event-based algorithm, verified against NEGFLO6 rebuilt from its C source. Missing data (NaN) is now handled consistently by every method: missing days contribute nothing to any total, break flow events, stay missing in the results, and negatives are carried across them. NEGFLO6's other known bugs are not reproduced (see the module documentation).
-- negflo `Negflo.neg_overflows`: now reports, for every method, all negative volume that was not redistributed (including volume discarded by SM3/SM5 and negatives outside SM6 segments), so that `sum(result) == sum(residual) - overflow`.
+- negflo `Negflo.neg_overflows` renamed to `Negflo.unallocated_negatives`. It now reports, for every method, all negative volume that was not redistributed (including volume discarded by SM3/SM5 and negatives outside SM6 segments), so that `sum(result) == sum(residual) - unallocated negatives`.
 - negflo `Negflo` SM2-SM5/SM7: flows equal to the flow limit no longer form part of a flow event (matching NEGFLO6).
+- negflo `Negflo.sm4()`: negative flows before the first event are no longer carried into it; as in NEGFLO6, they have no preceding event and are not redistributed (they are reported in the unallocated negatives).
 - negflo `Negflo.sm1()`: the flow limit is no longer used, matching the NEGFLO6 documentation and making SM6 equivalent to SM1 within each segment.
 - negflo `Negflo.sm6()`: negative flows outside every segment are now set to zero; generated segments are no longer stored on the instance.
 - negflo `Negflo.sm7()`: an event can absorb negative flows from both sides.

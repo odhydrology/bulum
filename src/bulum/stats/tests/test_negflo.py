@@ -19,11 +19,11 @@ nan = np.nan
 
 
 def run(method, values, flow_limit=0.0, **kwargs):
-    """Run a Negflo method on a single series; return (result list, overflow)."""
+    """Run a Negflo method on a single series; return (result list, unallocated negatives)."""
     df = pd.DataFrame({"a": values}, index=pd.date_range("2000-01-01", periods=len(values)))
     negflo = Negflo(df, flow_limit, **kwargs)
     result = getattr(negflo, method)()["a"]
-    return result.tolist(), negflo.neg_overflows["a"]
+    return result.tolist(), negflo.unallocated_negatives["a"]
 
 
 class Tests(unittest.TestCase):
@@ -119,25 +119,25 @@ class Tests(unittest.TestCase):
 
     def test_sm3_does_not_carry(self):
         """Negative flow an event cannot absorb is lost, not carried."""
-        result, overflow = run("sm3", [-6.0, 4.0, -1.0, 10.0])
+        result, unallocated = run("sm3", [-6.0, 4.0, -1.0, 10.0])
         self.assertSeriesEqual([0.0, 0.0, 0.0, 9.0], result)
-        self.assertEqual(-2.0, overflow)
+        self.assertEqual(-2.0, unallocated)
 
     def test_sm4(self):
         """Tests ordering: smooths backward into preceding positives first.
-        Negatives before the first event are carried into it."""
+        Negatives before the first event are not redistributed."""
         df = pd.DataFrame({
             "a": [1, -1],
             "b": [-1, 1]
         })
         negflo = Negflo(df, 0)
         negflo.sm4()
-        self.assertEqual(0, negflo.neg_overflows["a"])
+        self.assertEqual(0, negflo.unallocated_negatives["a"])
         self.assertEqual(0, np.count_nonzero(negflo.df_residual["a"]))
 
-        # b=[-1, 1]: no preceding positive, so the -1 is carried into the 1.
-        self.assertEqual(0, negflo.neg_overflows["b"])
-        self.assertEqual(0, np.count_nonzero(negflo.df_residual["b"]))
+        # b=[-1, 1]: no preceding positive, so the -1 is discarded (as in NEGFLO6).
+        self.assertEqual(-1, negflo.unallocated_negatives["b"])
+        self.assertEqual([0, 1], negflo.df_residual["b"].tolist())
 
     def test_sm4_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not
@@ -151,12 +151,13 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     def test_sm4_leading_negative(self):
-        """Leading negatives with no preceding positive are carried into the
-        first positive period.
+        """Leading negatives with no preceding positive are discarded, as in
+        NEGFLO6, and must not bleed into the following positive period.
 
-        The leading -1080 and the following -400 exceed positive period 1
-        [60, 80], so it is zeroed. The remaining carry also exceeds positive
-        period 2 [15, 80, 105] plus the trailing -80, so it is zeroed too.
+        The -400 after positive period 1 [60, 80] exceeds it, so it is zeroed
+        and 260 is carried. That plus the trailing -80 exceeds positive period
+        2 [15, 80, 105], so it is zeroed too, leaving 140 unabsorbed. With the
+        discarded -1080, the unallocated negatives total -1220.
         """
         df = pd.DataFrame({
             "a": [-80.0, -160.0, -240.0, -300.0, -230.0, -40.0, -30.0,  # leading neg
@@ -174,6 +175,14 @@ class Tests(unittest.TestCase):
         with self.subTest("neg period zeroed"):
             for i in [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 16]:
                 self.assertEqual(0.0, s.iloc[i])
+        with self.subTest("unallocated negatives"):
+            self.assertEqual(-1220.0, negflo.unallocated_negatives["a"])
+
+    def test_sm4_leading_negative_discarded(self):
+        """The leading negatives are not taken out of the first event."""
+        result, unallocated = run("sm4", [-5.0, 10.0, -2.0, 4.0])
+        self.assertSeriesEqual([0.0, 8.0, 0.0, 4.0], result)
+        self.assertEqual(-5.0, unallocated)
 
     def test_sm5_carry(self):
         """Tests to make sure ordering is correct i.e. smooths backward not
@@ -188,12 +197,12 @@ class Tests(unittest.TestCase):
         expect = pd.Series([0.0, 0.0, 2.0, 0.0, 3.0, 0.0])
         negflo = Negflo(df, 2)
         negflo.sm5()
-        self.assertEqual(-2, negflo.neg_overflows["a"])
+        self.assertEqual(-2, negflo.unallocated_negatives["a"])
         self.assertTrue(all(expect == negflo.df_residual["a"]))
 
     def test_sm6_period_specification(self):
         """Period specification working? Negatives outside every segment are
-        set to zero and count towards the overflow."""
+        set to zero and count towards the unallocated negatives."""
         df = pd.DataFrame({"a":
                            [-2, 2, 2, 0, 1, 1, -2, -2, 0, -1, 1]})
         expected = pd.DataFrame({"a": [0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1]})
@@ -210,7 +219,7 @@ class Tests(unittest.TestCase):
         negflo = Negflo(df, segments=segments)
         negflo.sm6()
         self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
-        self.assertEqual(negflo.neg_overflows["a"], -5)
+        self.assertEqual(negflo.unallocated_negatives["a"], -5)
 
     def test_sm6_sampling(self):
         """Sampling working as expected?"""
@@ -225,7 +234,7 @@ class Tests(unittest.TestCase):
         negflo = Negflo(df)
         negflo.sm6(sampling_frequency=pd.DateOffset(days=3))
         self.assertTrue(all(negflo.df_residual["a"] == expected["a"]))
-        self.assertEqual(negflo.neg_overflows["a"], -4)
+        self.assertEqual(negflo.unallocated_negatives["a"], -4)
 
     def test_sm6_start_date(self):
         """SM6 start date parameter working? Days before the first segment are
@@ -241,7 +250,7 @@ class Tests(unittest.TestCase):
         s = negflo.df_residual["a"]
         self.assertEqual(0, s.iloc[0])
         self.assertEqual(2, s.iloc[1])
-        self.assertEqual(-2, negflo.neg_overflows["a"])
+        self.assertEqual(-2, negflo.unallocated_negatives["a"])
 
     def test_sm6_single_day_segment(self):
         """A segment may start and end on the same day (NEGFLO6 never closed
@@ -303,15 +312,15 @@ class Tests(unittest.TestCase):
         })
         negflo = Negflo(df, 2)
         negflo.sm7()
-        self.assertEqual(0, negflo.neg_overflows["a"])
+        self.assertEqual(0, negflo.unallocated_negatives["a"])
         self.assertTrue(all(expect["a"] == negflo.df_residual["a"]))
 
     def test_sm7_absorbs_from_both_sides(self):
         """An event absorbs the negatives either side of it if it is the larger
         neighbour of both."""
-        result, overflow = run("sm7", [3.0, -2.0, 10.0, -4.0, 2.0, -1.0])
+        result, unallocated = run("sm7", [3.0, -2.0, 10.0, -4.0, 2.0, -1.0])
         self.assertSeriesEqual([3.0, 0.0, 4.0, 0.0, 1.0, 0.0], result)
-        self.assertEqual(0, overflow)
+        self.assertEqual(0, unallocated)
 
     def test_sm7_tie_goes_to_preceding_event(self):
         result, _ = run("sm7", [2.0, -1.0, 2.0])
@@ -444,27 +453,26 @@ class Tests(unittest.TestCase):
     def test_sm1_with_missing_data(self):
         """Missing days are excluded from the totals (previously a single NaN
         zeroed the whole series)."""
-        result, overflow = run("sm1", [6.0, nan, -3.0, 6.0])
+        result, unallocated = run("sm1", [6.0, nan, -3.0, 6.0])
         self.assertSeriesEqual([4.5, nan, 0.0, 4.5], result)
-        self.assertEqual(0, overflow)
+        self.assertEqual(0, unallocated)
 
     def test_missing_data_breaks_events(self):
         """A gap ends a flow event, so each part absorbs separately."""
-        result, overflow = run("sm3", [-2.0, 4.0, nan, 4.0, -1.0, 1.0])
+        result, unallocated = run("sm3", [-2.0, 4.0, nan, 4.0, -1.0, 1.0])
         self.assertSeriesEqual([0.0, 2.0, nan, 4.0, 0.0, 0.0], result)
-        self.assertEqual(0, overflow)
+        self.assertEqual(0, unallocated)
 
     def test_negatives_carried_across_missing_data(self):
         """Negatives are carried across gaps like any other day."""
-        values = [-6.0, nan, -2.0, 4.0, nan, 10.0, -1.0]
         with self.subTest("sm2"):
-            result, overflow = run("sm2", values)
+            result, unallocated = run("sm2", [-6.0, nan, -2.0, 4.0, nan, 10.0, -1.0])
             self.assertSeriesEqual([0.0, nan, 0.0, 0.0, nan, 6.0, 0.0], result)
-            self.assertEqual(-1.0, overflow)
+            self.assertEqual(-1.0, unallocated)
         with self.subTest("sm4"):
-            result, overflow = run("sm4", values)
-            self.assertSeriesEqual([0.0, nan, 0.0, 0.0, nan, 5.0, 0.0], result)
-            self.assertEqual(0, overflow)
+            result, unallocated = run("sm4", [4.0, -6.0, nan, -1.0, 10.0, -1.0])
+            self.assertSeriesEqual([0.0, 0.0, nan, 0.0, 6.0, 0.0], result)
+            self.assertEqual(0, unallocated)
 
     def test_matches_negflo6_with_missing_data(self):
         """Regression against NEGFLO6S (rebuilt from source with the SM4 typo
@@ -488,7 +496,7 @@ class Tests(unittest.TestCase):
 
     def test_volume_balance(self):
         """For every method, the result totals the positive residual less the
-        redistributed negative volume (i.e. total residual - overflow)."""
+        redistributed negative volume (i.e. total residual - unallocated negatives)."""
         rng = np.random.default_rng(42)
         values = rng.normal(0, 10, 400) * (rng.random(400) < 0.7)
         values[rng.random(400) < 0.1] = nan
@@ -497,8 +505,8 @@ class Tests(unittest.TestCase):
         for flow_limit in (0.0, 5.0):
             for method_name in ("cl1", *SM_METHODS):
                 with self.subTest(method=method_name, flow_limit=flow_limit):
-                    result, overflow = run(method_name, values, flow_limit, segments=segments)
-                    self.assertAlmostEqual(np.nansum(values) - overflow, np.nansum(result), places=6)
+                    result, unallocated = run(method_name, values, flow_limit, segments=segments)
+                    self.assertAlmostEqual(np.nansum(values) - unallocated, np.nansum(result), places=6)
                     self.assertTrue(np.nanmin(result) >= 0)
 
     # --- Construction and output ------------------------------------------
