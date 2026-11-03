@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - negflo `Negflo.from_flows()`: construct from measured and modelled flows; the residual is missing wherever either input is missing.
 - negflo `Negflo.segments`: public attribute holding the SM6 segments.
+- examples: `Examples_negflo.ipynb`, showing every Negflo method on an example with missing data.
 
 ### Changed
 - negflo `Negflo`: reimplemented around a single event-based algorithm, verified against NEGFLO6 rebuilt from its C source. Missing data (NaN) is now handled consistently by every method: missing days contribute nothing to any total, break flow events, stay missing in the results, and negatives are carried across them. NEGFLO6's other known bugs are not reproduced (see the module documentation).
@@ -17,10 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - negflo `Negflo` SM2-SM5/SM7: flows equal to the flow limit no longer form part of a flow event (matching NEGFLO6).
 - negflo `Negflo.sm4()`: negative flows before the first event are no longer carried into it; as in NEGFLO6, they have no preceding event and are not redistributed (they are reported in the unallocated negatives).
 - negflo `Negflo.sm1()`: the flow limit is no longer used, matching the NEGFLO6 documentation and making SM6 equivalent to SM1 within each segment.
-- negflo `Negflo.sm6()`: negative flows outside every segment are now set to zero; generated segments are no longer stored on the instance.
-- negflo `Negflo.sm7()`: an event can absorb negative flows from both sides.
-- negflo `Negflo`: unredistributed negative flow is logged at INFO rather than WARNING level.
-- negflo `Negflo`: `segments` is now keyword-only, and a negative `flow_limit` raises `ValueError`.
+- negflo `Negflo.sm6()`: negative flows outside every segment are now set to zero; generated segments are no longer stored on the instance, and always cover the last day of data.
+- negflo `Negflo.sm6()` (and so `run_all()`): raises `ValueError` if the residual is empty, its index is not sorted, unique dates (a numeric index is no longer silently read as timestamps), or a segment ends before it starts or overlaps another.
+- negflo `Negflo.sm7()`: an event can absorb negative flows from both sides; negative flow an event cannot absorb is no longer carried over to later events; and ties between neighbouring events now go to the preceding event rather than the following one.
+- negflo `Negflo`: unredistributed negative flow is logged at INFO rather than WARNING level, and not at all for CL1 (where it is expected).
+- negflo `Negflo`: `segments` is now keyword-only, a negative `flow_limit` raises `ValueError`, and the input is copied and converted to float (so non-numeric columns raise).
+- negflo: the module now defines `__all__`, so `from bulum.stats import *` exports only `Negflo` and `NegfloAnalysisType` from it.
 
 ### Removed
 - negflo `ContiguousIndexTracker`, `NegfloFileType`, `Negflo.log()`, the unfinished private `Negflo._from_config_file()`, and the unused `num_segments` parameter.

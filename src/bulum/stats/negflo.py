@@ -20,12 +20,13 @@ Absorbing
     flow limit. If the event's total excess is too small, all its flows are set
     to the flow limit and the remainder is left over.
 Unallocated negatives
-    Negative volume that was not absorbed by any event. It is reported (as a
-    negative number) per column in :attr:`Negflo.unallocated_negatives`, so
+    Negative volume that was not absorbed by any event. It is reported as a
+    negative number per column in :attr:`Negflo.unallocated_negatives`, so
     that for every method::
 
-        sum(result) == sum(positive residuals) + sum(negative residuals) - unallocated negatives
+        sum(result) == sum(residual) - unallocated negatives
 
+    i.e. the result totals more than the residual by the unallocated volume.
 Missing data
     Missing days (NaN) contribute nothing to any total, break flow events,
     and remain NaN in every result. Negative volumes are carried across gaps
@@ -41,33 +42,46 @@ This implementation follows the NEGFLO6 documentation and C source, except:
 * Missing data is excluded rather than treated as a measured flow of zero
   (which in NEGFLO6 created spurious negative residuals equal to the modelled
   flow).
-* The flow limit is applied. NEGFLO6 silently ignored positive flow limits.
+* The flow limit is applied (SM2-SM5, SM7). NEGFLO6 silently ignored positive
+  flow limits.
 * Results are not rounded to whole numbers.
+* SM2 and SM3 smooth an event that is still open at the end of the series.
+  NEGFLO6 skipped smoothing when that was the only event.
 * SM4's carry-over is calculated correctly. NEGFLO6 had a typo that reduced
   each event by the wrong negative total, and reused the previous event's
   total for an event still open at the end of the series.
+* SM6 only clips days outside every segment. NEGFLO6 could instead change them
+  using totals left over from SM2 when the segments did not cover the whole
+  period.
 * SM7 is a method in its own right using a non-negative flow limit, rather than
-  being triggered by a negative flow limit. Negatives after the last event are
-  absorbed by the last event, and an event may absorb negative volumes from both
-  sides (NEGFLO6 discarded the former and overwrote one of the latter).
+  being triggered by a negative flow limit. An event may absorb negative
+  volumes from both sides, and an event still open at the end of the series is
+  compared like any other. NEGFLO6 dropped one of the two volumes when an event
+  was chosen by both, and never chose an open final event.
 
-See Also
---------
-Spec obtained from: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
+References
+----------
+Specification: https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo
 """
 
 import logging
 import os
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Hashable, Sequence
 from enum import Enum
-from typing import Optional
+from itertools import pairwise
 
 import numpy as np
 import pandas as pd
 
 from bulum.utils import TimeseriesDataframe
 
+__all__ = ["Negflo", "NegfloAnalysisType"]
+
 logger = logging.getLogger(__name__)
+
+# Relative tolerance below which a volume difference is treated as rounding
+# error, so that e.g. an exactly balanced event leaves zeros, not 1e-17s.
+_RTOL = 1e-9
 
 
 class NegfloAnalysisType(Enum):
@@ -80,7 +94,7 @@ class NegfloAnalysisType(Enum):
     SMOOTHED_BACKWARD = 4  # sm4
     SMOOTHED_BACKWARD_NO_CARRY = 5  # sm5
     SMOOTHED_SEGMENTS = 6  # sm6
-    SMOOTHED_NEG_LIM = 7  # sm7
+    SMOOTHED_NEG_LIM = 7  # sm7 (named after NEGFLO6's negative flow limit switch)
 
     def to_file_extension(self) -> str:
         """Gives the corresponding file extension for the analysis type."""
@@ -127,18 +141,17 @@ def _find_events(x: np.ndarray, flow_limit: float) -> list[np.ndarray]:
     edges = np.diff(above)
     starts = np.flatnonzero(edges == 1)
     ends = np.flatnonzero(edges == -1)
-    return [np.arange(start, end) for start, end in zip(starts, ends)]
+    return [np.arange(start, end) for start, end in zip(starts, ends, strict=True)]
 
 
-def _negative_volumes(x: np.ndarray, events: list[np.ndarray]) -> np.ndarray:
+def _negative_volumes(x: np.ndarray, events: list[np.ndarray]) -> list[float]:
     """Negative volume preceding each event, followed by the volume after the
     last event (so ``len(events) + 1`` values).
 
     Requires a non-negative flow limit, so that events contain no negatives.
     """
-    cumulative = np.concatenate(([0.0], np.cumsum(np.where(x < 0, -x, 0.0))))
     cuts = [0, *(event[0] for event in events), len(x)]
-    return np.diff(cumulative[cuts])
+    return [_negative_total(x[start:end]) for start, end in pairwise(cuts)]
 
 
 def _absorb(x: np.ndarray, idx: np.ndarray, volume: float, flow_limit: float) -> float:
@@ -151,9 +164,10 @@ def _absorb(x: np.ndarray, idx: np.ndarray, volume: float, flow_limit: float) ->
         return volume
     excess = x[idx] - flow_limit
     total_excess = excess.sum()
-    if volume >= total_excess:
+    if volume >= total_excess * (1 - _RTOL):
         x[idx] = flow_limit
-        return volume - total_excess
+        leftover = volume - total_excess
+        return leftover if leftover > _RTOL * total_excess else 0.0
     x[idx] = flow_limit + excess * (1 - volume / total_excess)
     return 0.0
 
@@ -168,7 +182,7 @@ def _smooth_forward(x: np.ndarray, flow_limit: float, carry: bool) -> float:
     events = _find_events(x, flow_limit)
     volumes = _negative_volumes(x, events)
     carried = lost = 0.0
-    for event, volume in zip(events, volumes[:-1]):
+    for event, volume in zip(events, volumes[:-1], strict=True):
         leftover = _absorb(x, event, carried + volume, flow_limit)
         if carry:
             carried = leftover
@@ -187,7 +201,7 @@ def _smooth_backward(x: np.ndarray, flow_limit: float, carry: bool) -> float:
     events = _find_events(x, flow_limit)
     volumes = _negative_volumes(x, events)
     carried, lost = 0.0, volumes[0]
-    for event, volume in zip(events, volumes[1:]):
+    for event, volume in zip(events, volumes[1:], strict=True):
         leftover = _absorb(x, event, carried + volume, flow_limit)
         if carry:
             carried = leftover
@@ -210,7 +224,7 @@ def _smooth_adjacent(x: np.ndarray, flow_limit: float) -> float:
         neighbours = [j for j in (k - 1, k) if 0 <= j < len(events)]
         to_absorb[max(neighbours, key=lambda j: excess[j])] += volume
     return sum(_absorb(x, event, volume, flow_limit)
-               for event, volume in zip(events, to_absorb))
+               for event, volume in zip(events, to_absorb, strict=True))
 
 
 def _smooth_segments(x: np.ndarray, segment_masks: Sequence[np.ndarray]) -> float:
@@ -238,6 +252,19 @@ def _generate_segments(start: pd.Timestamp, last_date: pd.Timestamp,
     return segments
 
 
+def _as_dates(index: pd.Index) -> pd.DatetimeIndex:
+    """`index` as dates, checking it is non-empty, date-like, sorted and
+    unique (as segments are defined by date)."""
+    if len(index) == 0:
+        raise ValueError("The residual has no data.")
+    if pd.api.types.is_numeric_dtype(index):
+        raise ValueError(f"Expected an index of dates, got {index.dtype} values.")
+    dates = pd.DatetimeIndex(pd.to_datetime(index))
+    if not (dates.is_monotonic_increasing and dates.is_unique):
+        raise ValueError("Expected the dates in the index to be sorted and unique.")
+    return dates
+
+
 # ---------------------------------------------------------------------------
 # Public interface
 # ---------------------------------------------------------------------------
@@ -251,10 +278,26 @@ class Negflo:
     processed independently. See the module documentation for the concepts
     and the treatment of missing data.
 
+    Parameters
+    ----------
+    df_residual : pd.DataFrame or TimeseriesDataframe
+        Residual flows, one series per column, in time order. Missing data
+        should be NaN. Values are converted to float.
+    flow_limit : float, default 0.0
+        Non-negative flow limit (see :attr:`flow_limit`).
+    segments : sequence of (start, end), optional
+        Inclusive date ranges for :meth:`sm6`.
+
+    Raises
+    ------
+    ValueError
+        If `flow_limit` is negative.
+
     Attributes
     ----------
     flow_limit : float
         Flows at or below this limit never absorb negative flow (SM2-SM5, SM7).
+        SM1 and SM6 do not use it.
     segments : list of (start, end) tuples, optional
         Inclusive date ranges used by :meth:`sm6`.
     unallocated_negatives : dict
@@ -262,30 +305,22 @@ class Negflo:
         could not redistribute, per column.
     df_name : str or None
         Name of the input TimeseriesDataframe, used to name output files.
+        None for other inputs, including those constructed with
+        :meth:`from_flows`, whose files are named ``result.*``.
     """
 
     def __init__(self,
                  df_residual: pd.DataFrame | TimeseriesDataframe,
                  flow_limit: float = 0.0,
                  *,
-                 segments: Optional[Sequence[tuple[pd.Timestamp, pd.Timestamp]]] = None):
-        """
-        Parameters
-        ----------
-        df_residual : pd.DataFrame or TimeseriesDataframe
-            Residual flows, one series per column. Missing data should be NaN.
-        flow_limit : float, default 0.0
-            Non-negative flow limit.
-        segments : sequence of (start, end), optional
-            Inclusive date ranges for :meth:`sm6`.
-        """
+                 segments: Sequence[tuple[pd.Timestamp, pd.Timestamp]] | None = None):
         if flow_limit < 0:
             raise ValueError(f"Expected a non-negative flow limit, got {flow_limit}.")
-        self.df_name: Optional[str] = (
+        self.df_name: str | None = (
             df_residual.name if isinstance(df_residual, TimeseriesDataframe) else None)
         self.flow_limit = flow_limit
         self.segments = segments
-        self.unallocated_negatives: dict = {}
+        self.unallocated_negatives: dict[Hashable, float] = {}
         self._df_residual_raw = df_residual.astype(float)
         self._df_residual = self._df_residual_raw.copy()
         self._analysis_type = NegfloAnalysisType.RAW
@@ -296,7 +331,7 @@ class Negflo:
                    df_modelled: pd.DataFrame,
                    flow_limit: float = 0.0,
                    *,
-                   segments: Optional[Sequence[tuple[pd.Timestamp, pd.Timestamp]]] = None
+                   segments: Sequence[tuple[pd.Timestamp, pd.Timestamp]] | None = None
                    ) -> "Negflo":
         """Construct from measured (e.g. downstream gauged) and modelled (e.g.
         routed upstream) flows, computing the residual as measured - modelled.
@@ -330,11 +365,11 @@ class Negflo:
         result = self._df_residual_raw.copy()
         for i, column in enumerate(result.columns):
             x = result.iloc[:, i].to_numpy(dtype=float, copy=True)
-            unallocated = smooth(x)
+            unallocated = float(smooth(x))
             x[x < 0] = 0.0
             result.iloc[:, i] = x
             self.unallocated_negatives[column] = -unallocated if unallocated else 0.0
-            if unallocated:
+            if unallocated and analysis_type is not NegfloAnalysisType.CLIPPED:
                 logger.info("%s: %s of negative flow could not be redistributed in %s.",
                             column, unallocated, analysis_type.name)
         self._df_residual = result
@@ -452,14 +487,12 @@ class Negflo:
                          lambda x: _smooth_backward(x, self.flow_limit, carry=False))
 
     def sm6(self, *, use_predefined_segments: bool = True,
-            sampling_frequency: Optional[pd.DateOffset] = None,
-            sampling_start_date: Optional[pd.Timestamp] = None) -> pd.DataFrame:
+            sampling_frequency: pd.DateOffset | None = None,
+            sampling_start_date: pd.Timestamp | None = None) -> pd.DataFrame:
         """Redistribute negative flows within each segment, as per :meth:`sm1`.
 
         Negative flows outside every segment are set to zero. As with
         :meth:`sm1`, the flow limit is not used.
-
-        Assumes the index of the residual can be interpreted as dates.
 
         Parameters
         ----------
@@ -477,11 +510,17 @@ class Negflo:
         pd.DataFrame
             The smoothed residual dataframe.
 
+        Raises
+        ------
+        ValueError
+            If the residual is empty, its index is not sorted, unique dates, or
+            a segment ends before it starts or overlaps another.
+
         See Also
         --------
-        * :meth:`sm1`
+        sm1
         """
-        dates = pd.DatetimeIndex(pd.to_datetime(self._df_residual_raw.index))
+        dates = _as_dates(self._df_residual_raw.index)
         if use_predefined_segments and self.segments is not None:
             segments = [(pd.Timestamp(start), pd.Timestamp(end)) for start, end in self.segments]
         else:
@@ -490,7 +529,7 @@ class Negflo:
                 dates[-1],
                 pd.DateOffset(years=1) if sampling_frequency is None else sampling_frequency)
 
-        masks = []
+        masks: list[np.ndarray] = []
         for start, end in segments:
             if end < start:
                 raise ValueError(f"Segment ends before it starts: {(start, end)}")
@@ -507,9 +546,9 @@ class Negflo:
 
         The negative flows between two flow events are absorbed (as per
         :meth:`sm2`) by whichever of the two events has the larger total
-        excess above the flow limit. Negative flows before the first event or
-        after the last are absorbed by that event. Negative flow an event
-        cannot absorb is not carried over.
+        excess above the flow limit; the preceding event wins ties. Negative
+        flows before the first event or after the last are absorbed by that
+        event. Negative flow an event cannot absorb is not carried over.
 
         Returns
         -------
@@ -520,13 +559,16 @@ class Negflo:
                          lambda x: _smooth_adjacent(x, self.flow_limit))
 
     def run_all(self, folder: str = ".") -> None:
-        """Runs all analyses on the residual, saving each to ``folder``."""
+        """Runs all analyses on the residual, saving each to ``folder``.
+
+        Requires an index of dates, for :meth:`sm6`.
+        """
         for analysis in (self.rw1, self.cl1, self.sm1, self.sm2, self.sm3,
                          self.sm4, self.sm5, self.sm6, self.sm7):
             analysis()
             self.to_file(folder=folder)
 
-    def to_file(self, *, out_filename: Optional[str] = None, folder: Optional[str] = None) -> None:
+    def to_file(self, *, out_filename: str | None = None, folder: str | None = None) -> None:
         """Saves the result of the most recent analysis to a csv file. Missing
         data is written as an empty value.
 

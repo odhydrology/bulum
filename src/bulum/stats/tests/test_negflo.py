@@ -53,6 +53,12 @@ class Tests(unittest.TestCase):
         self.assertTrue(all(0 == negflo.df_residual["a"]))
         self.assertTrue(all(df["b"] == negflo.df_residual["b"]))
 
+    def test_sm1_negatives_exceed_positives(self):
+        """All positives are reduced to zero and the excess is unallocated."""
+        result, unallocated = run("sm1", [-5.0, 2.0])
+        self.assertSeriesEqual([0.0, 0.0], result)
+        self.assertEqual(-3.0, unallocated)
+
     def test_sm1_ignores_flow_limit(self):
         """SM1 factors all positive flows, as documented for NEGFLO6."""
         result, _ = run("sm1", [-3.0, 4.0, 8.0], flow_limit=5.0)
@@ -93,7 +99,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(3, np.count_nonzero(s1))
         self.assertEqual(3, np.count_nonzero(s1 == 0))
         self.assertEqual(3, s1[len(s1) - 2])
-        self.assertEqual(sum(s1), sum(negflo.df_residual["a"]))
+        self.assertEqual(0, negflo.unallocated_negatives["a"])
 
         s2 = negflo.df_residual["b"]
         # The 2.0 at index 3 is exactly at flow_limit, so it ends the positive period.
@@ -116,6 +122,13 @@ class Tests(unittest.TestCase):
         self.assertEqual(3, np.count_nonzero(s))
         self.assertEqual(3, np.count_nonzero(s == 0))
         self.assertEqual(3, s[len(s) - 2])
+
+    def test_sm2_carries(self):
+        """Contrast with test_sm3_does_not_carry: the 2 left over by the 4 is
+        carried to the 10."""
+        result, unallocated = run("sm2", [-6.0, 4.0, -1.0, 10.0])
+        self.assertSeriesEqual([0.0, 0.0, 0.0, 7.0], result)
+        self.assertEqual(0, unallocated)
 
     def test_sm3_does_not_carry(self):
         """Negative flow an event cannot absorb is lost, not carried."""
@@ -170,7 +183,7 @@ class Tests(unittest.TestCase):
         negflo.sm4()
         s = negflo.df_residual["a"]
         with self.subTest("positives absorbed to zero when neg exceeds period sum"):
-            for i in range(7, 9):   # positive period 1
+            for i in [7, 8, 13, 14, 15]:   # positive periods 1 and 2
                 self.assertEqual(0.0, s.iloc[i])
         with self.subTest("neg period zeroed"):
             for i in [0, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 16]:
@@ -268,15 +281,48 @@ class Tests(unittest.TestCase):
         self.assertIsNone(negflo.segments)
         self.assertSeriesEqual([0.0, 0.5, 0.5, 0.0], negflo.sm6()["a"])
 
+    def test_sm6_use_predefined_segments_false(self):
+        """Stored segments are ignored in favour of generated ones."""
+        dates = pd.date_range("2000-01-01", periods=4)
+        df = pd.DataFrame({"a": [-2.0, 2.0, 2.0, -1.0]}, index=dates)
+        negflo = Negflo(df, segments=[(dates[0], dates[1])])
+        with self.subTest("predefined"):
+            self.assertSeriesEqual([0.0, 0.0, 2.0, 0.0], negflo.sm6()["a"])
+            self.assertEqual(-1.0, negflo.unallocated_negatives["a"])
+        with self.subTest("generated"):
+            result = negflo.sm6(use_predefined_segments=False, sampling_frequency=pd.DateOffset(days=2))
+            self.assertSeriesEqual([0.0, 0.0, 1.0, 0.0], result["a"])
+            self.assertEqual(0, negflo.unallocated_negatives["a"])
+
+    def test_sm6_default_yearly_segments(self):
+        """Without segments, each year from the start of the data is smoothed separately."""
+        index = pd.DatetimeIndex(["2000-01-01", "2000-06-01", "2000-12-31", "2001-01-01"])
+        negflo = Negflo(pd.DataFrame({"a": [4.0, -2.0, 4.0, -2.0]}, index=index))
+        self.assertSeriesEqual([3.0, 0.0, 3.0, 0.0], negflo.sm6()["a"])
+        self.assertEqual(-2.0, negflo.unallocated_negatives["a"])
+
+    def test_sm6_string_date_index(self):
+        df = pd.DataFrame({"a": [-1.0, 4.0]}, index=["2000-01-01", "2000-01-02"])
+        self.assertSeriesEqual([0.0, 3.0], Negflo(df).sm6()["a"])
+
+    def test_sm6_invalid_index(self):
+        cases = {
+            "empty": pd.DataFrame({"a": []}, index=pd.DatetimeIndex([])),
+            "numeric": pd.DataFrame({"a": [1.0, -1.0]}),
+            "unsorted": pd.DataFrame({"a": [-1.0, 5.0]}, index=pd.DatetimeIndex(["2002-12-31", "2000-01-01"])),
+            "duplicated": pd.DataFrame({"a": [-1.0, 5.0]}, index=pd.DatetimeIndex(["2000-01-01", "2000-01-01"])),
+        }
+        for name, df in cases.items():
+            with self.subTest(name), self.assertRaises(ValueError):
+                Negflo(df).sm6()
+
     def test_sm6_invalid_segments(self):
         dates = pd.date_range("2000-01-01", periods=6)
         df = pd.DataFrame({"a": np.ones(6)}, index=dates)
-        with self.subTest("overlapping"):
-            with self.assertRaises(ValueError):
-                Negflo(df, segments=[(dates[0], dates[3]), (dates[3], dates[5])]).sm6()
-        with self.subTest("reversed"):
-            with self.assertRaises(ValueError):
-                Negflo(df, segments=[(dates[3], dates[0])]).sm6()
+        with self.subTest("overlapping"), self.assertRaises(ValueError):
+            Negflo(df, segments=[(dates[0], dates[3]), (dates[3], dates[5])]).sm6()
+        with self.subTest("reversed"), self.assertRaises(ValueError):
+            Negflo(df, segments=[(dates[3], dates[0])]).sm6()
 
     def test_sm7(self):
         """Chooses the larger flow period?"""
@@ -322,6 +368,13 @@ class Tests(unittest.TestCase):
         self.assertSeriesEqual([3.0, 0.0, 4.0, 0.0, 1.0, 0.0], result)
         self.assertEqual(0, unallocated)
 
+    def test_sm7_compares_excess_above_flow_limit(self):
+        """The [9] has more excess above 5 (4) than the [6, 6, 6] (3), although
+        its total flow is smaller."""
+        result, unallocated = run("sm7", [6.0, 6.0, 6.0, -1.0, 9.0], flow_limit=5)
+        self.assertSeriesEqual([6.0, 6.0, 6.0, 0.0, 8.0], result)
+        self.assertEqual(0, unallocated)
+
     def test_sm7_tie_goes_to_preceding_event(self):
         result, _ = run("sm7", [2.0, -1.0, 2.0])
         self.assertSeriesEqual([1.0, 0.0, 2.0], result)
@@ -338,11 +391,12 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(df), len(negflo.df_residual))
 
     def test_sm2_string_index_neg_zeroed(self):
-        """sm2 with a string date index must zero negatives and carry forward correctly.
+        """sm2 with a string date index must zero negatives and smooth forward correctly.
 
         No negative precedes the first positive period, so it must remain unchanged.
-        The negative at index 5 carries forward into index 6 (the next positive period),
-        fully consuming it.
+        The -70 at index 5 precedes the next positive period (index 6), fully
+        consuming it with 60 left over, which together with the final 350 is
+        unallocated.
         """
         orig = [100.0, 5.0, 10.0, 50.0, 30.0, -70.0, 10.0, -150.0, -200.0]
         df = self._make_string_indexed_df(orig)
@@ -355,9 +409,10 @@ class Tests(unittest.TestCase):
                 self.assertEqual(result.iloc[i], orig[i])
         # Negatives and following positive period zeroed by carry-forward
         self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
-        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by the preceding -70
         self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
         self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+        self.assertEqual(-410.0, negflo.unallocated_negatives["flow"])
 
     def test_sm3_string_index_neg_zeroed(self):
         """sm3 with a string date index must zero negatives at the correct rows."""
@@ -366,9 +421,10 @@ class Tests(unittest.TestCase):
         negflo.sm3()
         result = negflo.df_residual["flow"]
         self.assertEqual(result.iloc[5], 0.0)   # -70 zeroed
-        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by carried -70
+        self.assertEqual(result.iloc[6], 0.0)   # 10 consumed by the preceding -70
         self.assertEqual(result.iloc[7], 0.0)   # -150 zeroed
         self.assertEqual(result.iloc[8], 0.0)   # -200 zeroed
+        self.assertEqual(-410.0, negflo.unallocated_negatives["flow"])
 
     def test_sm4_string_index_no_extra_rows(self):
         """sm4 with a string date index must not create extra integer-keyed rows."""
@@ -435,6 +491,47 @@ class Tests(unittest.TestCase):
         for method_name in ("cl1", *SM_METHODS):
             getattr(negflo, method_name)()
         self.assertTrue(df.equals(original))
+
+    def test_no_flow_events(self):
+        """With nothing above the flow limit, no negatives can be absorbed
+        (except by SM1/SM6, which ignore the flow limit)."""
+        values = [-1.0, 0.5, -2.0]
+        for method_name in ("sm2", "sm3", "sm4", "sm5", "sm7"):
+            with self.subTest(method=method_name):
+                result, unallocated = run(method_name, values, flow_limit=1)
+                self.assertSeriesEqual([0.0, 0.5, 0.0], result)
+                self.assertEqual(-3.0, unallocated)
+        for method_name in ("sm1", "sm6"):
+            with self.subTest(method=method_name):
+                result, unallocated = run(method_name, values, flow_limit=1)
+                self.assertSeriesEqual([0.0, 0.0, 0.0], result)
+                self.assertEqual(-2.5, unallocated)
+
+    def test_no_rounding_noise(self):
+        """Exactly balanced volumes leave exact zeros, not floating-point residue."""
+        # negatives before the event (absorbed forwards) and after it (backwards)
+        cases = {(-0.1, -0.2, 0.3): ("sm1", "sm2", "sm3", "sm6", "sm7"),
+                 (0.1, 0.2, -0.3): ("sm1", "sm4", "sm5", "sm6", "sm7")}
+        for values, method_names in cases.items():
+            for method_name in method_names:
+                with self.subTest(values=values, method=method_name):
+                    result, unallocated = run(method_name, values)
+                    self.assertEqual([0.0, 0.0, 0.0], result)
+                    self.assertEqual(0.0, unallocated)
+
+    def test_precision_with_large_magnitudes(self):
+        """A small negative is not lost next to very large flows."""
+        result, unallocated = run("sm2", [-1e17, 2e17, -1.0, 1.0])
+        self.assertEqual([0.0, 1e17, 0.0, 0.0], result)
+        self.assertEqual(0.0, unallocated)
+
+    def test_logging(self):
+        """Unallocated negatives are logged, except for CL1 where they are expected."""
+        df = pd.DataFrame({"a": [-1.0, 2.0]})
+        with self.assertNoLogs("bulum.stats.negflo", level="INFO"):
+            Negflo(df).cl1()
+        with self.assertLogs("bulum.stats.negflo", level="INFO"):
+            Negflo(df).sm5()
 
     def test_negative_flow_limit_rejected(self):
         with self.assertRaises(ValueError):
