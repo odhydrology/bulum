@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.stats.storage_level_assessment module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.stats.storage_level_assessment module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -110,8 +110,8 @@ duration analysis, and statistical summaries organized by water year.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">bulum.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">StorageLevelAssessment</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Create sample storage data</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">&#39;2020-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2022-12-31&#39;</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">&#39;D&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">storage</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Storage&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="s1">'2020-01-01'</span><span class="p">,</span> <span class="s1">'2022-12-31'</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s1">'D'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">storage</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">dates</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'Storage'</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initialize assessment with trigger levels</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">])</span>
@@ -123,14 +123,14 @@ duration analysis, and statistical summaries organized by water year.</p>
 </div>
 <p>Usage with named triggers for better readability:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Initialize with meaningful trigger names</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">trigger_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Full Supply&quot;</span><span class="p">,</span> <span class="s2">&quot;Level 1&quot;</span><span class="p">,</span> <span class="s2">&quot;Level 2&quot;</span><span class="p">,</span> <span class="s2">&quot;Critical&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trigger_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"Full Supply"</span><span class="p">,</span> <span class="s2">"Level 1"</span><span class="p">,</span> <span class="s2">"Level 2"</span><span class="p">,</span> <span class="s2">"Critical"</span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">triggers</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">75</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">25</span><span class="p">],</span>
 <span class="gp">... </span>                           <span class="n">trigger_names</span><span class="o">=</span><span class="n">trigger_names</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>  <span class="c1"># Shows &quot;Trigger Name&quot; column</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>  <span class="c1"># Shows "Trigger Name" column</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Add additional trigger dynamically</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Emergency&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Emergency"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Advanced analysis and visualization:</p>
@@ -301,9 +301,9 @@ occurred.</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>  <span class="c1"># e.g., [5, 12, 3, 45] - four events of different lengths</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Analyze the events</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Longest event: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2"> days&quot;</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">&quot;No events&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Average event length: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> days&quot;</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">&quot;No events&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of events: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Longest event: </span><span class="si">{</span><span class="nb">max</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">}</span><span class="s2"> days"</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">"No events"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Average event length: </span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">events</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> days"</span> <span class="k">if</span> <span class="n">events</span> <span class="k">else</span> <span class="s2">"No events"</span><span class="p">)</span>
 </pre></div>
 </div>
 <p class="rubric">Notes</p>
@@ -488,8 +488,8 @@ consistency. Default is None.</p></li>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Assessment with names - name is required</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">sla_named</span> <span class="o">=</span> <span class="n">StorageLevelAssessment</span><span class="p">(</span><span class="n">storage_data</span><span class="p">,</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">],</span>
-<span class="gp">... </span>                                 <span class="n">trigger_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;High&quot;</span><span class="p">,</span> <span class="s2">&quot;Low&quot;</span><span class="p">])</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sla_named</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Critical&quot;</span><span class="p">)</span>  <span class="c1"># ✓ Valid</span>
+<span class="gp">... </span>                                 <span class="n">trigger_names</span><span class="o">=</span><span class="p">[</span><span class="s2">"High"</span><span class="p">,</span> <span class="s2">"Low"</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sla_named</span><span class="o">.</span><span class="n">add_trigger</span><span class="p">(</span><span class="mf">25.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"Critical"</span><span class="p">)</span>  <span class="c1"># ✓ Valid</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Immediate availability for analysis</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">summary</span> <span class="o">=</span> <span class="n">sla_named</span><span class="o">.</span><span class="n">Summary</span><span class="p">()</span>  <span class="c1"># Includes new trigger</span>

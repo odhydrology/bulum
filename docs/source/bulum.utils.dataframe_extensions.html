@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.utils.dataframe_extensions module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -186,10 +186,10 @@ attempting to load pickle files. Set to False to allow pickle loading.</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.json&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">)</span>  <span class="c1"># Auto-detects folder</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.zip&quot;</span><span class="p">)</span>  <span class="c1"># Auto-extracts zip</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;results.pkl&quot;</span><span class="p">,</span> <span class="n">pickle_safety_lock</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Unsafe!</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"results.json"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"results"</span><span class="p">)</span>  <span class="c1"># Auto-detects folder</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"results.zip"</span><span class="p">)</span>  <span class="c1"># Auto-extracts zip</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"results.pkl"</span><span class="p">,</span> <span class="n">pickle_safety_lock</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># Unsafe!</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -244,8 +244,8 @@ ensemble with the results.</p>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">DataframeEnsemble</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">add_dataframe</span><span class="p">(</span><span class="n">tsdf1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;folder&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;results&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"results"</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">"folder"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"results"</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">"json"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -254,7 +254,7 @@ ensemble with the results.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.utils.dataframe_extensions.RegexArg">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">RegexArg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.utils.dataframe_extensions.RegexArg" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Specifies the type of argument supplied to filtering functions in TSDF
 and DataframeEnsemble.</p>
@@ -296,18 +296,18 @@ depending on pandas internals</p></li>
 </ul>
 <p>For operations that don’t preserve metadata, use the <a class="reference internal" href="#bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply" title="bulum.utils.dataframe_extensions.TimeseriesDataframe.tsdf_apply"><code class="xref py py-meth docutils literal notranslate"><span class="pre">tsdf_apply()</span></code></a> method.</p>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file.csv&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;raw,validated&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'A'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"file.csv"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">"raw,validated"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Metadata preserved automatically in most operations:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span> <span class="o">*</span> <span class="mi">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># &quot;raw,validated&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># "test"</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># "raw,validated"</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># For rolling operations, use tsdf_apply:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># "test" - metadata preserved</span>
 </pre></div>
 </div>
 <div class="admonition seealso">
@@ -335,8 +335,8 @@ a comma ,).</p>
 <p>The <cite>check_membership</cite> flag will ensure that <cite>tag</cite> does not match with
 existing tags, but will not (at present) check the other way around. For
 example, the following will not raise an error:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;01&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-<span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;01a&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">"01"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">df</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">"01a"</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -365,8 +365,8 @@ example, the following will not raise an error:</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;file.csv&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">'A'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"file.csv"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -414,9 +414,9 @@ vice versa (i.e. via suffix replacement).</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;output.json&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;output.csv&quot;</span><span class="p">)</span> <span class="c1"># will attempt to locate metadata JSON file</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">&quot;data.dat&quot;</span><span class="p">,</span> <span class="n">format_override</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"output.json"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"output.csv"</span><span class="p">)</span> <span class="c1"># will attempt to locate metadata JSON file</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="s2">"data.dat"</span><span class="p">,</span> <span class="n">format_override</span><span class="o">=</span><span class="s2">"json"</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -451,10 +451,10 @@ vice versa (i.e. via suffix replacement).</p></li>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;data.csv&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;validated&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;json&quot;</span><span class="p">)</span>  <span class="c1"># Creates output.json</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;output&quot;</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">&quot;csv&quot;</span><span class="p">)</span>   <span class="c1"># Creates output.csv + output.metadata.json</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"data.csv"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">"validated"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">"json"</span><span class="p">)</span>  <span class="c1"># Creates output.json</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"output"</span><span class="p">,</span> <span class="n">save_format</span><span class="o">=</span><span class="s2">"csv"</span><span class="p">)</span>   <span class="c1"># Creates output.csv + output.metadata.json</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -493,20 +493,20 @@ metadata fields (name, source, description, tags) copied from self</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">&quot;data.csv&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">&quot;raw&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span> <span class="o">=</span> <span class="n">TimeseriesDataframe</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">"test"</span><span class="p">,</span> <span class="n">source</span><span class="o">=</span><span class="s2">"data.csv"</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tsdf</span><span class="o">.</span><span class="n">add_tag</span><span class="p">(</span><span class="s2">"raw"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Pandas .apply() preserves metadata automatically (no need for tsdf_apply):</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved!</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># "test" - metadata preserved!</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use tsdf_apply for rolling operations (metadata would be lost otherwise):</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">df</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># &quot;test&quot; - metadata preserved</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">name</span>  <span class="c1"># "test" - metadata preserved</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use tsdf_apply when creating new DataFrames from scratch:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">tsdf</span><span class="o">.</span><span class="n">tsdf_apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># &quot;raw&quot; - metadata preserved</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span><span class="o">.</span><span class="n">tags</span>  <span class="c1"># "raw" - metadata preserved</span>
 </pre></div>
 </div>
 <div class="admonition seealso">

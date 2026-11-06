@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.datetime_functions module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.utils.datetime_functions module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -113,10 +113,10 @@ the input string.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_date_format</span><span class="p">(</span><span class="s2">&quot;2023-12-25&quot;</span><span class="p">)</span>
-<span class="go">&#39;%Y-%m-%d&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_date_format</span><span class="p">(</span><span class="s2">&quot;25/12/2023&quot;</span><span class="p">)</span>
-<span class="go">&#39;%d/%m/%Y&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_date_format</span><span class="p">(</span><span class="s2">"2023-12-25"</span><span class="p">)</span>
+<span class="go">'%Y-%m-%d'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_date_format</span><span class="p">(</span><span class="s2">"25/12/2023"</span><span class="p">)</span>
+<span class="go">'%d/%m/%Y'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -158,8 +158,8 @@ after start_date if end_date, days, and years are not specified.</p>
 <span class="go">[datetime.datetime(2023, 1, 1, 0, 0), datetime.datetime(2023, 1, 2, 0, 0), datetime.datetime(2023, 1, 3, 0, 0)]</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_dates</span><span class="p">(</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">,</span> <span class="n">str_format</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
-<span class="go">[&#39;2023-01-01&#39;, &#39;2023-01-02&#39;]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_dates</span><span class="p">(</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">,</span> <span class="n">str_format</span><span class="o">=</span><span class="s1">'%Y-%m-</span><span class="si">%d</span><span class="s1">'</span><span class="p">)</span>
+<span class="go">['2023-01-01', '2023-01-02']</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -180,9 +180,9 @@ after start_date if end_date, days, and years are not specified.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_month</span><span class="p">([</span><span class="s1">&#39;2023-01-15&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-16&#39;</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_month</span><span class="p">([</span><span class="s1">'2023-01-15'</span><span class="p">,</span> <span class="s1">'2023-01-16'</span><span class="p">])</span>
 <span class="go">[1, 1]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_month</span><span class="p">([</span><span class="s1">&#39;2023-12-31&#39;</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_month</span><span class="p">([</span><span class="s1">'2023-12-31'</span><span class="p">])</span>
 <span class="go">[12]</span>
 </pre></div>
 </div>
@@ -204,10 +204,10 @@ after start_date if end_date, days, and years are not specified.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_next_month_start</span><span class="p">(</span><span class="s2">&quot;2023-02-15&quot;</span><span class="p">)</span>
-<span class="go">&#39;2023-03-01&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_next_month_start</span><span class="p">(</span><span class="s2">&quot;2023-12-15&quot;</span><span class="p">)</span>
-<span class="go">&#39;2024-01-01&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_next_month_start</span><span class="p">(</span><span class="s2">"2023-02-15"</span><span class="p">)</span>
+<span class="go">'2023-03-01'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_next_month_start</span><span class="p">(</span><span class="s2">"2023-12-15"</span><span class="p">)</span>
+<span class="go">'2024-01-01'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -228,10 +228,10 @@ after start_date if end_date, days, and years are not specified.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_prev_month_end</span><span class="p">(</span><span class="s2">&quot;2023-03-15&quot;</span><span class="p">)</span>
-<span class="go">&#39;2023-02-28&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_prev_month_end</span><span class="p">(</span><span class="s2">&quot;2024-03-15&quot;</span><span class="p">)</span>  <span class="c1"># Leap year</span>
-<span class="go">&#39;2024-02-29&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_prev_month_end</span><span class="p">(</span><span class="s2">"2023-03-15"</span><span class="p">)</span>
+<span class="go">'2023-02-28'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_prev_month_end</span><span class="p">(</span><span class="s2">"2024-03-15"</span><span class="p">)</span>  <span class="c1"># Leap year</span>
+<span class="go">'2024-02-29'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -252,12 +252,12 @@ after start_date if end_date, days, and years are not specified.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">&quot;2023-02-15&quot;</span><span class="p">)</span>
-<span class="go">&#39;2023-02-28&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">&quot;2024-02-15&quot;</span><span class="p">)</span>  <span class="c1"># Leap year</span>
-<span class="go">&#39;2024-02-29&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">&quot;2023-04-15&quot;</span><span class="p">)</span>
-<span class="go">&#39;2023-04-30&#39;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">"2023-02-15"</span><span class="p">)</span>
+<span class="go">'2023-02-28'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">"2024-02-15"</span><span class="p">)</span>  <span class="c1"># Leap year</span>
+<span class="go">'2024-02-29'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">get_this_month_end</span><span class="p">(</span><span class="s2">"2023-04-15"</span><span class="p">)</span>
+<span class="go">'2023-04-30'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -297,12 +297,12 @@ water year is from 2021-07-01 to 2022-06-30 inclusive.</p></li>
 </dl>
 <p class="rubric">Examples</p>
 <p>Basic usage with default July start:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_wy</span><span class="p">([</span><span class="s1">&#39;2023-06-30&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-07-01&#39;</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_wy</span><span class="p">([</span><span class="s1">'2023-06-30'</span><span class="p">,</span> <span class="s1">'2023-07-01'</span><span class="p">])</span>
 <span class="go">[2022, 2023]</span>
 </pre></div>
 </div>
 <p>Using fiscal year convention:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_wy</span><span class="p">([</span><span class="s1">&#39;2023-06-30&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-07-01&#39;</span><span class="p">],</span> <span class="n">using_end_year</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_wy</span><span class="p">([</span><span class="s1">'2023-06-30'</span><span class="p">,</span> <span class="s1">'2023-07-01'</span><span class="p">],</span> <span class="n">using_end_year</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="go">[2023, 2024]</span>
 </pre></div>
 </div>
@@ -366,13 +366,13 @@ water year start month.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_year_and_month</span><span class="p">([</span><span class="s1">&#39;2023-01-15&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-02-20&#39;</span><span class="p">])</span>
-<span class="go">[&#39;2023-01&#39;, &#39;2023-02&#39;]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">get_year_and_month</span><span class="p">([</span><span class="s1">'2023-01-15'</span><span class="p">,</span> <span class="s1">'2023-02-20'</span><span class="p">])</span>
+<span class="go">['2023-01', '2023-02']</span>
 </pre></div>
 </div>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">get_year_and_month</span><span class="p">([</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2023</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">)])</span>
-<span class="go">[&#39;2023-01&#39;, &#39;2023-02&#39;]</span>
+<span class="go">['2023-01', '2023-02']</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -408,10 +408,10 @@ when assigning directly to <code class="docutils literal notranslate"><span clas
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">standardize_datestring_format</span><span class="p">([</span><span class="s2">&quot;25/12/2023&quot;</span><span class="p">,</span> <span class="s2">&quot;26/12/2023&quot;</span><span class="p">])</span>
-<span class="go">[&#39;2023-12-25&#39;, &#39;2023-12-26&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">standardize_datestring_format</span><span class="p">([</span><span class="s2">&quot;25/12/2023&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="go">Index([&#39;2023-12-25&#39;], dtype=&#39;object&#39;)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">standardize_datestring_format</span><span class="p">([</span><span class="s2">"25/12/2023"</span><span class="p">,</span> <span class="s2">"26/12/2023"</span><span class="p">])</span>
+<span class="go">['2023-12-25', '2023-12-26']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">standardize_datestring_format</span><span class="p">([</span><span class="s2">"25/12/2023"</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="go">Index(['2023-12-25'], dtype='object')</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -464,26 +464,26 @@ dates don’t match input length (indicating non-consecutive dates or gaps).</p>
 </dl>
 <p class="rubric">Examples</p>
 <p>Generate mode (default) - fills in gaps:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-02&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-02'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">])</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span><span class="o">.</span><span class="n">dtype</span>
-<span class="go">dtype(&#39;&lt;M8[D]&#39;)</span>
+<span class="go">dtype('&lt;M8[D]')</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">],</span> <span class="n">check_length</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">],</span> <span class="n">check_length</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 <span class="go">3  # Generates all 3 dates: Jan 1, 2, 3</span>
 </pre></div>
 </div>
 <p>Parse mode - preserves gaps:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;parse&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dates</span> <span class="o">=</span> <span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"parse"</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">dates</span><span class="p">)</span>
 <span class="go">2  # Only Jan 1 and 3, no filling</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span> <span class="n">check_length</span><span class="o">=</span><span class="s2">&quot;warn&quot;</span><span class="p">))</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"generate"</span><span class="p">,</span> <span class="n">check_length</span><span class="o">=</span><span class="s2">"warn"</span><span class="p">))</span>
 <span class="go">3  # Issues warning but returns all dates</span>
 </pre></div>
 </div>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">&#39;2023-01-01&#39;</span><span class="p">,</span> <span class="s1">&#39;2023-01-03&#39;</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;generate&quot;</span><span class="p">,</span> <span class="n">check_length</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">)</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">to_np_datetimes64d</span><span class="p">([</span><span class="s1">'2023-01-01'</span><span class="p">,</span> <span class="s1">'2023-01-03'</span><span class="p">],</span> <span class="n">mode</span><span class="o">=</span><span class="s2">"generate"</span><span class="p">,</span> <span class="n">check_length</span><span class="o">=</span><span class="s2">"strict"</span><span class="p">)</span>
 <span class="gt">Traceback (most recent call last):</span>
 <span class="w">    </span><span class="o">...</span>
 <span class="gr">ValueError</span>: <span class="n">Date sequence validation failed...</span>

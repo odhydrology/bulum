@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.stats.stochastic_data_check module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.stats.stochastic_data_check module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -151,55 +151,55 @@ chts: Multi-level dictionary with charts stored by - Period (annual vs. months v
 
 <p class="rubric">Examples</p>
 <p>Constructing StochasticDataComparison.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span> <span class="o">=</span> <span class="n">StochasticDataComparison</span><span class="p">(</span><span class="n">dfs_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Dataset1&#39;</span><span class="p">:</span> <span class="n">df_1</span><span class="p">,</span> <span class="s1">&#39;Dataset2&#39;</span><span class="p">:</span> <span class="n">df_2</span><span class="p">})</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span> <span class="o">=</span> <span class="n">StochasticDataComparison</span><span class="p">(</span><span class="n">dfs_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'Dataset1'</span><span class="p">:</span> <span class="n">df_1</span><span class="p">,</span> <span class="s1">'Dataset2'</span><span class="p">:</span> <span class="n">df_2</span><span class="p">})</span>
 </pre></div>
 </div>
 <p>Output annual distribution all timeseries and datasets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output July (month 7) distribution comparison for given timeseries (“col1”).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">][</span><span class="s2">&quot;col1&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">][</span><span class="s2">"col1"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output July (month 7) distribution chart for given timeseries (“col1”).</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">][</span><span class="s2">&quot;col1&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">][</span><span class="s2">"col1"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output annual Lag-0 and Lag-1 cross correlations for all timeseries and datasets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output annual Lag-0 cross correlation chart comparison for given timeseries (“col1”)</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">][</span><span class="s2">&quot;lag0&quot;</span><span class="p">][</span><span class="s2">&quot;col1&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">][</span><span class="s2">"lag0"</span><span class="p">][</span><span class="s2">"col1"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output annual Lag-0 cross correlation heatmap for given dataset (“Dataset1”)</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">][</span><span class="s2">&quot;lag0&quot;</span><span class="p">][</span><span class="s2">&quot;Dataset1&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Correlations</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">][</span><span class="s2">"lag0"</span><span class="p">][</span><span class="s2">"Dataset1"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output annual statistic summary for all timeseries and datasets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output July mean total comparison for all timeseries and datasets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">&quot;outputs&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">][</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">"outputs"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">][</span><span class="s2">"mean"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output July mean total chart for all timeseries and datasets.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">][</span><span class="s2">&quot;mean&quot;</span><span class="p">]</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Stats</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">][</span><span class="s2">"mean"</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>Output July (month 7) distribution chart for all timeseries.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">alt</span><span class="o">.</span><span class="n">vconcat</span><span class="p">(</span><span class="o">*</span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">alt</span><span class="o">.</span><span class="n">vconcat</span><span class="p">(</span><span class="o">*</span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
 </pre></div>
 </div>
 <p>Output July (month 7) distribution chart for all timeseries and adjust properties.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">alt</span><span class="o">.</span><span class="n">vconcat</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;07&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">alt</span><span class="o">.</span><span class="n">vconcat</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"07"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
 </pre></div>
 </div>
 <p>Output annual distribution chart for given timeseries (“col1”), convert to log-scale.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">&quot;chts&quot;</span><span class="p">][</span><span class="s2">&quot;annual&quot;</span><span class="p">][</span><span class="s2">&quot;col1&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;log&#39;</span><span class="p">}</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Comparison</span><span class="o">.</span><span class="n">Distributions</span><span class="p">[</span><span class="s2">"chts"</span><span class="p">][</span><span class="s2">"annual"</span><span class="p">][</span><span class="s2">"col1"</span><span class="p">]</span><span class="o">.</span><span class="n">layer</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'log'</span><span class="p">}</span>
 </pre></div>
 </div>
 </dd></dl>

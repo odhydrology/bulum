@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.stats.negflo module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.stats.negflo module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -92,95 +92,143 @@
              
   <section id="module-bulum.stats.negflo">
 <span id="bulum-stats-negflo-module"></span><h1>bulum.stats.negflo module<a class="headerlink" href="#module-bulum.stats.negflo" title="Link to this heading"></a></h1>
-<p>Bulum implementation of Negflo.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This implementation is experimental, insofar as having been written
-entirely based off the Qld Hydrology page as a “spec”. If there
-are bugs/unexpected behaviours please let us know!</p>
+<p>Bulum implementation of NEGFLO.</p>
+<p>NEGFLO redistributes the negative flows in a residual flow series (e.g.
+downstream gauged flow minus routed upstream flow) by reducing positive flows,
+so that the negatives can be set to zero without inflating the total volume.</p>
+<section id="concepts">
+<h2>Concepts<a class="headerlink" href="#concepts" title="Link to this heading"></a></h2>
+<dl>
+<dt>Flow event</dt><dd><p>A maximal run of consecutive days with flow above the flow limit. Days with
+missing data (NaN) break events.</p>
+</dd>
+<dt>Negative volume</dt><dd><p>The total of the negative flows between two consecutive events (or before
+the first event, or after the last).</p>
+</dd>
+<dt>Absorbing</dt><dd><p>An event absorbs a negative volume by reducing each flow’s excess above the
+flow limit in proportion, i.e. by a factor of
+<code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">-</span> <span class="pre">negative</span> <span class="pre">volume</span> <span class="pre">/</span> <span class="pre">total</span> <span class="pre">excess</span></code>. Flows are never reduced below the
+flow limit. If the event’s total excess is too small, all its flows are set
+to the flow limit and the remainder is left over.</p>
+</dd>
+<dt>Unallocated negatives</dt><dd><p>Negative volume that was not absorbed by any event. It is reported as a
+negative number per column in <a class="reference internal" href="#bulum.stats.negflo.Negflo.unallocated_negatives" title="bulum.stats.negflo.Negflo.unallocated_negatives"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Negflo.unallocated_negatives</span></code></a>, so
+that for every method:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="nb">sum</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span> <span class="o">-</span> <span class="n">unallocated</span> <span class="n">negatives</span>
+</pre></div>
 </div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">Spec</span></code></p>
-</div>
-<dl class="py class">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">ContiguousIndexTracker</span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>Convenience class to track contiguous blocks of indices.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.add">
-<span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.add" title="Link to this definition"></a></dt>
-<dd><p>Adds current index/val pair to tracker.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.force_add">
-<span class="sig-name descname"><span class="pre">force_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.force_add" title="Link to this definition"></a></dt>
-<dd><p>Be careful with this, as it may invalidate any computations to do
-with the indices of the values.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.get">
-<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.get" title="Link to this definition"></a></dt>
-<dd><p>Return the list of indices which are currently being tracked.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.indices">
-<span class="sig-name descname"><span class="pre">indices</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.indices" title="Link to this definition"></a></dt>
-<dd><p>Returns a range of indices of the associated collection
-for which values were tracked.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.is_member_of_block">
-<span class="sig-name descname"><span class="pre">is_member_of_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.is_member_of_block" title="Link to this definition"></a></dt>
-<dd><p>Check if idx is adjacent to the currently tracked block of indices.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.is_tracking">
-<span class="sig-name descname"><span class="pre">is_tracking</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.is_tracking" title="Link to this definition"></a></dt>
-<dd><p>Checks if the tracker is active.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>If start_idx is not <cite>None</cite> then it is required that last_idx is also not
-null.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.offset">
-<span class="sig-name descname"><span class="pre">offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.14)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.offset" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)"><span class="pre">list</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.reset" title="Link to this definition"></a></dt>
-<dd><p>Resets to default or resets to current index/value (list).</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.ContiguousIndexTracker.sum_and_reset">
-<span class="sig-name descname"><span class="pre">sum_and_reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.ContiguousIndexTracker.sum_and_reset" title="Link to this definition"></a></dt>
-<dd><p>Returns the sum of the underlying accumulator and resets the trackers.</p>
-</dd></dl>
-
-</dd></dl>
-
+<p>i.e. the result totals more than the residual by the unallocated volume.</p>
+</dd>
+<dt>Missing data</dt><dd><p>Missing days (NaN) contribute nothing to any total, break flow events,
+and remain NaN in every result. Negative volumes are carried across gaps
+exactly as they are across days of zero flow.</p>
+</dd>
+</dl>
+<p>After smoothing, all remaining negative flows are set to zero. Flows between
+zero and the flow limit that are not part of an event are left unchanged.</p>
+</section>
+<section id="differences-from-negflo6">
+<h2>Differences from NEGFLO6<a class="headerlink" href="#differences-from-negflo6" title="Link to this heading"></a></h2>
+<p>This implementation follows the NEGFLO6 documentation and C source, except:</p>
+<ul class="simple">
+<li><p>Missing data is excluded rather than treated as a measured flow of zero
+(which in NEGFLO6 created spurious negative residuals equal to the modelled
+flow).</p></li>
+<li><p>The flow limit is applied (SM2-SM5, SM7). NEGFLO6 silently ignored positive
+flow limits.</p></li>
+<li><p>Results are not rounded to whole numbers.</p></li>
+<li><p>SM2 and SM3 smooth an event that is still open at the end of the series.
+NEGFLO6 skipped smoothing when that was the only event.</p></li>
+<li><p>SM4’s carry-over is calculated correctly. NEGFLO6 had a typo that reduced
+each event by the wrong negative total, and reused the previous event’s
+total for an event still open at the end of the series.</p></li>
+<li><p>SM6 only clips days outside every segment. NEGFLO6 could instead change them
+using totals left over from SM2 when the segments did not cover the whole
+period.</p></li>
+<li><p>SM7 is a method in its own right using a non-negative flow limit, rather than
+being triggered by a negative flow limit. An event may absorb negative
+volumes from both sides, and an event still open at the end of the series is
+compared like any other. NEGFLO6 dropped one of the two volumes when an event
+was chosen by both, and never chose an open final event.</p></li>
+</ul>
+<p class="rubric">References</p>
+<p>Specification: <a class="reference external" href="https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo">https://qldhyd.atlassian.net/wiki/spaces/MET/pages/524386/Negflo</a></p>
+</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Negflo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_residual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.MutableSequence" title="(in Python v3.14)"><span class="pre">MutableSequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">Negflo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_residual</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><span class="pre">TimeseriesDataframe</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.Negflo" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Bulum implementation of NEGFLO.</p>
-<p>When there are negative overflows from the smoothing algorithm, they will be
-noted in <cite>self.neg_overflows</cite>.</p>
+<p>Each analysis method (<a class="reference internal" href="#bulum.stats.negflo.Negflo.rw1" title="bulum.stats.negflo.Negflo.rw1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">rw1()</span></code></a>, <a class="reference internal" href="#bulum.stats.negflo.Negflo.cl1" title="bulum.stats.negflo.Negflo.cl1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">cl1()</span></code></a>, <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm1" title="bulum.stats.negflo.Negflo.sm1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm1()</span></code></a> … <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm7" title="bulum.stats.negflo.Negflo.sm7"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm7()</span></code></a>)
+works from the residual supplied on construction, independently of any
+previous call, and returns the result as a new dataframe. Columns are
+processed independently. See the module documentation for the concepts
+and the treatment of missing data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_residual</strong> (<em>pd.DataFrame</em><em> or </em><a class="reference internal" href="bulum.utils.dataframe_extensions.html#bulum.utils.dataframe_extensions.TimeseriesDataframe" title="bulum.utils.dataframe_extensions.TimeseriesDataframe"><em>TimeseriesDataframe</em></a>) – Residual flows, one series per column, in time order. Missing data
+should be NaN. Values are converted to float.</p></li>
+<li><p><strong>flow_limit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>default 0.0</em>) – Non-negative flow limit (see <a class="reference internal" href="#bulum.stats.negflo.Negflo.flow_limit" title="bulum.stats.negflo.Negflo.flow_limit"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flow_limit</span></code></a>).</p></li>
+<li><p><strong>segments</strong> (<em>sequence</em><em> of </em><em>(</em><em>start</em><em>, </em><em>end</em><em>)</em><em>, </em><em>optional</em>) – Inclusive date ranges for <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm6" title="bulum.stats.negflo.Negflo.sm6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm6()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If <cite>flow_limit</cite> is negative.</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.flow_limit">
+<span class="sig-name descname"><span class="pre">flow_limit</span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.flow_limit" title="Link to this definition"></a></dt>
+<dd><p>Flows at or below this limit never absorb negative flow (SM2-SM5, SM7).
+SM1 and SM6 do not use it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.segments">
+<span class="sig-name descname"><span class="pre">segments</span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.segments" title="Link to this definition"></a></dt>
+<dd><p>Inclusive date ranges used by <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm6" title="bulum.stats.negflo.Negflo.sm6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm6()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a> of (start, end) tuples, optional</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.unallocated_negatives">
+<span class="sig-name descname"><span class="pre">unallocated_negatives</span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.unallocated_negatives" title="Link to this definition"></a></dt>
+<dd><p>Negative volume (as a negative number) that the most recent analysis
+could not redistribute, per column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.df_name">
+<span class="sig-name descname"><span class="pre">df_name</span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.df_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the input TimeseriesDataframe, used to name output files.
+None for other inputs, including those constructed with
+<a class="reference internal" href="#bulum.stats.negflo.Negflo.from_flows" title="bulum.stats.negflo.Negflo.from_flows"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_flows()</span></code></a>, whose files are named <code class="docutils literal notranslate"><span class="pre">result.*</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a> or None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.cl1">
 <span class="sig-name descname"><span class="pre">cl1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.cl1" title="Link to this definition"></a></dt>
-<dd><p>Clip all negative flows to zero.</p>
+<dd><p>Set all negative flows to zero.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The clipped residual dataframe.</p>
@@ -194,31 +242,39 @@ noted in <cite>self.neg_overflows</cite>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.df_residual">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">df_residual</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.df_residual" title="Link to this definition"></a></dt>
-<dd><p>The current working residual dataframe (read-only).</p>
+<dd><p>The result of the most recent analysis (read-only copy).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.log">
-<span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.log" title="Link to this definition"></a></dt>
-<dd><p>Not yet implemented.</p>
-<p>Input_file_name.LOG</p>
-<p>A file is also created which gives the total of the positive and negative
-flows, the total of the positive flows above the flow limit. It also gives the
-start and end of each period of flows above the flow limit, the total of the
-preceding negatives and the total of the positive flow above the flow limit.</p>
+<dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.from_flows">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_flows</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_measured</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_modelled</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">flow_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Sequence" title="(in Python v3.14)"><span class="pre">Sequence</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#bulum.stats.negflo.Negflo" title="bulum.stats.negflo.Negflo"><span class="pre">Negflo</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.from_flows" title="Link to this definition"></a></dt>
+<dd><p>Construct from measured (e.g. downstream gauged) and modelled (e.g.
+routed upstream) flows, computing the residual as measured - modelled.</p>
+<p>The dataframes are aligned on their index; a day is missing in the
+residual if it is missing (or absent) in either input.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_measured</strong> (<em>pd.DataFrame</em>) – Flows with matching column names.</p></li>
+<li><p><strong>df_modelled</strong> (<em>pd.DataFrame</em>) – Flows with matching column names.</p></li>
+<li><p><strong>flow_limit</strong> – See <a class="reference internal" href="#bulum.stats.negflo.Negflo" title="bulum.stats.negflo.Negflo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Negflo</span></code></a>.</p></li>
+<li><p><strong>segments</strong> – See <a class="reference internal" href="#bulum.stats.negflo.Negflo" title="bulum.stats.negflo.Negflo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Negflo</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.run_all">
 <span class="sig-name descname"><span class="pre">run_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.run_all" title="Link to this definition"></a></dt>
 <dd><p>Runs all analyses on the residual, saving each to <code class="docutils literal notranslate"><span class="pre">folder</span></code>.</p>
+<p>Requires an index of dates, for <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm6" title="bulum.stats.negflo.Negflo.sm6"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm6()</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.rw1">
 <span class="sig-name descname"><span class="pre">rw1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.rw1" title="Link to this definition"></a></dt>
-<dd><p>Compute the raw residual i.e. downstream-upstream flows.</p>
-<p>Internally, resets the residual to that stored on initialisation.</p>
+<dd><p>The raw residual, unchanged.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The raw residual dataframe.</p>
@@ -232,12 +288,15 @@ preceding negatives and the total of the positive flow above the flow limit.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm1">
 <span class="sig-name descname"><span class="pre">sm1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm1" title="Link to this definition"></a></dt>
-<dd><p>Redistribute negative flows across all positive flow events.</p>
-<p>The negative flows are set to zero and the excess positive flows have
-been adjusted by a factor of:</p>
+<dd><p>Redistribute negative flows across the whole period.</p>
+<p>All negative flows are set to zero and all positive flows are factored
+by:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Total</span> <span class="n">of</span> <span class="n">the</span> <span class="n">negative</span> <span class="n">flows</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Total</span> <span class="n">of</span> <span class="n">the</span> <span class="n">positive</span> <span class="n">flows</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>This preserves the variability of the flows and the total volume, and
+is most useful for preserving storage behaviour if the reach flows into
+a dam. The flow limit is not used (i.e. it is zero).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -251,25 +310,21 @@ been adjusted by a factor of:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm2">
 <span class="sig-name descname"><span class="pre">sm2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm2" title="Link to this definition"></a></dt>
-<dd><p>Redistribute negative flows into future positive flow events, with
+<dd><p>Redistribute negative flows into the following flow event, with
 carry-over.</p>
-<p>Accumulated negative flows are factored into positive flow events
-(defined as periods above the flow limit) using the formula from before,
-namely:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Total</span> <span class="n">of</span> <span class="n">the</span> <span class="n">accumulated</span> <span class="n">negative</span> <span class="n">flows</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Total</span> <span class="n">of</span> <span class="n">the</span> <span class="n">positive</span> <span class="n">flow</span> <span class="n">period</span><span class="p">)</span>
+<p>Each flow event (a run of flows above the flow limit) absorbs the
+negative flows preceding it, reducing the flows’ excess above the flow
+limit by the factor:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">1</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">Total</span> <span class="n">of</span> <span class="n">the</span> <span class="n">preceding</span> <span class="n">negative</span> <span class="n">flows</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">Total</span> <span class="n">excess</span> <span class="n">of</span> <span class="n">the</span> <span class="n">event</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that this will not reduce flows below the specified flow limit
-(<cite>self.flow_limit</cite>).</p>
-<p>This method accumulates negative flows such that if the first
-encountered positive flow period is not sufficiently large, it will load
-the remaining balance into the next positive flow period.</p>
-<p>As before, if the flow limit is set to zero flow, the flows will give
-modelled flows with a mean that is close to the mean of the measure
-flows. However, it can eliminate small flow peaks if there are a lot of
-negative flows. Setting the flow limit to a high flow preserves these
-peaks, but can severely reduce the high flows. It can give a ranked flow
-plot with a notch at the flow limit.</p>
+<p>If an event is not large enough, its flows are set to the flow limit
+and the remaining negative flow is carried over to the next event.</p>
+<p>This is most useful if the negative flows mainly occur on the rising
+limb of the hydrograph. With a flow limit of zero, the mean flow is
+close to the measured mean, but small flow peaks can be eliminated.
+A higher flow limit preserves these peaks but can severely reduce high
+flows, giving a ranked flow plot with a notch at the flow limit.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -283,8 +338,8 @@ plot with a notch at the flow limit.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm3">
 <span class="sig-name descname"><span class="pre">sm3</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm3" title="Link to this definition"></a></dt>
-<dd><p>Redistribute negative flows into future positive flow events, without
-carry-over.</p>
+<dd><p>As <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a>, but negative flow an event cannot absorb is not
+carried over to the next event.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -293,19 +348,18 @@ carry-over.</p>
 <dd class="field-even"><p>pd.DataFrame</p>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a></p></li>
-</ul>
-</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm4">
 <span class="sig-name descname"><span class="pre">sm4</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm4" title="Link to this definition"></a></dt>
-<dd><p>Redistribute negative flows into past positive flow events, carrying
-forward negative flow into the future. Refer to <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a>.</p>
+<dd><p>Redistribute negative flows into the preceding flow event, with
+carry-over.</p>
+<p>As <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a>, except each event absorbs the negative flows following
+it. Negative flow an event cannot absorb is carried over to the next
+event. Negative flow before the first event has no preceding event, so
+it is not redistributed (as in NEGFLO6). This is most useful if the
+negative flows mainly occur on the falling limb of the hydrograph.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -319,8 +373,8 @@ forward negative flow into the future. Refer to <a class="reference internal" hr
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm5">
 <span class="sig-name descname"><span class="pre">sm5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm5" title="Link to this definition"></a></dt>
-<dd><p>Redistribute negative flows into past positive flow events, without
-carrying negative flows into the future.</p>
+<dd><p>As <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm4" title="bulum.stats.negflo.Negflo.sm4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm4()</span></code></a>, but negative flow an event cannot absorb (or that
+precedes the first event) is not carried over.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -329,42 +383,22 @@ carrying negative flows into the future.</p>
 <dd class="field-even"><p>pd.DataFrame</p>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a></p></li>
-<li><p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm4" title="bulum.stats.negflo.Negflo.sm4"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm4()</span></code></a></p></li>
-</ul>
-</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm6">
-<span class="sig-name descname"><span class="pre">sm6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_predefined_segments</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.tseries.offsets.DateOffset.html#pandas.tseries.offsets.DateOffset" title="(in pandas v3.0.3)"><span class="pre">DateOffset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm6" title="Link to this definition"></a></dt>
-<dd><p>Smooths over the specified segments.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Not fully tested/implemented. If this doesn’t work, let us know
-and you should be able to manually chunk data and apply sm1().
-See e.g. utils.get_wy().</p>
-</div>
-<p>Applies the SM1 smoothing algorithm (ie global smoothing) for flows
-across the specified periods. If no segments are defined or <cite>method</cite> is
-set to <cite>sample</cite>, then it will partition the full period on an annual
-(default) basis.</p>
-<p>Unlike the reference documentation, this function does not set the flow
-limit to zero while smoothing.</p>
-<p>Assumes the indices of the underlying dataframe are datetimes.</p>
+<span class="sig-name descname"><span class="pre">sm6</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_predefined_segments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_frequency</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.tseries.offsets.DateOffset.html#pandas.tseries.offsets.DateOffset" title="(in pandas v3.0.3)"><span class="pre">DateOffset</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.Timestamp.html#pandas.Timestamp" title="(in pandas v3.0.3)"><span class="pre">Timestamp</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm6" title="Link to this definition"></a></dt>
+<dd><p>Redistribute negative flows within each segment, as per <a class="reference internal" href="#bulum.stats.negflo.Negflo.sm1" title="bulum.stats.negflo.Negflo.sm1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm1()</span></code></a>.</p>
+<p>Negative flows outside every segment are set to zero. As with
+<a class="reference internal" href="#bulum.stats.negflo.Negflo.sm1" title="bulum.stats.negflo.Negflo.sm1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm1()</span></code></a>, the flow limit is not used.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>use_predefined_segments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Use the stored segments (<cite>self.sm6_segment_boundaries</cite>) if they
-exist. Otherwise the segments will be computed when this method
-is called.</p></li>
-<li><p><strong>sampling_frequency</strong> (<em>pd.DateOffset</em><em>, </em><em>optional</em>) – Specifies the time interval for smoothing periods. Defaults to
-one year.</p></li>
-<li><p><strong>sampling_start_date</strong> (<em>pd.Timestamp</em><em>, </em><em>optional</em>) – Specifies the start of the first period for sampling. Defaults
-to the start of the data period.</p></li>
+<li><p><strong>use_predefined_segments</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>default True</em>) – Use <a class="reference internal" href="#bulum.stats.negflo.Negflo.segments" title="bulum.stats.negflo.Negflo.segments"><code class="xref py py-attr docutils literal notranslate"><span class="pre">segments</span></code></a> if they exist. Otherwise segments are
+generated from <cite>sampling_frequency</cite> and <cite>sampling_start_date</cite>.</p></li>
+<li><p><strong>sampling_frequency</strong> (<em>pd.DateOffset</em><em>, </em><em>optional</em>) – Length of generated segments. Defaults to one year.</p></li>
+<li><p><strong>sampling_start_date</strong> (<em>pd.Timestamp</em><em>, </em><em>optional</em>) – Start of the first generated segment. Defaults to the start of the
+data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -373,24 +407,26 @@ to the start of the data period.</p></li>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>pd.DataFrame</p>
 </dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the residual is empty, its index is not sorted, unique dates, or
+    a segment ends before it starts or overlaps another.</p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm1" title="bulum.stats.negflo.Negflo.sm1"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm1()</span></code></a></p></li>
-</ul>
+<p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm1" title="bulum.stats.negflo.Negflo.sm1"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sm1</span></code></a></p>
 </div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.sm7">
 <span class="sig-name descname"><span class="pre">sm7</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v3.0.3)"><span class="pre">DataFrame</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.sm7" title="Link to this definition"></a></dt>
-<dd><p>Smooths negative flows over the largest adjacent positive flow event.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Unlike the reference document, this program does not require the flow
-limit be negative.</p>
-</div>
+<dd><p>Redistribute negative flows into the larger adjacent flow event.</p>
+<p>The negative flows between two flow events are absorbed (as per
+<a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a>) by whichever of the two events has the larger total
+excess above the flow limit; the preceding event wins ties. Negative
+flows before the first event or after the last are absorbed by that
+event. Negative flow an event cannot absorb is not carried over.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The smoothed residual dataframe.</p>
@@ -399,23 +435,19 @@ limit be negative.</p>
 <dd class="field-even"><p>pd.DataFrame</p>
 </dd>
 </dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<ul class="simple">
-<li><p><a class="reference internal" href="#bulum.stats.negflo.Negflo.sm2" title="bulum.stats.negflo.Negflo.sm2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">sm2()</span></code></a></p></li>
-</ul>
-</div>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="bulum.stats.negflo.Negflo.to_file">
 <span class="sig-name descname"><span class="pre">to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.Negflo.to_file" title="Link to this definition"></a></dt>
-<dd><p>Saves the result dataframe to the output file.</p>
+<dd><p>Saves the result of the most recent analysis to a csv file. Missing
+data is written as an empty value.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>out_filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Explicit output path. If omitted, the filename is derived from
-<code class="docutils literal notranslate"><span class="pre">df_name</span></code> and the current analysis type extension.</p></li>
+<li><p><strong>out_filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Explicit output path. If it has no extension, the extension of the
+current analysis type is added. If omitted, the filename is derived
+from <code class="docutils literal notranslate"><span class="pre">df_name</span></code> and the current analysis type extension.</p></li>
 <li><p><strong>folder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Directory in which to place the auto-named file. Ignored when
 <code class="docutils literal notranslate"><span class="pre">out_filename</span></code> is supplied.</p></li>
 </ul>
@@ -427,7 +459,7 @@ limit be negative.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bulum.stats.negflo.NegfloAnalysisType">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NegfloAnalysisType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.NegfloAnalysisType" title="Link to this definition"></a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NegfloAnalysisType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.NegfloAnalysisType" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
 <p>Negflo class keeps track of most recent analysis performed.</p>
 <dl class="py attribute">
@@ -480,33 +512,6 @@ limit be negative.</p>
 <span class="sig-name descname"><span class="pre">to_file_extension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></span><a class="headerlink" href="#bulum.stats.negflo.NegfloAnalysisType.to_file_extension" title="Link to this definition"></a></dt>
 <dd><p>Gives the corresponding file extension for the analysis type.</p>
 </dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="bulum.stats.negflo.NegfloFileType">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">NegfloFileType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#bulum.stats.negflo.NegfloFileType" title="Link to this definition"></a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a></p>
-<p>Negflo file types. For use in config file setup.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="bulum.stats.negflo.NegfloFileType.IQQM">
-<span class="sig-name descname"><span class="pre">IQQM</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#bulum.stats.negflo.NegfloFileType.IQQM" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="bulum.stats.negflo.NegfloFileType.IQQM_GUI">
-<span class="sig-name descname"><span class="pre">IQQM_GUI</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#bulum.stats.negflo.NegfloFileType.IQQM_GUI" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="bulum.stats.negflo.NegfloFileType.SOURCE_INPUT">
-<span class="sig-name descname"><span class="pre">SOURCE_INPUT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#bulum.stats.negflo.NegfloFileType.SOURCE_INPUT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="bulum.stats.negflo.NegfloFileType.SOURCE_OUTPUT">
-<span class="sig-name descname"><span class="pre">SOURCE_OUTPUT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#bulum.stats.negflo.NegfloFileType.SOURCE_OUTPUT" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 

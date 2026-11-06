@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.io.iqqm_out_reader module &mdash; Bulum 0.3.3 documentation</title>
+  <title>bulum.io.iqqm_out_reader module &mdash; Bulum 0.3.5 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=d5a15cff"></script>
+      <script src="../_static/documentation_options.js?v=ba50482b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -98,7 +98,7 @@
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Read and parse IQQM .OUT files with associated .IQN index files.</p>
 <p class="rubric">Examples</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span> <span class="o">=</span> <span class="n">IqqmOutReader</span><span class="p">(</span><span class="s2">&quot;abcd01.IQN&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span> <span class="o">=</span> <span class="n">IqqmOutReader</span><span class="p">(</span><span class="s2">"abcd01.IQN"</span><span class="p">)</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="mi">23</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
