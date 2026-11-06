@@ -542,8 +542,12 @@ class ReportCardProcessor:
         Residual mass = cumulative sum - cumulative mean
         This highlights long-term trends and bias between series.
 
-        Only uses days where both obs and mod are available.
+        Only uses days where both obs and mod are available. Non-paired days are
+        returned as NaN so plots show a gap instead of joining across missing periods.
         """
+        if self.aligned_data is None:
+            self.align_data()
+
         paired = self.get_paired_data()
 
         # Convert to GL for plotting
@@ -562,8 +566,13 @@ class ReportCardProcessor:
         obs_residual = obs_cumsum - obs_mean * n
         mod_residual = mod_cumsum - mod_mean * n
 
+        # Expand to the full analysis period, with NaN on non-paired days
+        all_dates = self.aligned_data.index
+        obs_residual = pd.Series(obs_residual, index=paired.index).reindex(all_dates).values
+        mod_residual = pd.Series(mod_residual, index=paired.index).reindex(all_dates).values
+
         self.residual_mass = ResidualMassData(
-            dates=paired.index,
+            dates=all_dates,
             obs_residual=obs_residual,
             mod_residual=mod_residual
         )
