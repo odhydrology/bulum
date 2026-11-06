@@ -31,6 +31,15 @@ COLORS = {
 }
 
 
+def _r_limits(lo: float, hi: float, log: bool = False, pad: float = 0.04):
+    """Axis limits padded like R's default (xaxs/yaxs = 'r')."""
+    if log:
+        lo, hi = np.log10(lo), np.log10(hi)
+    d = pad * (hi - lo)
+    lo, hi = lo - d, hi + d
+    return (10**lo, 10**hi) if log else (lo, hi)
+
+
 class ReportCardPlotter:
     """
     Creates the report card visualization.
@@ -167,8 +176,17 @@ class ReportCardPlotter:
         ax.set_title('Flow exceedance showing low flow',
                      fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_xlim(0, 1)
-        ax.set_ylim(bottom=1)
+        minlog=1e-1
+
+        # x max: exceedance where the later of obs and mod first drops below minlog
+        # (series that never drop below minlog use the last point)
+        first_below = [np.argmax(v < minlog) if (v < minlog).any() else len(v) - 1
+                       for v in (exc.obs_values, exc.mod_values)]
+        x_max = exc.probabilities[max(first_below)]
+
+        ax.set_ylim(*_r_limits(1, np.max([exc.obs_values, exc.mod_values]), log=True))
+        ax.set_xlim(*_r_limits(0, x_max))
+    
         ax.grid(True, which='both', linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
         self._add_legend(ax)
         self._style_axes(ax)
@@ -198,8 +216,9 @@ class ReportCardPlotter:
         ax.set_title('Flow exceedance showing high flow',
                      fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_xlim(0.0001, 1)
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(*_r_limits(0, np.max([exc.obs_values, exc.mod_values])))
+        ax.set_xlim(*_r_limits(exc.probabilities.min(), 1, log=True))
+
         ax.grid(True, which='both', linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
         self._add_legend(ax)
         self._style_axes(ax)
