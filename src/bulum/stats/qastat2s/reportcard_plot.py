@@ -285,17 +285,23 @@ class ReportCardPlotter:
         """Plot annual water year totals."""
         wy = self.processor.water_year
 
+        # steps-post draws each value over the interval after its point, so water year
+        # y spans [y, y + 1). The last year has no step, so pad with a point one year
+        # later repeating the last value.
+        years = np.append(wy.years, wy.years[-1] + 1)
+        pad = lambda v: np.append(v, v[-1])
+
         # Plot incomplete years with dashed step lines
-        ax.plot(wy.years, wy.obs_totals_with_gaps, color=self.colors['observed'],
-                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-pre')
-        ax.plot(wy.years, wy.mod_totals_with_gaps, color=self.colors['modelled'],
-                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-pre')
+        ax.plot(years, pad(wy.obs_totals_with_gaps), color=self.colors['observed'],
+                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-post')
+        ax.plot(years, pad(wy.mod_totals_with_gaps), color=self.colors['modelled'],
+                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-post')
 
         # Plot complete years with solid step lines
-        ax.plot(wy.years, wy.obs_totals, color=self.colors['observed'],
-                linewidth=self.lw, linestyle='-', label='obs', drawstyle='steps-pre')
-        ax.plot(wy.years, wy.mod_totals, color=self.colors['modelled'],
-                linewidth=self.lw, linestyle='-', label='mod', drawstyle='steps-pre')
+        ax.plot(years, pad(wy.obs_totals), color=self.colors['observed'],
+                linewidth=self.lw, linestyle='-', label='obs', drawstyle='steps-post')
+        ax.plot(years, pad(wy.mod_totals), color=self.colors['modelled'],
+                linewidth=self.lw, linestyle='-', label='mod', drawstyle='steps-post')
 
         ax.set_xlabel('', fontsize=8, color=self.colors['primary'])
         ax.set_ylabel('Flow (GL/y)', fontsize=8, color=self.colors['primary'])
@@ -308,7 +314,8 @@ class ReportCardPlotter:
         title = f'Annual time series ({month_names[start_month - 1]} to {month_names[end_month - 1]})'
         ax.set_title(title, fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(*_r_limits(0, np.nanmax([wy.mod_totals,wy.mod_totals_with_gaps,wy.obs_totals,wy.obs_totals_with_gaps])))
+        #ax.set_ylim(bottom=0)
         ax.grid(True, linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
 
         # Add note about missing data

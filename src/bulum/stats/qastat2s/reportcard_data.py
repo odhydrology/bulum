@@ -481,8 +481,10 @@ class ReportCardProcessor:
         Water year start month is configurable (default July for Australian convention).
         Water year is labelled by the year of the start month.
 
-        Returns totals only for years with complete data, plus separate arrays
-        including incomplete years (for dashed line plotting).
+        Totals are summed over paired days only (both obs and mod available), so
+        obs and mod are comparable in every year. Returns totals only for years with
+        complete data, plus separate arrays including incomplete years (for dashed
+        line plotting). Years with no paired days are NaN.
         """
         if self.aligned_data is None:
             self.align_data()
@@ -490,12 +492,15 @@ class ReportCardProcessor:
         data = self._assign_water_year(self.aligned_data)
         start_month = self.config.water_year_start_month
 
-        # Group by water year
+        # Group by water year (all days, to identify years with missing data)
         grouped = data.groupby('water_year')
+        years = grouped.size().index.values
 
-        # Calculate totals (ML -> GL, so divide by 1000)
-        obs_totals = grouped['obs'].sum() / 1000
-        mod_totals = grouped['mod'].sum() / 1000
+        # Calculate totals over paired days only (ML -> GL, so divide by 1000)
+        paired = self._assign_water_year(self.get_paired_data())
+        paired_grouped = paired.groupby('water_year')
+        obs_totals = (paired_grouped['obs'].sum() / 1000).reindex(years)
+        mod_totals = (paired_grouped['mod'].sum() / 1000).reindex(years)
 
         # Count valid days per water year
         obs_days = grouped['obs'].count()
@@ -509,7 +514,6 @@ class ReportCardProcessor:
             is_leap = (feb_year % 4 == 0 and feb_year % 100 != 0) or (feb_year % 400 == 0)
             return 366 if is_leap else 365
 
-        years = obs_totals.index.values
         expected_days = np.array([water_year_days(wy) for wy in years])
 
         # Complete years: both obs and mod have all days
