@@ -594,8 +594,8 @@ class ReportCardProcessor:
         obs_sorted = np.sort(obs)[::-1]  # descending
         mod_sorted = np.sort(mod)[::-1]  # descending
 
-        high_idx = int(p_high * n)
-        low_idx = int(p_low * n)
+        high_idx = round(p_high * n)
+        low_idx = round(p_low * n)
 
         high_obs = np.sum(obs_sorted[:high_idx])
         high_mod = np.sum(mod_sorted[:high_idx])
