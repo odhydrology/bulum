@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
+## 0.3.5
+
+### Changed
+- negflo `Negflo.neg_overflows` renamed to `Negflo.unallocated_negatives`. `ContiguousIndexTracker`, `NegfloFileType` and `Negflo.log()` removed.
+
+### Fixed
+- negflo: corrected NEGFLO handling of missing values. `Negflo` was reimplemented to do this, so results can differ from 0.3.4; see the module documentation and `Examples_negflo.ipynb`.
+- stats `StochasticDataComparison`: the annual standard deviation statistic is now calculated (the function itself was stored rather than its result).
+
+## 0.3.4
+
+### Added
+- stats.qastat2s: new subpackage that generates a one-page hydrology "report card" comparing modelled and observed flows (`report_card()`, `report_card_from_data()`). Import it explicitly, as with swflo2s: `import bulum.stats.qastat2s as qastat2s`.
+
 ## 0.3.3
 
 !! IMPORTANT !! - This repo no longer supports Python 3.9 (end of life). The new minimum tested python version is 3.11.

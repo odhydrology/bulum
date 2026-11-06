@@ -140,3 +140,4 @@ test_outputs/
 trash
 src/bulum/io/tests/iqqm_results/temp.run
 .claude
+.DS_Store

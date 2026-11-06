@@ -309,12 +309,28 @@ class Tests(unittest.TestCase):
         self.assertEqual(round(sdc.Stats["outputs"]["04"]["skew"]["Historical"]["20>PPT_410A.q13>GS130410A Isaac River at Deverill"], 3), 3.972)
 
         # Testing charts
-        sdc.Stats["chts"]["annual"]["skew"]
-        sdc.Stats["chts"]["monthly"]["skew"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
-        sdc.Correlations["chts"]["annual"]["lag1"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
-        sdc.Correlations["heatmaps"]["annual"]["lag0"]["Historical"]
-        sdc.Correlations["chts"]["daily"]["lag0"]["3>PPT_206A.q13>GS130206A Theresa Creek at Gregory Highw"]
-        sdc.Distributions["chts"]["annual"]["7>PPT502Ba.q13>GS130502B Brown River at Brown Lake Part"]
+        ## Force conversion to JSON so altair checks for errors.
+        
+        for timescale,vals in sdc.Stats["chts"].items():
+            if timescale in ["01","07","annual"]:
+                for chart in vals.values(): chart.to_json(format="vega")
+            if timescale =="monthly":
+                for stat,chart in vals.items():
+                    for chart in list(chart.values())[::9]: chart.to_json(format="vega")
+
+        for timescale,vals in sdc.Correlations["chts"].items():
+            if timescale in ["02","08","annual","daily"]:
+                for lag,col in vals.items():
+                    for chart in list(col.values())[::9]: chart.to_json(format="vega")
+
+        for timescale,vals in sdc.Correlations["heatmaps"].items():
+            if timescale in ["03","09","annual","daily"]:
+                for lag,col in vals.items():
+                    for chart in list(col.values())[::9]: chart.to_json(format="vega")
+
+        for timescale,col in sdc.Distributions["chts"].items():
+            if timescale in ["04","10","annual","daily"]:
+                for chart in list(col.values())[::9]: chart.to_json(format="vega")
 
     def test_cumulative_risk(self):
         ensemble = utils.DataframeEnsemble()

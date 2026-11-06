@@ -89,11 +89,15 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Sphinx dependencies
-        run: pip install sphinx>=8.0 sphinx-rtd-theme>=3.0 myst-parser
+      # bulum itself must be importable for autodoc to document the API
+      - name: Install bulum and Sphinx dependencies
+        run: pip install . "sphinx>=8.0" "sphinx-rtd-theme>=3.0" myst-parser
 
       - name: Build docs
         run: sphinx-build sphinx-docs docs
 
-      - name: Push to docs branch
-        run: git push origin docs
+      - name: Commit and push to docs branch
+        run: |
+          git add docs
+          git diff --cached --quiet || git commit -m "Build docs for ${GITHUB_REF_NAME}"
+          git push origin docs

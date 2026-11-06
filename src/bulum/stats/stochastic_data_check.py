@@ -408,7 +408,7 @@ class StochasticDataComparison:
             subset = self.cropped_df_ann[ds]
 
             stats[ds]['annual']['mean'] = subset.mean()
-            stats[ds]['annual']['stddev'] = subset.apply(lambda x: np.std)
+            stats[ds]['annual']['stddev'] = subset.apply(lambda x: np.std(x))
             stats[ds]['annual']['skew'] = subset.skew()
             stats[ds]['annual']['coeffofvar'] = subset.apply(lambda x: np.std(x)/np.mean(x))
             stats[ds]['annual']['min'] = subset.min()
