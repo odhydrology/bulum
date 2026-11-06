@@ -299,6 +299,10 @@ class ReportCardProcessor:
         # Zero flow threshold (ML/d)
         self.zero_threshold = 1.0
 
+        # Max fraction of missing days in a water year for it to be used in
+        # the driest 3-year search (applies to obs, mod and rain)
+        self.driest_max_missing = 0.20
+
     def load_data(self) -> None:
         """Load all input CSV files."""
         self.obs_raw = read_timeseries_csv(
@@ -691,44 +695,59 @@ class ReportCardProcessor:
         Compute the mean daily flow for the driest consecutive 3 water-year period.
 
         Water year start month is configurable (default July for Australian convention).
-        Finds the 3 consecutive water years with lowest total observed flow,
-        then returns the mean daily flow for both observed and modelled.
+        The period is first cropped to whole water years. A water year is valid only
+        if no series (obs, mod, rain) is missing more than driest_max_missing of its
+        days. The driest period is the 3 consecutive valid water years with the lowest
+        sum of annual mean daily rainfall. Returns the mean daily obs and mod flow over
+        the paired days in that period, or (NaN, NaN) if no valid period exists.
         """
-        data = self._assign_water_year(paired)
+        data = utils.crop_to_wy(self.aligned_data, self.config.water_year_start_month)
+        if data.empty:
+            return np.nan, np.nan
+        data = self._assign_water_year(data)
 
         # Group by water year
         wy_totals = data.groupby('water_year').agg({
-            'obs': ['sum', 'count'],
-            'mod': ['sum', 'count']
+            'obs': ['count'],
+            'mod': ['count'],
+            'rain': ['mean', 'count', 'size']
         })
-        wy_totals.columns = ['obs_sum', 'obs_count', 'mod_sum', 'mod_count']
+        wy_totals.columns = ['obs_count', 'mod_count', 'rain_mean', 'rain_count', 'days']
         years = wy_totals.index.values
+
+        # A water year is valid if no series is missing more than the allowed fraction
+        missing = 1 - wy_totals[['obs_count', 'mod_count', 'rain_count']].div(wy_totals['days'], axis=0)
+        wy_totals['valid'] = missing.max(axis=1) <= self.driest_max_missing
 
         if len(years) < 3:
             # Not enough data for 3-year period
-            return np.mean(paired['obs']), np.mean(paired['mod'])
+            return np.nan, np.nan
 
-        # Find 3 consecutive water years with lowest total observed flow
-        min_3yr_sum = float('inf')
+        # Find 3 consecutive valid water years with lowest total mean daily rainfall
+        min_3yr_rain = float('inf')
         min_start_wy = None
 
         for i in range(len(years) - 2):
             # Check if these are consecutive years
             if years[i+1] == years[i] + 1 and years[i+2] == years[i] + 2:
-                sum_3yr = wy_totals.loc[years[i]:years[i+2], 'obs_sum'].sum()
-                if sum_3yr < min_3yr_sum:
-                    min_3yr_sum = sum_3yr
+                window = wy_totals.loc[years[i]:years[i+2]]
+                if not window['valid'].all():
+                    continue
+                sum_3yr = window['rain_mean'].sum()
+                if sum_3yr < min_3yr_rain:
+                    min_3yr_rain = sum_3yr
                     min_start_wy = years[i]
 
         if min_start_wy is None:
-            # No 3 consecutive years found
-            return np.mean(paired['obs']), np.mean(paired['mod'])
+            # No valid 3 consecutive years found
+            return np.nan, np.nan
 
-        # Calculate mean daily flow for the driest 3 water years
-        driest_3wy = wy_totals.loc[min_start_wy:min_start_wy+2]
-        total_days = driest_3wy['obs_count'].sum()
-        obs_mean = driest_3wy['obs_sum'].sum() / total_days
-        mod_mean = driest_3wy['mod_sum'].sum() / total_days
+        # Calculate mean daily flow over paired days in the driest 3 water years
+        paired = self._assign_water_year(paired)
+        driest_3wy = paired[paired['water_year'].between(min_start_wy, min_start_wy + 2)]
+        total_days = len(driest_3wy)
+        obs_mean = driest_3wy['obs'].sum() / total_days
+        mod_mean = driest_3wy['mod'].sum() / total_days
 
         return obs_mean, mod_mean
 
