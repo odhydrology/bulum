@@ -631,10 +631,11 @@ class ReportCardProcessor:
         nse = 1 - np.sum((obs - mod)**2) / np.sum((obs - np.mean(obs))**2)
 
         # Non-matching zero flow days
-        # Counts days where model predicts zero flow but observed is not zero
+        # Counts days where model predicts zero flow but observed is not zero,
+        # AND days where observed is zero and model is not.
         obs_zero = obs < self.zero_threshold
         mod_zero = mod < self.zero_threshold
-        non_matching = np.sum(mod_zero & ~obs_zero) / n * 100
+        non_matching = np.sum(mod_zero != obs_zero) / n * 100
 
         # Metadata
         total_days = len(self.aligned_data)

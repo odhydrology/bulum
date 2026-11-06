@@ -409,7 +409,7 @@ class ReportCardPlotter:
         bi_data = [
             ['Bivariate Statistic', 'Value', 'Rating'],
             ['Nash-Sutcliffe Efficiency(NSE)', f'{stats.nse:.2f}', p.get_nse_rating(stats.nse)],
-            ['Non-matching Zero Flow Days', f'{stats.non_matching_zero_days:.1f}%',
+            ['Non-matching Zero Flow Days+', f'{stats.non_matching_zero_days:.1f}%',
              p.get_rating(stats.non_matching_zero_days, is_absolute=True)],
         ]
 
