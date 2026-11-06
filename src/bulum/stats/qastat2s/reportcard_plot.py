@@ -388,21 +388,21 @@ class ReportCardPlotter:
         uni_data = [
             ['Univariate Statistic', 'Obs', 'Mod\u0394', 'Rating'],
             ['Total Flow (ML)', f'{stats.total_flow_obs:,.0f}', f'{stats.total_flow_bias:.1f}%',
-             p.get_rating(stats.total_flow_bias)],
+             p.get_rating(stats.total_flow_bias, 'whole')],
             ['Total Low Flow (ML)*', f'{stats.low_flow_obs:,.0f}', f'{stats.low_flow_bias:.1f}%',
-             p.get_rating(stats.low_flow_bias)],
+             p.get_rating(stats.low_flow_bias, 'partial')],
             ['Total Medium Flow (ML)*', f'{stats.med_flow_obs:,.0f}', f'{stats.med_flow_bias:.1f}%',
-             p.get_rating(stats.med_flow_bias)],
+             p.get_rating(stats.med_flow_bias, 'partial')],
             ['Total High Flow (ML)*', f'{stats.high_flow_obs:,.0f}', f'{stats.high_flow_bias:.1f}%',
-             p.get_rating(stats.high_flow_bias)],
+             p.get_rating(stats.high_flow_bias, 'partial')],
             ['Mean Flow Volume (ML/d)', f'{stats.mean_flow_obs:.0f}', f'{stats.mean_flow_bias:.1f}%',
-             p.get_rating(stats.mean_flow_bias)],
+             p.get_rating(stats.mean_flow_bias, 'whole')],
             ['Driest 3 Year Mean (ML/d)', f'{stats.driest_3yr_obs:.0f}', f'{stats.driest_3yr_bias:.1f}%',
-             p.get_rating(stats.driest_3yr_bias)],
+             p.get_rating(stats.driest_3yr_bias, 'partial')],
             ['Zero Flow Days (%)+', f'{stats.zero_flow_days_obs:.1f}%', f'{stats.zero_flow_days_diff:.1f}%^',
-             p.get_rating(stats.zero_flow_days_diff, is_absolute=True)],
+             p.get_rating(stats.zero_flow_days_diff, 'zero_diff')],
             ['Standard Deviation (ML/d)', f'{stats.std_dev_obs:.0f}', f'{stats.std_dev_bias:.1f}%',
-             p.get_rating(stats.std_dev_bias)],
+             p.get_rating(stats.std_dev_bias, 'std_dev')],
         ]
 
         # Bivariate statistics data
@@ -410,7 +410,7 @@ class ReportCardPlotter:
             ['Bivariate Statistic', 'Value', 'Rating'],
             ['Nash-Sutcliffe Efficiency(NSE)', f'{stats.nse:.2f}', p.get_nse_rating(stats.nse)],
             ['Non-matching Zero Flow Days+', f'{stats.non_matching_zero_days:.1f}%',
-             p.get_rating(stats.non_matching_zero_days, is_absolute=True)],
+             p.get_rating(stats.non_matching_zero_days, 'non_matching')],
         ]
 
         # Table positioning

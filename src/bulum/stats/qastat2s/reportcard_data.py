@@ -742,51 +742,59 @@ class ReportCardProcessor:
         self.compute_residual_mass()
         self.compute_statistics()
 
-    def get_rating(self, bias_percent: float, is_absolute: bool = False) -> str:
-        """
-        Convert bias percentage to star rating.
+    # Upper limits (inclusive) on |value| for 5, 4, 3 and 2 stars; anything above is 1 star
+    RATING_BANDS = {
+        'whole':        (0.1, 1, 5, 10),   # Total flow, mean flow
+        'partial':      (1, 5, 10, 25),    # Low/med/high flow, driest 3 yr
+        'std_dev':      (1, 5, 10, 25),    # Standard deviation
+        'zero_diff':    (0.1, 1, 5, 10),   # Absolute difference in % zero flow days
+        'non_matching': (5, 10, 25, 50),   # % non-matching zero flow days
+    }
 
-        Rating thresholds (approximate, adjust as needed):
-        5 stars: < 2% bias
-        4 stars: < 5% bias
-        3 stars: < 10% bias
-        2 stars: < 20% bias
-        1 star: >= 20% bias
-        """
-        bias = abs(bias_percent) if not is_absolute else bias_percent
+    @staticmethod
+    def _stars(n: int) -> str:
+        """Return n filled stars followed by (5 - n) empty stars."""
+        return "\u2605" * n + "\u2606" * (5 - n)
 
-        if bias < 2:
-            return "\u2605\u2605\u2605\u2605\u2605"  # 5 filled stars
-        elif bias < 5:
-            return "\u2605\u2605\u2605\u2605\u2606"  # 4 filled, 1 empty
-        elif bias < 10:
-            return "\u2605\u2605\u2605\u2606\u2606"  # 3 filled, 2 empty
-        elif bias < 20:
-            return "\u2605\u2605\u2606\u2606\u2606"  # 2 filled, 3 empty
-        else:
-            return "\u2605\u2606\u2606\u2606\u2606"  # 1 filled, 4 empty
+    def get_rating(self, value: float, kind: str) -> str:
+        """
+        Convert a bias / percentage statistic to a star rating.
+
+        Args:
+            value: Statistic value (%). The absolute value is rated.
+            kind: Band set to use, a key of RATING_BANDS
+                ('whole', 'partial', 'std_dev', 'zero_diff', 'non_matching').
+
+        Returns:
+            Star string, or '' if value is NaN.
+        """
+        if np.isnan(value):
+            return ''
+        v = abs(value)
+        for n, limit in zip((5, 4, 3, 2), self.RATING_BANDS[kind]):
+            if v <= limit:
+                return self._stars(n)
+        return self._stars(1)
 
     def get_nse_rating(self, nse: float) -> str:
         """
         Convert NSE to star rating.
 
         NSE thresholds:
-        5 stars: > 0.9
-        4 stars: > 0.8
-        3 stars: > 0.65
-        2 stars: > 0.5
-        1 star: <= 0.5
+        5 stars: > 0.90
+        4 stars: > 0.75
+        3 stars: > 0.50
+        2 stars: > 0.25
+        1 star: <= 0.25
+
+        Returns '' if NSE is NaN.
         """
-        if nse > 0.9:
-            return "\u2605\u2605\u2605\u2605\u2605"
-        elif nse > 0.8:
-            return "\u2605\u2605\u2605\u2605\u2606"
-        elif nse > 0.65:
-            return "\u2605\u2605\u2605\u2606\u2606"
-        elif nse > 0.5:
-            return "\u2605\u2605\u2606\u2606\u2606"
-        else:
-            return "\u2605\u2606\u2606\u2606\u2606"
+        if np.isnan(nse):
+            return ''
+        for n, lower in zip((5, 4, 3, 2), (0.90, 0.75, 0.50, 0.25)):
+            if nse > lower:
+                return self._stars(n)
+        return self._stars(1)
 
 
 def main():
