@@ -20,6 +20,8 @@ def annual_sum(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -34,7 +36,7 @@ def annual_sum(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum()
+            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False)
         else:
             return np.nan
 
@@ -50,6 +52,8 @@ def annual_max(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -64,7 +68,7 @@ def annual_max(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum().max()
+            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False).max()
         else:
             return np.nan
 
@@ -80,6 +84,8 @@ def annual_min(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -94,7 +100,7 @@ def annual_min(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum().min()
+            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False).min()
         else:
             return np.nan
 
@@ -110,6 +116,8 @@ def annual_mean(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -124,7 +132,7 @@ def annual_mean(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum().mean()
+            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False).mean()
         else:
             return np.nan
 
@@ -140,6 +148,8 @@ def annual_median(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -154,7 +164,7 @@ def annual_median(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum().median()
+            return cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False).median()
         else:
             return np.nan
 
@@ -170,6 +180,8 @@ def annual_percentile(df: pd.DataFrame, q, wy_month=7, allow_part_years=False):
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
         Allow part water years or only complete water years. Defaults to False.
+        When False, a water year containing any missing (NaN) values has a
+        NaN annual total and is excluded from the statistic.
 
     Returns
     -------
@@ -189,7 +201,7 @@ def annual_percentile(df: pd.DataFrame, q, wy_month=7, allow_part_years=False):
     else:
         cropped_df = utils.crop_to_wy(df, wy_month)
         if (len(cropped_df) > 0):
-            temp = cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum().apply(lambda x: np.percentile(x, q))
+            temp = cropped_df.groupby(utils.get_wy(cropped_df.index, wy_month)).sum(skipna=False).apply(lambda x: np.nanpercentile(x, q))
             temp.index = q
             return temp
         else:
