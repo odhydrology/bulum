@@ -31,6 +31,15 @@ COLORS = {
 }
 
 
+def _r_limits(lo: float, hi: float, log: bool = False, pad: float = 0.04):
+    """Axis limits padded like R's default (xaxs/yaxs = 'r')."""
+    if log:
+        lo, hi = np.log10(lo), np.log10(hi)
+    d = pad * (hi - lo)
+    lo, hi = lo - d, hi + d
+    return (10**lo, 10**hi) if log else (lo, hi)
+
+
 class ReportCardPlotter:
     """
     Creates the report card visualization.
@@ -167,8 +176,17 @@ class ReportCardPlotter:
         ax.set_title('Flow exceedance showing low flow',
                      fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_xlim(0, 1)
-        ax.set_ylim(bottom=1)
+        minlog=1e-1
+
+        # x max: exceedance where the later of obs and mod first drops below minlog
+        # (series that never drop below minlog use the last point)
+        first_below = [np.argmax(v < minlog) if (v < minlog).any() else len(v) - 1
+                       for v in (exc.obs_values, exc.mod_values)]
+        x_max = exc.probabilities[max(first_below)]
+
+        ax.set_ylim(*_r_limits(1, np.max([exc.obs_values, exc.mod_values]), log=True))
+        ax.set_xlim(*_r_limits(0, x_max))
+    
         ax.grid(True, which='both', linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
         self._add_legend(ax)
         self._style_axes(ax)
@@ -198,8 +216,9 @@ class ReportCardPlotter:
         ax.set_title('Flow exceedance showing high flow',
                      fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_xlim(0.0001, 1)
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(*_r_limits(0, np.max([exc.obs_values, exc.mod_values])))
+        ax.set_xlim(*_r_limits(exc.probabilities.min(), 1, log=True))
+
         ax.grid(True, which='both', linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
         self._add_legend(ax)
         self._style_axes(ax)
@@ -266,17 +285,23 @@ class ReportCardPlotter:
         """Plot annual water year totals."""
         wy = self.processor.water_year
 
+        # steps-post draws each value over the interval after its point, so water year
+        # y spans [y, y + 1). The last year has no step, so pad with a point one year
+        # later repeating the last value.
+        years = np.append(wy.years, wy.years[-1] + 1)
+        pad = lambda v: np.append(v, v[-1])
+
         # Plot incomplete years with dashed step lines
-        ax.plot(wy.years, wy.obs_totals_with_gaps, color=self.colors['observed'],
-                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-pre')
-        ax.plot(wy.years, wy.mod_totals_with_gaps, color=self.colors['modelled'],
-                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-pre')
+        ax.plot(years, pad(wy.obs_totals_with_gaps), color=self.colors['observed'],
+                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-post')
+        ax.plot(years, pad(wy.mod_totals_with_gaps), color=self.colors['modelled'],
+                linewidth=self.lw/2, linestyle='--', alpha=0.7, drawstyle='steps-post')
 
         # Plot complete years with solid step lines
-        ax.plot(wy.years, wy.obs_totals, color=self.colors['observed'],
-                linewidth=self.lw, linestyle='-', label='obs', drawstyle='steps-pre')
-        ax.plot(wy.years, wy.mod_totals, color=self.colors['modelled'],
-                linewidth=self.lw, linestyle='-', label='mod', drawstyle='steps-pre')
+        ax.plot(years, pad(wy.obs_totals), color=self.colors['observed'],
+                linewidth=self.lw, linestyle='-', label='obs', drawstyle='steps-post')
+        ax.plot(years, pad(wy.mod_totals), color=self.colors['modelled'],
+                linewidth=self.lw, linestyle='-', label='mod', drawstyle='steps-post')
 
         ax.set_xlabel('', fontsize=8, color=self.colors['primary'])
         ax.set_ylabel('Flow (GL/y)', fontsize=8, color=self.colors['primary'])
@@ -289,7 +314,8 @@ class ReportCardPlotter:
         title = f'Annual time series ({month_names[start_month - 1]} to {month_names[end_month - 1]})'
         ax.set_title(title, fontsize=10, color=self.colors['primary'], fontweight='bold')
 
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(*_r_limits(0, np.nanmax([wy.mod_totals,wy.mod_totals_with_gaps,wy.obs_totals,wy.obs_totals_with_gaps])))
+        #ax.set_ylim(bottom=0)
         ax.grid(True, linestyle=':', color=self.colors['grid'], linewidth=self.lw_grid)
 
         # Add note about missing data
@@ -388,29 +414,31 @@ class ReportCardPlotter:
         uni_data = [
             ['Univariate Statistic', 'Obs', 'Mod\u0394', 'Rating'],
             ['Total Flow (ML)', f'{stats.total_flow_obs:,.0f}', f'{stats.total_flow_bias:.1f}%',
-             p.get_rating(stats.total_flow_bias)],
+             p.get_rating(stats.total_flow_bias, 'whole')],
             ['Total Low Flow (ML)*', f'{stats.low_flow_obs:,.0f}', f'{stats.low_flow_bias:.1f}%',
-             p.get_rating(stats.low_flow_bias)],
+             p.get_rating(stats.low_flow_bias, 'partial')],
             ['Total Medium Flow (ML)*', f'{stats.med_flow_obs:,.0f}', f'{stats.med_flow_bias:.1f}%',
-             p.get_rating(stats.med_flow_bias)],
+             p.get_rating(stats.med_flow_bias, 'partial')],
             ['Total High Flow (ML)*', f'{stats.high_flow_obs:,.0f}', f'{stats.high_flow_bias:.1f}%',
-             p.get_rating(stats.high_flow_bias)],
+             p.get_rating(stats.high_flow_bias, 'partial')],
             ['Mean Flow Volume (ML/d)', f'{stats.mean_flow_obs:.0f}', f'{stats.mean_flow_bias:.1f}%',
-             p.get_rating(stats.mean_flow_bias)],
-            ['Driest 3 Year Mean (ML/d)', f'{stats.driest_3yr_obs:.0f}', f'{stats.driest_3yr_bias:.1f}%',
-             p.get_rating(stats.driest_3yr_bias)],
+             p.get_rating(stats.mean_flow_bias, 'whole')],
+            ['Driest 3 Year Mean (ML/d)',
+             'n/a' if np.isnan(stats.driest_3yr_obs) else f'{stats.driest_3yr_obs:.0f}',
+             'n/a' if np.isnan(stats.driest_3yr_bias) else f'{stats.driest_3yr_bias:.1f}%',
+             p.get_rating(stats.driest_3yr_bias, 'partial')],
             ['Zero Flow Days (%)+', f'{stats.zero_flow_days_obs:.1f}%', f'{stats.zero_flow_days_diff:.1f}%^',
-             p.get_rating(stats.zero_flow_days_diff, is_absolute=True)],
+             p.get_rating(stats.zero_flow_days_diff, 'zero_diff')],
             ['Standard Deviation (ML/d)', f'{stats.std_dev_obs:.0f}', f'{stats.std_dev_bias:.1f}%',
-             p.get_rating(stats.std_dev_bias)],
+             p.get_rating(stats.std_dev_bias, 'std_dev')],
         ]
 
         # Bivariate statistics data
         bi_data = [
             ['Bivariate Statistic', 'Value', 'Rating'],
             ['Nash-Sutcliffe Efficiency(NSE)', f'{stats.nse:.2f}', p.get_nse_rating(stats.nse)],
-            ['Non-matching Zero Flow Days', f'{stats.non_matching_zero_days:.1f}%',
-             p.get_rating(stats.non_matching_zero_days, is_absolute=True)],
+            ['Non-matching Zero Flow Days+', f'{stats.non_matching_zero_days:.1f}%',
+             p.get_rating(stats.non_matching_zero_days, 'non_matching')],
         ]
 
         # Table positioning

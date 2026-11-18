@@ -10,6 +10,15 @@ from numpy.typing import NDArray
 import pandas as pd
 
 
+def _strftime(d: datetime, fmt: str) -> str:
+    """``d.strftime(fmt)`` with ``%Y`` always zero-padded to four digits.
+
+    On Linux (glibc) ``%Y`` is not padded, so year 1 gives ``'1'`` instead of
+    ``'0001'`` as on Windows. Stochastic data use dates from year 0001.
+    """
+    return d.strftime(fmt.replace("%Y", f"{d.year:04d}"))
+
+
 def get_date_format(date_str: str) -> str:
     """
     Determine the date format of a date string using trial and error.
@@ -93,7 +102,7 @@ def standardize_datestring_format(values: pd.Index | list[str], *, as_index: boo
             end_date_format = get_date_format(values[-1])
             placeholder_values = ["" for _ in values]
             placeholder_values[0] = values[0]
-            placeholder_values[-1] = datetime.strptime(values[-1], end_date_format).strftime(date_format)
+            placeholder_values[-1] = _strftime(datetime.strptime(values[-1], end_date_format), date_format)
             np_dates = to_np_datetimes64d(placeholder_values, date_fmt=date_format, check_dates=False)
         else:
             raise e
@@ -517,7 +526,7 @@ def get_year_and_month(v: Union[list[str], list[datetime]]) -> list[str]:
     else:
         cast(list[datetime], v)
         # assume dates are datetime
-        year_month = [d.strftime(r"%Y-%m") for d in v]  # type: ignore
+        year_month = [_strftime(d, r"%Y-%m") for d in v]  # type: ignore
     return year_month
 
 
@@ -644,7 +653,7 @@ def get_dates(start_date: Union[datetime, str],
     date_list = [start_date + timedelta(days=x) for x in range(days)]
     # Convert to string format if required
     if str_format is not None:
-        date_list = [d.strftime(str_format) for d in date_list]  # type: ignore
+        date_list = [_strftime(d, str_format) for d in date_list]  # type: ignore
     return date_list
 
 

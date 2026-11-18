@@ -6,8 +6,13 @@ on:
       - 'v*'
 
 jobs:
+  test:
+    name: Run CI
+    uses: ./.github/workflows/CI.yml
+
   build:
     name: Build distribution
+    needs: test
     runs-on: ubuntu-latest
 
     steps:

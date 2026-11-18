@@ -8,6 +8,7 @@ import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from bulum import utils
+from bulum.utils.datetime_functions import _strftime
 
 
 def find_col(df: pd.DataFrame, string_pattern: str, unique_match: bool = True) -> pd.Series | pd.DataFrame:
@@ -226,7 +227,7 @@ def set_index_dt(df: pd.DataFrame, dt_values: list | None = None, start_dt: date
 def datetimes_to_strings(v: Iterable[datetime | pd.Timestamp],
                          str_format: str = r"%Y-%m-%d") -> list[str]:
     """Converts a list of datetimes to strings using the given format."""
-    return [d.strftime(str_format) for d in v]
+    return [_strftime(d, str_format) for d in v]
 
 
 @overload

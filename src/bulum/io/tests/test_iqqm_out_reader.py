@@ -1,10 +1,15 @@
+import shutil
 import unittest
 
 import bulum.io as bio
 
+HAS_IQMGUI = shutil.which("iqmgui") is not None
+NEEDS_IQMGUI = unittest.skipUnless(HAS_IQMGUI, "iqmgui not on PATH")
+
 
 class Tests(unittest.TestCase):
 
+    @NEEDS_IQMGUI
     def test_iqqm_out_reader(self):
         reader = bio.iqqm_out_reader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
         reader.require(node="030", output="01")
@@ -14,6 +19,7 @@ class Tests(unittest.TestCase):
         self.assertAlmostEqual(len(df), 43464)
         self.assertAlmostEqual(df["030_01.d"].sum(), 30598077.0495)
 
+    @NEEDS_IQMGUI
     def test_iqqm_out_reader2(self):
         reader = bio.iqqm_out_reader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
         df = reader.read(read_all_availabe=True)
@@ -22,6 +28,8 @@ class Tests(unittest.TestCase):
     def test_iqqm_out_reader3(self):
         for engine in ["iqqmgui", "python"]:
             with self.subTest(engine=engine):
+                if engine == "iqqmgui" and not HAS_IQMGUI:
+                    self.skipTest("iqmgui not on PATH")
                 reader = bio.IqqmOutReader("./src/bulum/io/tests/iqqm_results/O02l.IQN")
                 reader.require(type=3.1, output=2)
                 reader.require(supertype=8, output=2)
