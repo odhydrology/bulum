@@ -49,6 +49,94 @@ class Tests(unittest.TestCase):
         answer_complete_wy = bsta.annual_median(df, 7)["Functions\\Functions\\Functions\\Functions@Results@ODH_RWA@$f_KurandaTWS (ML.day^-1)"]
         self.assertAlmostEqual(answer_complete_wy, 457.233468094998)
 
+    @staticmethod
+    def _missing_data_df(start="2000-07-01", wy_month=7):
+        """Three complete water years from `start` of 1, 3 and 2 per day. The
+        three years from `start` must not include 29 February.
+
+        Column 'gap' has 10 missing days in the second year; column
+        'all_missing' has all of the second year missing. The complete-year
+        totals are 365 and 730. The second year has the highest values, so a
+        gap there changes the maximum (a short gap) and the minimum (a full
+        gap)."""
+        start = pd.Timestamp(start)
+        idx = pd.date_range(start, start + pd.DateOffset(years=3, days=-1), freq="D",
+                            name="Date")
+        wy = pd.Series(utils.get_wy(idx, wy_month), index=idx)
+        first = wy.iloc[0]
+        values = wy.map({first: 1.0, first + 1: 3.0, first + 2: 2.0})
+        df = pd.DataFrame({"gap": values, "all_missing": values})
+        second = start + pd.DateOffset(years=1)
+        gap_start = second + pd.DateOffset(months=6)
+        df.loc[gap_start:gap_start + pd.Timedelta(days=9), "gap"] = float("nan")
+        df.loc[second:second + pd.DateOffset(years=1, days=-1), "all_missing"] = float("nan")
+        return df
+
+    def _missing_data_variants(self):
+        """(name, df, wy_month) for the missing-data fixture with a string
+        index and with other water year start months."""
+        string_index = self._missing_data_df()
+        string_index.index = string_index.index.strftime("%Y-%m-%d")
+        return [
+            ("July, date index", self._missing_data_df(), 7),
+            ("July, string index", string_index, 7),
+            ("January", self._missing_data_df("2001-01-01", 1), 1),
+            ("October", self._missing_data_df("2000-10-01", 10), 10),
+        ]
+
+    def test_annual_stats_exclude_years_with_missing_data(self):
+        # With allow_part_years=False, water years with missing data are
+        # excluded. Each statistic has at least one column where counting
+        # missing days as zero would give a different result.
+        cases = [
+            ("annual_max", bsta.annual_max, 730.0),
+            ("annual_min", bsta.annual_min, 365.0),
+            ("annual_mean", bsta.annual_mean, 547.5),
+            ("annual_median", bsta.annual_median, 547.5),
+            ("annual_percentile", lambda d, m: bsta.annual_percentile(d, 50, m).iloc[0], 547.5),
+        ]
+        for variant, df, wy_month in self._missing_data_variants():
+            for name, func, expected in cases:
+                result = func(df, wy_month)
+                for col in df.columns:
+                    with self.subTest(variant=variant, func=name, column=col):
+                        self.assertAlmostEqual(result[col], expected)
+                if name != "annual_percentile":  # Series input is tested separately
+                    with self.subTest(variant=variant, func=name, column="gap as Series"):
+                        self.assertAlmostEqual(func(df["gap"], wy_month), expected)
+
+    def test_annual_stats_nan_without_complete_year(self):
+        df = self._missing_data_df().iloc[:30]
+        funcs = [
+            ("annual_sum", bsta.annual_sum),
+            ("annual_max", bsta.annual_max),
+            ("annual_min", bsta.annual_min),
+            ("annual_mean", bsta.annual_mean),
+            ("annual_median", bsta.annual_median),
+            ("annual_percentile", lambda d: bsta.annual_percentile(d, 50)),
+        ]
+        for name, func in funcs:
+            with self.subTest(func=name):
+                self.assertTrue(pd.isna(func(df)))
+
+    def test_annual_sum_nan_for_years_with_missing_data(self):
+        df = self._missing_data_df()
+        result = bsta.annual_sum(df)
+        columns = [(col, result[col]) for col in df.columns]
+        columns.append(("gap as Series", bsta.annual_sum(df["gap"])))
+        for col, totals in columns:
+            with self.subTest(column=col):
+                self.assertEqual(totals.loc[2000], 365.0)
+                self.assertTrue(pd.isna(totals.loc[2001]))
+                self.assertEqual(totals.loc[2002], 730.0)
+
+    def test_annual_sum_part_years_still_skips_missing(self):
+        # With allow_part_years=True, the available days are summed.
+        df = self._missing_data_df()
+        result = bsta.annual_sum(df, allow_part_years=True)
+        self.assertEqual(result["gap"].loc[2001], 3.0 * 355)
+        self.assertEqual(result["all_missing"].loc[2001], 0.0)
+
     def test_monthly_reliability(self):
         # Test timeseries demand input
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
