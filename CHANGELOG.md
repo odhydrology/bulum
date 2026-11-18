@@ -6,8 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Added
+- utils `annual_totals` sums daily data into water year totals. The annual statistics and annual plots use it, so they share one rule for missing data.
+
 ### Fixed
 - plots.pyblo: the chart now renders when the VegaFusion data transformer is enabled. Before, the subtitle raised "Expression parsing error: Integers may not have leading zeros" unless `subtitle=False`.
+- stats annual statistics (`annual_sum`, `annual_max`, `annual_min`, `annual_mean`, `annual_median`, `annual_percentile`) exclude water years with missing data when `allow_part_years=False`. Before, missing days were summed as zero.
+  - Results from data with gaps may differ from earlier versions.
+  - `annual_sum` gives `NaN` for those years.
+  - A column with a gap in every water year gives `NaN` for every statistic.
+  - Dates absent from the index count as missing values, the same as `NaN`.
+  - With `allow_part_years=True`, the available days are still summed, but a water year with no values is now excluded rather than counted as zero. A column with no values gives `NaN`.
+  - `swflo2s.mean_annual_flow` uses `annual_mean`, so its result also changes for data with gaps.
+- plots `annual_plot` gives no point for a water year with a missing value or date. Before, it accepted a leap water year with one missing day, and raised a `KeyError` for a missing date. Data with no complete water year gives an empty chart rather than an `IndexError`. String dates outside 1677 to 2262, such as stochastic dates, plot on pandas 2.
+- plots `annual_demand_supply_plot` gives no bar for a water year with no values. Before, it drew a zero bar.
+
+### Changed
+- stats `annual_percentile` accepts a Series, and `q` as a tuple or numpy array. It raises a `ValueError` when `q` is not numeric, has more than one dimension, or is outside 0 to 100.
+- stats annual statistics, `annual_plot` and `annual_demand_supply_plot` raise a `ValueError` naming a duplicate date when the index has duplicate dates. Before, with a `DatetimeIndex`, the duplicates were summed into the totals.
+- utils `to_np_datetimes64d` with `mode="parse"` parses `YYYY-MM-DD` dates about 10 times faster. The results and errors are unchanged.
+
+### Removed
+- `setup.py`. The package metadata is in `pyproject.toml`, and building needs setuptools 64 or later. Build with `python -m build` or `uv build`.
 
 ## 0.3.6
 
