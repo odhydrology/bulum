@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
+## Unreleased
+
+### Fixed
+- stats.qastat2s changes to reflect legacy QASTAT
+  - star ratings dependent on the statistic with rating bands
+  - driest 3-year mean now uses lowest mean daily rainfall as opposed to observed flow
+  - non-matching zero flow days counts in both directions
+  - high/low flow band splits are now rounded rather than truncated
+  - axis limits are now padded as R does, and low-flow x-axis now ends where flow drops below 0.1 ML/d, and the high-flow x-axis starts at the smallest plotting position.
+  - driest 3-year mean only uses water years with <=20% missing days (obs, mod and rain), and returns NaN ("n/a") if no valid period exists
+  - annual water year totals summed over paired days only
+  - annual time series step plot now aligned to water years and includes the final year
+  - residual mass shows gaps over missing periods instead of joining across them
+
 ## 0.3.5
 
 ### Changed
