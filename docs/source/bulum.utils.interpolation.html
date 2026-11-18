@@ -6,14 +6,14 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bulum.utils.interpolation module &mdash; Bulum 0.3.5 documentation</title>
+  <title>bulum.utils.interpolation module &mdash; Bulum 0.3.6 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
 
   
       <script src="../_static/jquery.js?v=5d32c60e"></script>
       <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../_static/documentation_options.js?v=ba50482b"></script>
+      <script src="../_static/documentation_options.js?v=8da8c241"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/js/theme.js"></script>
@@ -92,15 +92,15 @@
 <span id="bulum-utils-interpolation-module"></span><h1>bulum.utils.interpolation module<a class="headerlink" href="#module-bulum.utils.interpolation" title="Link to this heading"></a></h1>
 <p>This module provides interpolation utilities.</p>
 <div class="deprecated">
-<p><span class="versionmodified deprecated">Deprecated since version 0.1.0: </span>The <a class="reference internal" href="#bulum.utils.interpolation.interp" title="bulum.utils.interpolation.interp"><code class="xref py py-func docutils literal notranslate"><span class="pre">interp()</span></code></a> function is deprecated. Use <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.interp()</span></code></a> directly instead.</p>
+<p><span class="versionmodified deprecated">Deprecated since version 0.1.0: </span>The <a class="reference internal" href="#bulum.utils.interpolation.interp" title="bulum.utils.interpolation.interp"><code class="xref py py-func docutils literal notranslate"><span class="pre">interp()</span></code></a> function is deprecated. Use <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.interp()</span></code></a> directly instead.</p>
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="bulum.utils.interpolation.interp">
-<span class="sig-name descname"><span class="pre">interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.14)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.4)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bulum.utils.interpolation.interp" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">interp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.5)"><span class="pre">ndarray</span></a></span></span><a class="headerlink" href="#bulum.utils.interpolation.interp" title="Link to this definition"></a></dt>
 <dd><p>Linear interpolation function.</p>
 <div class="deprecated">
 <p><span class="versionmodified deprecated">Deprecated since version 0.1.0: </span>This function is deprecated and will be removed in a future version.
-Use <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.4)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.interp()</span></code></a> directly instead.</p>
+Use <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.5)"><code class="xref py py-func docutils literal notranslate"><span class="pre">numpy.interp()</span></code></a> directly instead.</p>
 </div>
 <p>This is a simple wrapper around numpy.interp() provided for convenience.
 All arguments are passed directly to the numpy function.</p>
@@ -121,7 +121,7 @@ All arguments are passed directly to the numpy function.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.4)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.interp</span></code></a></dt><dd><p>The underlying numpy interpolation function.</p>
+<dt><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.interp.html#numpy.interp" title="(in NumPy v2.5)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.interp</span></code></a></dt><dd><p>The underlying numpy interpolation function.</p>
 </dd>
 </dl>
 </div>
