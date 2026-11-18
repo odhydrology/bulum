@@ -41,6 +41,7 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             bio.write_area_ts_csv(df, self.tmp_dir / "clash.csv")
 
+    @unittest.skipUnless(shutil.which("csvidx"), "csvidx not on PATH")
     def test_write_idx(self):
         tmp_path = self.tmp_dir / "test_data.idx"
         df = bio.read_ts_csv("./src/bulum/io/tests/test_data.csv")

@@ -209,9 +209,11 @@ def read_idx(filename: str | Path, skip_header_bytes: Optional[bool] = None) -> 
             sname = f"{n + 1}>{sfile}>{sdesc}"
             snames.append(sname)
     # Read ".out" file
-    out_filename = filename.with_suffix(".out")
-    if not os.path.exists(out_filename):
-        raise FileNotFoundError(f"File does not exist: {out_filename}")
+    # Try both cases so this also works on case-sensitive filesystems
+    out_candidates = [filename.with_suffix(".out"), filename.with_suffix(".OUT")]
+    out_filename = next((f for f in out_candidates if f.exists()), None)
+    if out_filename is None:
+        raise FileNotFoundError(f"File does not exist: {out_candidates[0]}")
     # 4-byte reals
     b_types = [(s, 'f4') for s in snames]
     # Read all data in, drop header bytes (first row) if necessary

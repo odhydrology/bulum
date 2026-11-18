@@ -93,7 +93,7 @@ class Tests(unittest.TestCase):
         plots.annual_demand_supply_plot(df["b"],df["a"])
     
     def test_pyblo(self):
-        pathlist=['./src/bulum/plots/tests/919001C.csv','./src/bulum/plots/tests/919001B.csv','./src/bulum/plots/tests/919001A.csv','./src/bulum/plots/tests/919003A.csv','./src/bulum/plots/tests/919009B.csv','./src/bulum/plots/tests/919009A.csv']
+        pathlist=['./src/bulum/plots/tests/919001c.csv','./src/bulum/plots/tests/919001b.csv','./src/bulum/plots/tests/919001a.csv','./src/bulum/plots/tests/919003a.csv','./src/bulum/plots/tests/919009b.csv','./src/bulum/plots/tests/919009a.csv']
         df_list=[]
         for i in range(len(pathlist)):
             df_list.append(io.read_ts_csv(pathlist[i])["Total"])
