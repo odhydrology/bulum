@@ -17,10 +17,11 @@ def _annual_totals(
     False and `df` does not contain a complete water year.
 
     With `allow_part_years=False`, a water year containing any missing values
-    has a NaN total. With `allow_part_years=True`, missing values are skipped.
+    has a NaN total. With `allow_part_years=True`, missing values are skipped,
+    and a water year with no values has a NaN total.
     """
     if allow_part_years:
-        return df.groupby(utils.get_wy(df.index, wy_month)).sum()
+        return df.groupby(utils.get_wy(df.index, wy_month)).sum(min_count=1)
     cropped_df = utils.crop_to_wy(df, wy_month)
     if len(cropped_df) == 0:
         return None
@@ -40,6 +41,8 @@ def annual_sum(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values has a
         NaN total.
+        When True, missing values are skipped, and a water year with no values
+        has a NaN total.
 
     Returns
     -------
@@ -67,6 +70,8 @@ def annual_max(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values is
         excluded.
+        When True, missing values are skipped, and a water year with no values
+        is excluded.
 
     Returns
     -------
@@ -94,6 +99,8 @@ def annual_min(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values is
         excluded.
+        When True, missing values are skipped, and a water year with no values
+        is excluded.
 
     Returns
     -------
@@ -121,6 +128,8 @@ def annual_mean(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values is
         excluded.
+        When True, missing values are skipped, and a water year with no values
+        is excluded.
 
     Returns
     -------
@@ -148,6 +157,8 @@ def annual_median(df: pd.DataFrame, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values is
         excluded.
+        When True, missing values are skipped, and a water year with no values
+        is excluded.
 
     Returns
     -------
@@ -178,6 +189,8 @@ def annual_percentile(df: pd.DataFrame, q, wy_month=7, allow_part_years=False):
         Allow part water years or only complete water years. Defaults to False.
         When False, a water year containing any missing (NaN) values is
         excluded.
+        When True, missing values are skipped, and a water year with no values
+        is excluded.
 
     Returns
     -------

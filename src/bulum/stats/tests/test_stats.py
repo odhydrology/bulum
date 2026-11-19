@@ -163,12 +163,46 @@ class Tests(unittest.TestCase):
                 self.assertTrue(pd.isna(totals.loc[2001]))
                 self.assertEqual(totals.loc[2002], 730.0)
 
-    def test_annual_sum_part_years_still_skips_missing(self):
-        # With allow_part_years=True, the available days are summed.
+    def test_annual_stats_part_years_with_missing_data(self):
+        # With allow_part_years=True, the available days are summed, and a
+        # water year with no values is excluded. A year of zeros still
+        # totals zero.
         df = self._missing_data_df()
-        result = bsta.annual_sum(df, allow_part_years=True)
-        self.assertEqual(result["gap"].loc[2001], 3.0 * 355)
-        self.assertEqual(result["all_missing"].loc[2001], 0.0)
+        df["zero_year"] = df["gap"].fillna(3.0)
+        df.loc["2001-07-01":"2002-06-30", "zero_year"] = 0.0
+        cases = [
+            # (name, func, {column: expected})
+            ("annual_max", bsta.annual_max,
+             {"gap": 1065.0, "all_missing": 730.0, "zero_year": 730.0}),
+            ("annual_min", bsta.annual_min,
+             {"gap": 365.0, "all_missing": 365.0, "zero_year": 0.0}),
+            ("annual_mean", bsta.annual_mean,
+             {"gap": 720.0, "all_missing": 547.5, "zero_year": 365.0}),
+            ("annual_median", bsta.annual_median,
+             {"gap": 730.0, "all_missing": 547.5, "zero_year": 365.0}),
+            ("annual_percentile",
+             lambda d, allow_part_years: bsta.annual_percentile(
+                 d, 50, allow_part_years=allow_part_years).iloc[0],
+             {"gap": 730.0, "all_missing": 547.5, "zero_year": 365.0}),
+        ]
+        for name, func, expected in cases:
+            result = func(df, allow_part_years=True)
+            for col, value in expected.items():
+                with self.subTest(func=name, column=col):
+                    self.assertAlmostEqual(result[col], value)
+        totals = bsta.annual_sum(df, allow_part_years=True)
+        self.assertEqual(totals["gap"].loc[2001], 3.0 * 355)
+        self.assertTrue(pd.isna(totals["all_missing"].loc[2001]))
+        self.assertEqual(totals["zero_year"].loc[2001], 0.0)
+
+    def test_annual_stats_part_years_with_missing_data_by_variant(self):
+        # The water year start month and the index format also apply when
+        # part years are allowed.
+        for variant, df, wy_month in self._missing_data_variants():
+            with self.subTest(variant=variant):
+                result = bsta.annual_mean(df, wy_month, allow_part_years=True)
+                self.assertAlmostEqual(result["gap"], (365.0 + 3.0 * 355 + 730.0) / 3)
+                self.assertAlmostEqual(result["all_missing"], 547.5)
 
     def test_annual_sum_water_year_totals(self):
         nan = float("nan")
@@ -179,11 +213,11 @@ class Tests(unittest.TestCase):
             ("complete years", full, False,
              {2000: (365.0, 365.0), 2001: (nan, nan), 2002: (730.0, 730.0)}),
             ("complete years, part allowed", full, True,
-             {2000: (365.0, 365.0), 2001: (1065.0, 0.0), 2002: (730.0, 730.0)}),
+             {2000: (365.0, 365.0), 2001: (1065.0, nan), 2002: (730.0, 730.0)}),
             ("part year cropped", part, False,
              {2001: (nan, nan), 2002: (730.0, 730.0)}),
             ("part year kept", part, True,
-             {2000: (303.0, 303.0), 2001: (1065.0, 0.0), 2002: (730.0, 730.0)}),
+             {2000: (303.0, 303.0), 2001: (1065.0, nan), 2002: (730.0, 730.0)}),
         ]
         for name, df, allow_part_years, expected in cases:
             with self.subTest(case=name):
