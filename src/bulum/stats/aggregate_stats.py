@@ -11,15 +11,33 @@ import pandas as pd
 from bulum import utils
 
 
+def _fill_missing_dates(df: pd.DataFrame) -> pd.DataFrame:
+    """Returns `df` with a daily date index from its first to its last date.
+    Dates absent from the index are added with NaN values."""
+    if len(df) == 0:
+        return df
+    index = df.index
+    # A sorted, unique index with one row per day between its first and last
+    # dates is complete, so only start and end dates need parsing.
+    days = (pd.Timestamp(index[-1]) - pd.Timestamp(index[0])).days + 1
+    if days == len(index) and index.is_monotonic_increasing and index.is_unique:
+        return df
+    dates = pd.DatetimeIndex(pd.to_datetime(index), name=index.name)
+    all_dates = pd.date_range(dates.min(), dates.max(), freq="D", name=index.name)
+    return df.set_axis(dates).reindex(all_dates)
+
+
 def _annual_totals(
         df: pd.DataFrame, wy_month: int, allow_part_years: bool) -> pd.DataFrame | None:
     """Returns the water year totals of `df`, or None if `allow_part_years` is
     False and `df` does not contain a complete water year.
 
-    With `allow_part_years=False`, a water year containing any missing values
-    has a NaN total. With `allow_part_years=True`, missing values are skipped,
-    and a water year with no values has a NaN total.
+    Dates absent from the index count as missing values. With
+    `allow_part_years=False`, a water year containing any missing values has a
+    NaN total. With `allow_part_years=True`, missing values are skipped, and a
+    water year with no values has a NaN total.
     """
+    df = _fill_missing_dates(df)
     if allow_part_years:
         return df.groupby(utils.get_wy(df.index, wy_month)).sum(min_count=1)
     cropped_df = utils.crop_to_wy(df, wy_month)
@@ -34,7 +52,8 @@ def annual_sum(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     wy_month : int, optional
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
@@ -63,7 +82,8 @@ def annual_max(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     wy_month : int, optional
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
@@ -92,7 +112,8 @@ def annual_min(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     wy_month : int, optional
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
@@ -121,7 +142,8 @@ def annual_mean(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     wy_month : int, optional
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
@@ -150,7 +172,8 @@ def annual_median(df: pd.DataFrame, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     wy_month : int, optional
         Water year start month. Defaults to 7 (i.e. July).
     allow_part_years : bool, optional
@@ -180,7 +203,8 @@ def annual_percentile(df: pd.DataFrame, q, wy_month=7, allow_part_years=False):
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe with date as index.
+        Dataframe with a daily date index. Dates absent from the index count
+        as missing values.
     q : float or sequence of float
         Percentile or percentiles to compute, between 0 and 100.
     wy_month : int, optional

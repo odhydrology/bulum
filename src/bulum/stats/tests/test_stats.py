@@ -204,6 +204,71 @@ class Tests(unittest.TestCase):
                 self.assertAlmostEqual(result["gap"], (365.0 + 3.0 * 355 + 730.0) / 3)
                 self.assertAlmostEqual(result["all_missing"], 547.5)
 
+    def test_annual_stats_dates_missing_from_index(self):
+        # Dates absent from the index count as missing values, so dropping
+        # rows gives the same results as setting them to NaN.
+        funcs = [
+            ("annual_sum", bsta.annual_sum),
+            ("annual_max", bsta.annual_max),
+            ("annual_min", bsta.annual_min),
+            ("annual_mean", bsta.annual_mean),
+            ("annual_median", bsta.annual_median),
+            ("annual_percentile", lambda d, m, allow_part_years: bsta.annual_percentile(
+                d, [10, 90], m, allow_part_years)),
+        ]
+        for variant, df, wy_month in self._missing_data_variants():
+            for col in df.columns:
+                with_nan = df[[col]]
+                dropped = with_nan.dropna()
+                self.assertLess(len(dropped), len(with_nan))
+                for allow_part_years in (False, True):
+                    for name, func in funcs:
+                        with self.subTest(variant=variant, column=col, func=name,
+                                          allow_part_years=allow_part_years):
+                            expected = func(with_nan, wy_month, allow_part_years)
+                            result = func(dropped, wy_month, allow_part_years)
+                            if isinstance(expected, pd.DataFrame):
+                                pd.testing.assert_frame_equal(result, expected)
+                            else:
+                                pd.testing.assert_series_equal(result, expected)
+
+    def test_annual_stats_unsorted_index(self):
+        # An unsorted index has the right number of rows but is not treated
+        # as complete without checking; it gives the same results as sorted.
+        df = self._missing_data_df()
+        string_index = df.set_axis(df.index.strftime("%Y-%m-%d"))
+        shuffled_order = np.random.default_rng(0).permutation(len(df))
+        for variant, data in (("date index", df), ("string index", string_index)):
+            for order_name, unsorted in (("reversed", data.iloc[::-1]),
+                                         ("shuffled", data.iloc[shuffled_order])):
+                for allow_part_years in (False, True):
+                    with self.subTest(variant=variant, order=order_name,
+                                      allow_part_years=allow_part_years):
+                        pd.testing.assert_frame_equal(
+                            bsta.annual_sum(unsorted, allow_part_years=allow_part_years),
+                            bsta.annual_sum(data, allow_part_years=allow_part_years))
+
+    def test_annual_stats_index_that_looks_complete(self):
+        # Indexes with one row per day between their end dates that still
+        # have a date missing.
+        df = self._missing_data_df()[["gap"]].fillna(1.0)
+        missing = "2002-01-20"
+        moved = "2003-07-01"  # outside the end dates, placed mid-series
+        extra = df.loc[["2003-06-30"]].set_axis(pd.DatetimeIndex([moved], name="Date"))
+        position = df.index.get_loc(pd.Timestamp(missing))
+        out_of_order = pd.concat([df.iloc[:position], extra, df.iloc[position + 1:]])
+        expected = bsta.annual_sum(out_of_order.sort_index())
+        with self.subTest(case="date missing, extra date out of order"):
+            self.assertEqual(len(out_of_order), len(df))
+            pd.testing.assert_frame_equal(bsta.annual_sum(out_of_order), expected)
+            self.assertTrue(pd.isna(bsta.annual_sum(out_of_order)["gap"].loc[2001]))
+        duplicated = df.drop(pd.Timestamp(missing))
+        duplicated = pd.concat([duplicated, duplicated.loc[["2002-01-21"]]]).sort_index()
+        with self.subTest(case="date missing, another date duplicated"):
+            self.assertEqual(len(duplicated), len(df))
+            with self.assertRaises(ValueError):
+                bsta.annual_sum(duplicated)
+
     def test_annual_sum_water_year_totals(self):
         nan = float("nan")
         full = self._missing_data_df()
