@@ -170,6 +170,32 @@ class Tests(unittest.TestCase):
         self.assertEqual(result["gap"].loc[2001], 3.0 * 355)
         self.assertEqual(result["all_missing"].loc[2001], 0.0)
 
+    def test_annual_sum_water_year_totals(self):
+        nan = float("nan")
+        full = self._missing_data_df()
+        part = full.loc["2000-09-01":]  # WY2000 starts in September: 303 days
+        cases = [
+            # (name, df, allow_part_years, {water year: (gap, all_missing)})
+            ("complete years", full, False,
+             {2000: (365.0, 365.0), 2001: (nan, nan), 2002: (730.0, 730.0)}),
+            ("complete years, part allowed", full, True,
+             {2000: (365.0, 365.0), 2001: (1065.0, 0.0), 2002: (730.0, 730.0)}),
+            ("part year cropped", part, False,
+             {2001: (nan, nan), 2002: (730.0, 730.0)}),
+            ("part year kept", part, True,
+             {2000: (303.0, 303.0), 2001: (1065.0, 0.0), 2002: (730.0, 730.0)}),
+        ]
+        for name, df, allow_part_years, expected in cases:
+            with self.subTest(case=name):
+                result = bsta.annual_sum(df, 7, allow_part_years)
+                expected_df = pd.DataFrame.from_dict(
+                    expected, orient="index", columns=["gap", "all_missing"])
+                pd.testing.assert_frame_equal(result, expected_df, check_index_type=False)
+
+    def test_annual_sum_part_year_without_complete_year(self):
+        df = self._missing_data_df().iloc[:30]
+        self.assertEqual(len(bsta.annual_sum(df, allow_part_years=True)), 1)
+
     def test_monthly_reliability(self):
         # Test timeseries demand input
         df = io.read_ts_csv("./src/bulum/stats/tests/test_dem_sup_data_trunc.csv")
