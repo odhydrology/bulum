@@ -2,7 +2,7 @@
 
 ## Installation
 
-This package may be installed using pip from GitHub, directly from PyPi (public), or from a .tar.gz. Examples are shown below.
+This package may be installed using pip from GitHub, directly from PyPI (public), or from a .tar.gz. Examples are shown below.
 
 ```bash
 pip install git+https://github.com/odhydrology/bulum
@@ -30,34 +30,27 @@ bulum.hello_world()
 
 API documentation is available at [odhydrology.github.io/bulum](https://odhydrology.github.io/bulum/).
 
-## Build and Upload to PyPi
+## Build and upload to PyPI
 
-First build a distribution from an anaconda prompt in the root of your project, and then upload the dist to PyPi using Twine.
+Pushing any tag starting with `v` runs the Release workflow. The workflow has four jobs.
+
+- **Run CI** runs the CI workflow.
+- **Build distribution** checks that the tag matches `v` plus the version in `src/bulum/version.py`, then builds the sdist and wheel with `python -m build`. A tag that does not match fails this job, and the later jobs do not run.
+- **Publish to PyPI** uploads the distributions to PyPI by trusted publishing, so it needs no API token. It is skipped for tags containing `dev`.
+- **Build documentation on 'docs' branch** merges `main` into the `docs` branch, rebuilds the Sphinx documentation and pushes it. It runs for every tag that passes the build, including `dev` tags.
+
+To build and publish by hand, run these from the root of the project:
 
 ```bash
-python setup.py sdist
+uv build
+uv publish --token <API token>
 ```
 
-```bash
-twine upload dist\bulum-0.0.32.tar.gz
-```
-
-As of Nov 2023, PyPi uses an API token instead of a conventional password. You can still use Twine, but the username is "\_\_token__", and password is the API token which is very long string starting with "pypi-". 
-
-``` bash
-username = __token__
-password = pypi-#####################################################################################
-```
+Publishing by hand needs a PyPI API token instead of a password. The token is a long string starting with "pypi-".
 
 Where can I find the API token password? Chas has it in his emails. It is also here on the network at *.\ODH working files\Professional development, reading, etc\Software\ODHSoftware\bulum\PyPi_password_and_instructions.txt*.
 
-How do I make a new API token? Go to your PyPi account settings, and click on "API tokens". Then click on "Add API token", and give it a name. The token will be displayed on the next screen.
-
-Alternatively, 
-```bash
-uv build
-uv publish --token XXXXX
-```
+How do I make a new API token? Go to your PyPI account settings, and click on "API tokens". Then click on "Add API token", and give it a name. The token will be displayed on the next screen.
 
 ## Unit Tests
 
