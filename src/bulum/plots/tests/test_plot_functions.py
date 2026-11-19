@@ -64,6 +64,60 @@ class Tests(unittest.TestCase):
         df.index.name = "Date"
         plots.annual_plot(df)
 
+    @staticmethod
+    def _missing_data_df():
+        """Daily values of 1.0 for water years 2001 to 2003, where WY2003 is
+        a leap year. Column "gap" misses 10 days of WY2002, "all_missing"
+        misses all of WY2002, and "leap_gap" misses one day of WY2003."""
+        idx = pd.date_range("2001-07-01", "2004-06-30", freq="D", name="Date")
+        df = pd.DataFrame({"full": 1.0, "gap": 1.0, "all_missing": 1.0, "leap_gap": 1.0}, index=idx)
+        df.loc["2003-01-01":"2003-01-10", "gap"] = np.nan
+        df.loc["2002-07-01":"2003-06-30", "all_missing"] = np.nan
+        df.loc["2004-01-15", "leap_gap"] = np.nan
+        return df
+
+    def test_annual_plot_missing_data(self):
+        nan = np.nan
+        df = self._missing_data_df()
+        cases = [
+            # (name, df, {column: [WY2001, WY2002, WY2003]})
+            ("missing values", df,
+             {"full": [365, 365, 366], "gap": [365, nan, 366],
+              "all_missing": [365, nan, 366], "leap_gap": [365, 365, nan]}),
+            ("missing dates", df.drop(pd.date_range("2003-01-01", "2003-01-10")),
+             {"full": [365, nan, 366]}),
+            ("string dates", df.set_axis(df.index.strftime("%Y-%m-%d")),
+             {"gap": [365, nan, 366]}),
+        ]
+        for name, data, expected in cases:
+            with self.subTest(case=name):
+                chart = plots.annual_plot(data)
+                totals = chart.data.pivot(index="Water year", columns="Data set", values="Flow (ML/a)")
+                for col, values in expected.items():
+                    np.testing.assert_array_equal(totals[col].to_numpy(), values)
+
+    def test_annual_plot_stochastic_dates(self):
+        # String dates in years outside the nanosecond timestamp range.
+        dates = np.arange(np.datetime64("0001-07-01"), np.datetime64("0003-07-01"))
+        df = pd.DataFrame({"a": 1.0}, index=[str(date) for date in dates])
+        chart = plots.annual_plot(df.drop(df.index[400]))
+        np.testing.assert_array_equal(chart.data["Flow (ML/a)"].to_numpy(), [365, np.nan])
+
+    def test_annual_plot_no_complete_year(self):
+        df = self._missing_data_df().iloc[:30]
+        self.assertEqual(len(plots.annual_plot(df).data), 0)
+
+    def test_annual_demand_supply_plot_missing_data(self):
+        nan = np.nan
+        df = self._missing_data_df()
+        expected = {"full": [365, 365, 366], "gap": [365, 355, 366],
+                    "all_missing": [365, nan, 366], "leap_gap": [365, 365, 365]}
+        for col, values in expected.items():
+            with self.subTest(column=col):
+                chart = plots.annual_demand_supply_plot(df[col].rename("demand"), df["full"].rename("supply"))
+                totals = chart.layer[0].data.set_index("index")
+                np.testing.assert_array_equal(totals["demand"].to_numpy(), values)
+
     def test_residual_mass_curve(self):
         start_dt=datetime(1889, 1, 1)
         df = pd.DataFrame()
