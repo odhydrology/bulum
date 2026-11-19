@@ -264,10 +264,29 @@ class Tests(unittest.TestCase):
             self.assertTrue(pd.isna(bsta.annual_sum(out_of_order)["gap"].loc[2001]))
         duplicated = df.drop(pd.Timestamp(missing))
         duplicated = pd.concat([duplicated, duplicated.loc[["2002-01-21"]]]).sort_index()
-        with self.subTest(case="date missing, another date duplicated"):
-            self.assertEqual(len(duplicated), len(df))
-            with self.assertRaises(ValueError):
-                bsta.annual_sum(duplicated)
+        string_dates = duplicated.set_axis(duplicated.index.strftime("%Y-%m-%d"))
+        for name, data in (("date index", duplicated), ("string index", string_dates)):
+            with self.subTest(case="date missing, another date duplicated", input=name):
+                self.assertEqual(len(data), len(df))
+                with self.assertRaisesRegex(ValueError, "duplicate dates, such as 2002-01-21"):
+                    bsta.annual_sum(data)
+
+    def test_annual_stats_no_columns(self):
+        # A frame with no columns gives an empty result, not NaN.
+        df = self._missing_data_df()[[]]
+        funcs = [
+            ("annual_sum", bsta.annual_sum, (3, 0)),
+            ("annual_max", bsta.annual_max, (0,)),
+            ("annual_min", bsta.annual_min, (0,)),
+            ("annual_mean", bsta.annual_mean, (0,)),
+            ("annual_median", bsta.annual_median, (0,)),
+            ("annual_percentile", lambda d, **kw: bsta.annual_percentile(d, [10, 90], **kw), (2, 0)),
+        ]
+        for name, func, shape in funcs:
+            for allow_part_years in (False, True):
+                with self.subTest(func=name, allow_part_years=allow_part_years):
+                    result = func(df, allow_part_years=allow_part_years)
+                    self.assertEqual(result.shape, shape)
 
     def test_annual_sum_water_year_totals(self):
         nan = float("nan")
