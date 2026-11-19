@@ -1,5 +1,6 @@
 import unittest
 
+import numpy as np
 import pandas as pd
 
 import bulum.stats as bsta
@@ -118,6 +119,38 @@ class Tests(unittest.TestCase):
         for name, func in funcs:
             with self.subTest(func=name):
                 self.assertTrue(pd.isna(func(df)))
+
+    def test_annual_percentile_inputs(self):
+        df = self._missing_data_df()
+        cases = [
+            ("scalar q", df, 50, [50]),
+            ("list q", df, [10, 90], [10, 90]),
+            ("tuple q", df, (10, 90), [10, 90]),
+            ("array q", df, np.array([10, 90]), [10, 90]),
+            ("series input", df["gap"], [10, 90], [10, 90]),
+            ("lower bound", df, 0, [0]),
+            ("upper bound", df, 100, [100]),
+            ("both bounds", df, [0, 100], [0, 100]),
+        ]
+        for name, data, q, expected_index in cases:
+            with self.subTest(case=name):
+                result = bsta.annual_percentile(data, q)
+                self.assertEqual(list(result.index), expected_index)
+                self.assertAlmostEqual(np.ravel(result.loc[expected_index[-1]])[0],
+                                       np.percentile([365.0, 730.0], expected_index[-1]))
+        invalid = [
+            (101, r"between 0 and 100, got \[101\]"),
+            (-1, r"between 0 and 100, got \[-1\]"),
+            ([50, 150.5], r"between 0 and 100, got \[50.0, 150.5\]"),
+            (float("nan"), "between 0 and 100"),
+            ("50", "must be numeric"),
+            (None, "must be numeric"),
+            (np.array([[5, 95]]), "1-D sequence"),
+        ]
+        for q, message in invalid:
+            with self.subTest(case=f"invalid q={q!r}"):
+                with self.assertRaisesRegex(ValueError, message):
+                    bsta.annual_percentile(df, q)
 
     def test_annual_sum_nan_for_years_with_missing_data(self):
         df = self._missing_data_df()
