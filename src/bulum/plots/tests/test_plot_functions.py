@@ -2,11 +2,13 @@ import random
 import unittest
 from datetime import datetime
 
+import altair as alt
 import matplotlib
 matplotlib.use('Agg')  # Set non-interactive backend for testing
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pytest
 
 from bulum import io, plots, stats, utils
 
@@ -100,6 +102,27 @@ class Tests(unittest.TestCase):
         sites=["919001C","919001B","919001A","919003A","919009B","919009A"]
         series=["Gauge data","Gauge data","Gauge data","Gauge data","Gauge data","Gauge data"]
         plots.pyblo(df_list,sites,series)
+
+    def test_pyblo_vegafusion(self):
+        # Issue #8: VegaFusion parsed a one-element list subtitle as an
+        # expression and failed on the leading zeros in its dates (the
+        # issue's date range started "01/01/1889").
+        pathlist=['./src/bulum/plots/tests/919001c.csv','./src/bulum/plots/tests/919003a.csv']
+        df_list=[io.read_ts_csv(path)["Total"] for path in pathlist]
+        sites=["919001C","919003A"]
+        series=["Gauge data","Gauge data"]
+        charts = {subtitle: plots.pyblo(df_list,sites,series,subtitle=subtitle)
+                  for subtitle in [True, False]}
+        # The subtitle text must be a plain string, not a one-element list.
+        with alt.data_transformers.enable("default"):
+            title_text = charts[True].to_dict()["title"]["text"]
+        self.assertIsInstance(title_text, str)
+        self.assertTrue(title_text.startswith("Annual (January to December)"))
+        pytest.importorskip("vegafusion")
+        with alt.data_transformers.enable("vegafusion"):
+            for subtitle, chart in charts.items():
+                with self.subTest(subtitle=subtitle):
+                    chart.to_dict(format="vega")
 
     def test_wy_event_heatmap(self):
         start_dt=datetime(1889, 1, 1)
