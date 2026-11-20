@@ -109,9 +109,112 @@ def crop_to_wy(df: pd.DataFrame | pd.Series, wy_month: int = 7) -> pd.DataFrame 
     start_date = utils.get_wy_start_date(df, wy_month)
     end_date = utils.get_wy_end_date(df, wy_month)
     if isinstance(start_date, datetime):  # handle datetime inputs
-        start_date = start_date.strftime(r"%Y-%m-%d")
-        end_date = end_date.strftime(r"%Y-%m-%d")
+        start_date = _strftime(start_date, r"%Y-%m-%d")
+        end_date = _strftime(end_date, r"%Y-%m-%d")
     return df.loc[(df.index >= start_date) & (df.index <= end_date)]
+
+
+def _fill_missing_dates(df: pd.DataFrame | pd.Series) -> pd.DataFrame | pd.Series:
+    """Returns `df` with a daily date index from its first to its last date.
+    Dates absent from the index are added with NaN values."""
+    if len(df) == 0:
+        return df
+    index = df.index
+    # A sorted, unique index with one row per day between its first and last
+    # dates is complete, so only start and end dates need parsing.
+    days = (pd.Timestamp(index[-1]) - pd.Timestamp(index[0])).days + 1
+    if days == len(index) and index.is_monotonic_increasing and index.is_unique:
+        return df
+    if isinstance(index, pd.DatetimeIndex):
+        dates = index
+    else:
+        # Seconds resolution covers years 0001 to 9999. pandas 2 parses
+        # strings with pd.to_datetime to nanoseconds, which cover 1677 to 2262.
+        days = utils.to_np_datetimes64d(index, mode="parse")
+        dates = pd.DatetimeIndex(days.astype("datetime64[s]"), name=index.name)
+    if not dates.is_unique:
+        # date() formats years before 1000 with zero padding on every platform
+        duplicate = dates[dates.duplicated()][0].date()
+        raise ValueError(f"The date index has duplicate dates, such as {duplicate}.")
+    all_dates = pd.date_range(dates.min(), dates.max(), freq="D", unit=dates.unit,
+                              name=index.name)
+    return df.set_axis(dates).reindex(all_dates)
+
+
+@overload
+def annual_totals(df: pd.DataFrame, wy_month: int = 7, allow_part_years: bool = False) -> pd.DataFrame:
+    ...
+
+
+@overload
+def annual_totals(df: pd.Series, wy_month: int = 7, allow_part_years: bool = False) -> pd.Series:
+    ...
+
+
+def annual_totals(df: pd.DataFrame | pd.Series, wy_month: int = 7,
+                  allow_part_years: bool = False) -> pd.DataFrame | pd.Series:
+    """
+    Sum daily data into water year totals.
+
+    Dates absent from the index count as missing (`NaN`) values.
+
+    With `allow_part_years=False`, the data is cropped to complete water years
+    with :func:`crop_to_wy`. A water year containing any missing (`NaN`)
+    values then has a `NaN` total.
+
+    With `allow_part_years=True`, part water years at the start and end are
+    kept, and missing values are skipped. A water year with no values has a
+    `NaN` total, and a water year of zeros has a total of 0.
+
+    Parameters
+    ----------
+    df : :class:`~pandas.DataFrame` or :class:`~pandas.Series`
+        Daily timeseries with date as index.
+    wy_month : int, optional
+        Water year start month (1=January, 7=July, etc.). Defaults to 7.
+    allow_part_years : bool, optional
+        Allow part water years or only complete water years. Defaults to False.
+
+    Returns
+    -------
+    :class:`~pandas.DataFrame` or :class:`~pandas.Series`
+        The total of each column for each water year, indexed by water year.
+        The result is empty if `allow_part_years=False` and there is no
+        complete water year. Returns the same type as the input.
+
+    Raises
+    ------
+    ValueError
+        If the date index has duplicate dates.
+
+    Examples
+    --------
+    In these examples, `series` is a daily series of 1.0 from July 2000 to
+    June 2002, with ten missing days in the 2001 water year.
+
+    >>> annual_totals(series)
+    2000    365.0
+    2001      NaN
+    dtype: float64
+    >>> annual_totals(series, allow_part_years=True)
+    2000    365.0
+    2001    355.0
+    dtype: float64
+    """
+    df = _fill_missing_dates(df)
+    if allow_part_years:
+        return df.groupby(utils.get_wy(df.index, wy_month, as_list=False)).sum(min_count=1)
+    cropped_df = crop_to_wy(df, wy_month)
+    if len(cropped_df) == 0:
+        return cropped_df.groupby(np.empty(0, dtype=int)).sum()
+    water_years = utils.get_wy(cropped_df.index, wy_month, as_list=False)
+    # For migration to pandas 3.0:
+    # return cropped_df.groupby(water_years).sum(skipna=False)
+    # That form is about twice as fast for this step, but saves only a few
+    # percent of the whole call. A pandas version check was not added, because
+    # CI runs the locked pandas 3 and would never test the pandas 2 branch.
+    totals = cropped_df.groupby(water_years).sum()
+    return totals.mask(cropped_df.isna().groupby(water_years).any())
 
 
 def check_df_format_standards(df: pd.DataFrame) -> list[str]:
@@ -325,7 +428,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d") -> 
         pass
     elif is_datetime(df.index):
         # Try to convert datetimes to strings.
-        new_index_values = [d.strftime(str_format) for d in df.index]
+        new_index_values = [_strftime(d, str_format) for d in df.index]
         df.index = new_index_values  # type: ignore
     else:
         raise ValueError("The index is not strings or datetimes.")

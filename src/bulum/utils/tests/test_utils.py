@@ -171,6 +171,134 @@ class Tests(unittest.TestCase):
         self.assertEqual(start_jul, datetime(1919, 6, 30))
         self.assertEqual(start_mar, datetime(1920, 2, 29))
 
+    @staticmethod
+    def _annual_totals_df():
+        """Three water years of daily values (WY2000 = 1, WY2001 = 3,
+        WY2002 = 2). Column "gap" misses 10 days of WY2001, and column
+        "all_missing" misses all of WY2001."""
+        idx = pd.date_range("2000-07-01", "2003-06-30", freq="D", name="Date")
+        wy = pd.Series(utils.get_wy(idx, 7), index=idx)
+        values = wy.map({2000: 1.0, 2001: 3.0, 2002: 2.0})
+        df = pd.DataFrame({"gap": values, "all_missing": values})
+        df.loc["2002-01-01":"2002-01-10", "gap"] = np.nan
+        df.loc["2001-07-01":"2002-06-30", "all_missing"] = np.nan
+        return df
+
+    def test_annual_totals(self):
+        nan = np.nan
+        full = self._annual_totals_df()
+        part = full.loc["2000-09-01":]  # WY2000 starts in September: 303 days
+        cases = [
+            # (name, df, allow_part_years, {water year: (gap, all_missing)})
+            ("complete years", full, False,
+             {2000: (365.0, 365.0), 2001: (nan, nan), 2002: (730.0, 730.0)}),
+            ("complete years, part allowed", full, True,
+             {2000: (365.0, 365.0), 2001: (1065.0, nan), 2002: (730.0, 730.0)}),
+            ("part year cropped", part, False,
+             {2001: (nan, nan), 2002: (730.0, 730.0)}),
+            ("part year kept", part, True,
+             {2000: (303.0, 303.0), 2001: (1065.0, nan), 2002: (730.0, 730.0)}),
+        ]
+        for name, df, allow_part_years, expected in cases:
+            expected_df = pd.DataFrame.from_dict(
+                expected, orient="index", columns=["gap", "all_missing"])
+            with self.subTest(case=name, input="DataFrame"):
+                result = utils.annual_totals(df, 7, allow_part_years)
+                pd.testing.assert_frame_equal(result, expected_df, check_index_type=False)
+            with self.subTest(case=name, input="Series"):
+                result = utils.annual_totals(df["gap"], 7, allow_part_years)
+                pd.testing.assert_series_equal(result, expected_df["gap"], check_index_type=False)
+
+    def test_annual_totals_zero_year(self):
+        # A water year of zeros totals 0, not NaN.
+        df = self._annual_totals_df()
+        df.loc["2001-07-01":"2002-06-30", "all_missing"] = 0.0
+        for allow_part_years in (False, True):
+            with self.subTest(allow_part_years=allow_part_years):
+                result = utils.annual_totals(df, 7, allow_part_years)
+                self.assertEqual(result["all_missing"].loc[2001], 0.0)
+
+    def test_annual_totals_no_complete_year(self):
+        df = self._annual_totals_df().iloc[:30]
+        cases = [
+            # (allow_part_years, expected length)
+            (False, 0),
+            (True, 1),
+        ]
+        for allow_part_years, expected in cases:
+            for data in (df, df["gap"]):
+                with self.subTest(allow_part_years=allow_part_years, input=type(data).__name__):
+                    self.assertEqual(len(utils.annual_totals(data, 7, allow_part_years)), expected)
+
+    def test_annual_totals_dates_missing_from_index(self):
+        # Dates absent from the index count as missing values.
+        df = self._annual_totals_df()[["gap"]].fillna(3.0)
+        df = df.drop(pd.date_range("2002-01-01", "2002-01-10"))
+        cases = [
+            # (allow_part_years, expected WY2001 total)
+            (False, np.nan),
+            (True, 3.0 * 355),
+        ]
+        inputs = [
+            ("DataFrame", df),
+            ("Series", df["gap"]),
+            ("string dates", df.set_axis(df.index.strftime("%Y-%m-%d"))),
+        ]
+        for allow_part_years, expected in cases:
+            for name, data in inputs:
+                with self.subTest(allow_part_years=allow_part_years, input=name):
+                    result = utils.annual_totals(data, 7, allow_part_years)
+                    total = result.loc[2001] if isinstance(result, pd.Series) else result["gap"].loc[2001]
+                    np.testing.assert_equal(total, expected)
+                    self.assertEqual(result.loc[2000] if isinstance(result, pd.Series) else result["gap"].loc[2000], 365.0)
+
+    def test_annual_totals_leap_year(self):
+        # WY2003 includes 29 February 2004, so it has 366 days. A missing value
+        # or date on any one of them leaves 365 values, which is still not a
+        # complete year.
+        full = pd.Series(1.0, index=pd.date_range("2002-07-01", "2004-06-30", freq="D"))
+        cases = [
+            # (name, series, allow_part_years, expected WY2003 total)
+            ("complete", full, False, 366.0),
+            ("NaN on 29 Feb", full.mask(full.index == "2004-02-29"), False, np.nan),
+            ("29 Feb absent", full.drop(pd.Timestamp("2004-02-29")), False, np.nan),
+            ("29 Feb absent, part years", full.drop(pd.Timestamp("2004-02-29")), True, 365.0),
+        ]
+        for name, series, allow_part_years, expected in cases:
+            with self.subTest(case=name):
+                result = utils.annual_totals(series, 7, allow_part_years)
+                self.assertEqual(result.loc[2002], 365.0)
+                np.testing.assert_equal(result.loc[2003], expected)
+
+    def test_annual_totals_duplicate_dates(self):
+        cases = [
+            # (name, index, date in the message)
+            ("stochastic dates", ["0001-07-01", "0001-07-02", "0001-07-02"], "0001-07-02"),
+            ("two NaT", pd.DatetimeIndex(["2000-07-01", None, None]), "NaT"),
+        ]
+        for name, index, expected in cases:
+            with self.subTest(case=name):
+                with self.assertRaisesRegex(ValueError, f"duplicate dates, such as {expected}"):
+                    utils.annual_totals(pd.Series(1.0, index=index))
+
+    def test_annual_totals_stochastic_dates(self):
+        # String dates in years 0001 to 9999, outside the nanosecond timestamp
+        # range, with ten dates absent from the second water year.
+        cases = [
+            # (start, allow_part_years, expected totals)
+            ("0001-07-01", False, [365.0, np.nan]),
+            ("0001-07-01", True, [365.0, 355.0]),
+            ("9997-07-01", False, [365.0, np.nan]),
+            ("9997-07-01", True, [365.0, 355.0]),
+        ]
+        for start, allow_part_years, expected in cases:
+            dates = np.arange(np.datetime64(start), np.datetime64(start) + 2 * 365)
+            series = pd.Series(1.0, index=[str(date) for date in dates])
+            series = series.drop(series.index[400:410])
+            with self.subTest(start=start, allow_part_years=allow_part_years):
+                result = utils.annual_totals(series, 7, allow_part_years)
+                np.testing.assert_equal(result.to_numpy(), expected)
+
     # ==== NEW EDGE CASE TESTS ====
 
     def test_get_wy_leap_years(self):
@@ -699,3 +827,30 @@ class Tests(unittest.TestCase):
         self.assertTrue(str(result[0]).startswith("0002-01-01"))
         self.assertTrue(str(result[1]).startswith("0005-06-15"))
         self.assertTrue(str(result[2]).startswith("9999-12-31"))
+
+    def test_to_np_datetimes64d_parse_mode_matches_strptime(self):
+        # Parse mode gives the result, or raises the error, that strptime does
+        # with the date format, including for strings numpy alone would accept.
+        cases = [
+            # (name, dates, expected dates or exception)
+            ("pd.Index", pd.Index(["2023-06-30", "2024-02-29"]), ["2023-06-30", "2024-02-29"]),
+            ("unpadded month", ["2023-6-30"], ["2023-06-30"]),
+            ("mixed padding", ["2023-06-30", "2023-6-30"], ["2023-06-30", "2023-06-30"]),
+            ("no separators", ["20230630"], ValueError),
+            ("blank", [""], ValueError),
+            ("NaT", ["NaT"], ValueError),
+            ("time", ["2023-06-30T00:00"], ValueError),
+            ("year and month", ["2023-06"], ValueError),
+            ("negative year", ["-001-01-01"], ValueError),
+            ("five-digit year", ["+10000-01-01"], ValueError),
+            ("29 Feb in a common year", ["2023-02-29"], ValueError),
+            ("datetime", [datetime(2023, 6, 30)], TypeError),
+        ]
+        for name, dates, expected in cases:
+            with self.subTest(case=name):
+                if isinstance(expected, type):
+                    with self.assertRaises(expected):
+                        utils.to_np_datetimes64d(dates, mode="parse")
+                else:
+                    result = utils.to_np_datetimes64d(dates, mode="parse")
+                    np.testing.assert_array_equal(result, np.array(expected, dtype="datetime64[D]"))

@@ -5,7 +5,6 @@ from typing import Union
 import altair as alt
 import numpy as np
 import pandas as pd
-from pandas.api.types import is_datetime64_any_dtype as is_datetime
 
 from bulum import trans, utils
 
@@ -501,6 +500,9 @@ def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wySt
     """
     Annual plot of timeseries data.
 
+    Only complete water years are plotted. A water year with a missing
+    (`NaN`) value or a missing date has no point.
+
     Parameters
     ----------
     df : DataFrame 
@@ -521,10 +523,6 @@ def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wySt
     `altair.Chart`
 
     """
-    # "annual_plot()" is not currently compatible with string dates, so copy dataframe and convert to datetime if necessary
-    if (not is_datetime(df.index)):
-        df = utils.convert_index_to_datetime(df.copy(deep=True))
-
     alt.data_transformers.disable_max_rows()
     xLabel='Water year'
 
@@ -541,10 +539,7 @@ def annual_plot(df:pd.DataFrame,yLabel='Flow (ML/a)',legendTitle='Data set',wySt
     if wyStartMonth==11: xLabel='Water year (Nov to Oct)'
     if wyStartMonth==12: xLabel='Water year (Dec to Nov)'
 
-    start_date=utils.get_wy_start_date(df,wyStartMonth)
-    end_date=utils.get_wy_end_date(df,wyStartMonth) + timedelta(days=1) #Add day because last index in .loc is not included
-    cropped_df=df.loc[utils.get_dates(start_date,end_date)]
-    annual_cropped_df=cropped_df.groupby(utils.get_wy(cropped_df.index, wyStartMonth)).sum(min_count=365)
+    annual_cropped_df=utils.annual_totals(df, wyStartMonth)
 
     df_melted = annual_cropped_df.reset_index().melt('index')
     df_melted.rename(columns={'index':'Water year','value':yLabel,'variable':legendTitle}, inplace=True)
@@ -765,6 +760,9 @@ def annual_demand_supply_plot(demand: pd.DataFrame, supply: pd.DataFrame,
                               xlabel="WY", ylabel="ML/a", sup_opacity = 1) -> alt.Chart:
     """Annual plot of demand and supply from daily timeseries input.
 
+    Part water years at the start and end are plotted. Missing (`NaN`) values
+    are skipped, and a water year with no values has no bar.
+
     Parameters
     ----------
     demand : pd.DataFrame
@@ -818,7 +816,7 @@ def annual_demand_supply_plot(demand: pd.DataFrame, supply: pd.DataFrame,
     sup_cols = supply.columns.values
 
     df=pd.concat([demand,supply],axis=1)
-    df_annual=df.groupby(utils.get_wy(df.index, wy_month)).sum()
+    df_annual=utils.annual_totals(df, wy_month, allow_part_years=True)
 
     cht_dem=alt.Chart(df_annual.reset_index()).mark_bar(width=alt.RelativeBandSize(1)
     ).transform_fold(
