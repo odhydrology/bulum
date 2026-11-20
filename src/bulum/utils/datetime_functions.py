@@ -143,9 +143,8 @@ def _generate_date_range(start_date: datetime, end_date: datetime) -> np.typing.
 
 
 def _parse_date_list(values: list[str], date_fmt: str) -> np.typing.NDArray[np.datetime64]:
-    """Parse each date string in the list individually.
+    """Parse each date string in the list.
 
-    Iterates over each date string and converts it to numpy datetime64.
     Preserves non-consecutive dates and gaps in the sequence.
 
     Parameters
@@ -160,6 +159,20 @@ def _parse_date_list(values: list[str], date_fmt: str) -> np.typing.NDArray[np.d
     np.typing.NDArray[np.datetime64]
         Numpy array of datetime64[D] values, one for each input date.
     """
+    # Fast path for ISO format (YYYY-MM-DD)
+    if date_fmt == r'%Y-%m-%d':
+        # numpy parses ISO dates in one call. Its parser also accepts other
+        # forms, so the result is used only if it converts back to the input.
+        try:
+            np_dates = np.array(values, dtype='datetime64[D]')
+        except ValueError:
+            np_dates = None
+        if (np_dates is not None and np_dates.size
+                and not np.isnat(np_dates).any()
+                and np_dates.min() >= np.datetime64('0001-01-01')
+                and np_dates.max() <= np.datetime64('9999-12-31')
+                and np.array_equal(np.datetime_as_string(np_dates), np.asarray(values, dtype=str))):
+            return np_dates
     parsed_dates = []
     for date_str in values:
         dt = datetime.strptime(date_str, date_fmt)
@@ -245,8 +258,8 @@ def to_np_datetimes64d(values: list[str], date_fmt: str = r'%Y-%m-%d',
     if hasattr(values, 'tolist'):
         values = values.tolist()
 
+    # Parse mode: Convert each date string individually, preserving gaps
     if mode == "parse":
-        # Parse mode: Convert each date string individually, preserving gaps
         return _parse_date_list(values, date_fmt)
 
     # Generate mode: Create all dates between first and last date

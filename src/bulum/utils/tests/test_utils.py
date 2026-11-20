@@ -827,3 +827,30 @@ class Tests(unittest.TestCase):
         self.assertTrue(str(result[0]).startswith("0002-01-01"))
         self.assertTrue(str(result[1]).startswith("0005-06-15"))
         self.assertTrue(str(result[2]).startswith("9999-12-31"))
+
+    def test_to_np_datetimes64d_parse_mode_matches_strptime(self):
+        # Parse mode gives the result, or raises the error, that strptime does
+        # with the date format, including for strings numpy alone would accept.
+        cases = [
+            # (name, dates, expected dates or exception)
+            ("pd.Index", pd.Index(["2023-06-30", "2024-02-29"]), ["2023-06-30", "2024-02-29"]),
+            ("unpadded month", ["2023-6-30"], ["2023-06-30"]),
+            ("mixed padding", ["2023-06-30", "2023-6-30"], ["2023-06-30", "2023-06-30"]),
+            ("no separators", ["20230630"], ValueError),
+            ("blank", [""], ValueError),
+            ("NaT", ["NaT"], ValueError),
+            ("time", ["2023-06-30T00:00"], ValueError),
+            ("year and month", ["2023-06"], ValueError),
+            ("negative year", ["-001-01-01"], ValueError),
+            ("five-digit year", ["+10000-01-01"], ValueError),
+            ("29 Feb in a common year", ["2023-02-29"], ValueError),
+            ("datetime", [datetime(2023, 6, 30)], TypeError),
+        ]
+        for name, dates, expected in cases:
+            with self.subTest(case=name):
+                if isinstance(expected, type):
+                    with self.assertRaises(expected):
+                        utils.to_np_datetimes64d(dates, mode="parse")
+                else:
+                    result = utils.to_np_datetimes64d(dates, mode="parse")
+                    np.testing.assert_array_equal(result, np.array(expected, dtype="datetime64[D]"))
