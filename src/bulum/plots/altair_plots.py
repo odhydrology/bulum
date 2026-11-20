@@ -293,11 +293,13 @@ def pyblo(dflist: list[pd.Series], sites: list, series: list, wy_month=1, site_o
     if width == None:
         width = no_years*12       
 
-    # Show subtitle if parameter is True
-    if subtitle:    
-        subtitle = ["Annual (" + months[wy_month-1] + " to " + months[wy_month-2] + ") percentage of available data: " + format(start_date.replace(month=wy_month),"%d/%m/%Y") + " - " + format(end_date.replace(month=wy_month)-timedelta(1),"%d/%m/%Y")]
+    # Show subtitle if parameter is True. Pass the text as a plain string:
+    # VegaFusion parses a one-element list of title text as an expression.
+    # An empty list keeps the space below the chart when it is turned off.
+    if subtitle:
+        title_text = "Annual (" + months[wy_month-1] + " to " + months[wy_month-2] + ") percentage of available data: " + format(start_date.replace(month=wy_month),"%d/%m/%Y") + " - " + format(end_date.replace(month=wy_month)-timedelta(1),"%d/%m/%Y")
     else:
-        subtitle=[]
+        title_text = []
 
     chart=alt.Chart(df_chart_stack_annual
         ).transform_lookup( # Lookup data column series
@@ -359,7 +361,7 @@ def pyblo(dflist: list[pd.Series], sites: list, series: list, wy_month=1, site_o
             height=height,
             width=width,
             title=alt.TitleParams(
-                subtitle,
+                title_text,
                 baseline='bottom',
                 orient='bottom',
                 anchor='start',

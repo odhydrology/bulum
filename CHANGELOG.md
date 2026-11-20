@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) from version 0.3.0 forward.
 
+## Unreleased
+
+### Fixed
+- plots.pyblo: the chart now renders when the VegaFusion data transformer is enabled. Before, the subtitle raised "Expression parsing error: Integers may not have leading zeros" unless `subtitle=False`.
+
 ## 0.3.6
 
 ### Fixed
