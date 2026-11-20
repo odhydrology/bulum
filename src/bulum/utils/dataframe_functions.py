@@ -109,8 +109,8 @@ def crop_to_wy(df: pd.DataFrame | pd.Series, wy_month: int = 7) -> pd.DataFrame 
     start_date = utils.get_wy_start_date(df, wy_month)
     end_date = utils.get_wy_end_date(df, wy_month)
     if isinstance(start_date, datetime):  # handle datetime inputs
-        start_date = start_date.strftime(r"%Y-%m-%d")
-        end_date = end_date.strftime(r"%Y-%m-%d")
+        start_date = _strftime(start_date, r"%Y-%m-%d")
+        end_date = _strftime(end_date, r"%Y-%m-%d")
     return df.loc[(df.index >= start_date) & (df.index <= end_date)]
 
 
@@ -428,7 +428,7 @@ def convert_index_to_string(df: pd.DataFrame, str_format: str = r"%Y-%m-%d") -> 
         pass
     elif is_datetime(df.index):
         # Try to convert datetimes to strings.
-        new_index_values = [d.strftime(str_format) for d in df.index]
+        new_index_values = [_strftime(d, str_format) for d in df.index]
         df.index = new_index_values  # type: ignore
     else:
         raise ValueError("The index is not strings or datetimes.")
