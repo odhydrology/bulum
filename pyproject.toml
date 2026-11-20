@@ -34,6 +34,9 @@ where = ["src"]
 version = { attr = "bulum.version.__version__" }
 
 [tool.pytest.ini_options]
+markers = [
+    "external: launches an external program (csvidx or iqmgui). Skip with -m \"not external\".",
+]
 filterwarnings = [
     "ignore::DeprecationWarning:matplotlib",
     "ignore::DeprecationWarning:PIL",

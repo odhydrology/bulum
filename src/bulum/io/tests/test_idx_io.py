@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 import bulum.io as bio
 
@@ -41,6 +42,7 @@ class Tests(unittest.TestCase):
         with self.assertRaises(ValueError):
             bio.write_area_ts_csv(df, self.tmp_dir / "clash.csv")
 
+    @pytest.mark.external
     @unittest.skipUnless(shutil.which("csvidx"), "csvidx not on PATH")
     def test_write_idx(self):
         tmp_path = self.tmp_dir / "test_data.idx"
@@ -94,6 +96,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(df_original.shape, df_roundtrip.shape,
                          "DataFrame shape changed after round-trip")
 
+    @pytest.mark.external
     @unittest.skipIf(shutil.which('csvidx') is None, "csvidx.exe not found on path")
     def test_idx_csvidx_roundtrip(self):
         """Test that writing and reading back preserves data size for write_idx (csvidx)."""
