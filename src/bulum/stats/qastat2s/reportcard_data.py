@@ -7,6 +7,7 @@ This module handles:
 3. Computing derived datasets for report card plots and statistics
 """
 
+import warnings
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -25,8 +26,14 @@ class ReportCardConfig:
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     percentiles_auto: bool = True
-    p_low: float = 0.79  # Low flow threshold (exceedance probability)
-    p_high: float = 0.1  # High flow threshold (exceedance probability)
+    # Flow band thresholds. Each defaults to auto (zcp_*_frac * observed zero-crossover
+    # point); a given p_* overrides auto, and a given q_* (ML/d) overrides p_*.
+    p_low: Optional[float] = None   # Low flow threshold (exceedance probability)
+    p_high: Optional[float] = None  # High flow threshold (exceedance probability)
+    q_high: Optional[float] = None  # High flow threshold (ML/d)
+    q_low: Optional[float] = None   # Low flow threshold (ML/d)
+    zcp_high_frac: float = 0.10
+    zcp_low_frac: float = 0.80
     num_lags: int = 10
     num_flow_bands: int = 0
     num_seasons: int = 4
@@ -299,6 +306,12 @@ class ReportCardProcessor:
         # Zero flow threshold (ML/d)
         self.zero_threshold = 1.0
 
+        # Observed flow at or below this (ML/d) defines the zero-crossover point
+        self.zcp_threshold = 0.1
+
+        # Set once resolve_thresholds() has written p_high/p_low into config
+        self._thresholds_resolved = False
+
         # Max fraction of missing days in a water year for it to be used in
         # the driest 3-year search (applies to obs, mod and rain)
         self.driest_max_missing = 0.20
@@ -405,6 +418,52 @@ class ReportCardProcessor:
             n_points=n
         )
         return self.exceedance
+
+    def zero_crossover_point(self) -> float:
+        """
+        Exceedance fraction at which observed flow first drops to zcp_threshold or below.
+
+        Uses the Cunnane plotting position (as bulum.trans.get_exceedence_plotting_position).
+        Returns 1.0 if observed flow never reaches the threshold.
+        """
+        if self.exceedance is None:
+            self.compute_exceedance()
+        exc = self.exceedance
+        at_or_below = exc.obs_values <= self.zcp_threshold  # obs_values sorted descending
+        if not at_or_below.any():
+            return 1.0
+        k = int(np.argmax(at_or_below))  # 0-based first position at/below threshold
+        return (k + 1 - 0.4) / (exc.n_points + 0.2)
+
+    def resolve_thresholds(self) -> None:
+        """
+        Set config.p_high / p_low. For each, in order of precedence:
+        ML/d threshold (q_*), exceedance fraction (p_*), else auto from the
+        observed zero-crossover point (zcp_*_frac * ZCP, rounded to a whole percent).
+        """
+        if self._thresholds_resolved:
+            return
+        if self.exceedance is None:
+            self.compute_exceedance()
+        cfg, exc = self.config, self.exceedance
+        for side in ('high', 'low'):
+            if getattr(cfg, f'q_{side}') is not None and getattr(cfg, f'p_{side}') is not None:
+                warnings.warn(f"Both p_{side} and q_{side} given; using q_{side} "
+                              f"({getattr(cfg, f'q_{side}')} ML/d)", UserWarning, stacklevel=2)
+        # Fraction of paired days with obs >= q, so round(p * n) gives exactly that count
+        if cfg.q_high is not None:
+            cfg.p_high = np.sum(exc.obs_values >= cfg.q_high) / exc.n_points
+        if cfg.q_low is not None:
+            cfg.p_low = np.sum(exc.obs_values >= cfg.q_low) / exc.n_points
+        if cfg.p_high is None or cfg.p_low is None:
+            zcp = self.zero_crossover_point()
+            if cfg.p_high is None:
+                cfg.p_high = round(cfg.zcp_high_frac * zcp,2)
+            if cfg.p_low is None:
+                cfg.p_low = round(cfg.zcp_low_frac * zcp,2)
+        if not 0 <= cfg.p_high <= cfg.p_low <= 1:
+            raise ValueError(f"Invalid flow thresholds: p_high={cfg.p_high}, p_low={cfg.p_low}")
+        self._thresholds_resolved = True
 
     def compute_flood_events(self, window_days: int = 51,
                              num_events: int = 2) -> List[FloodEvent]:
@@ -595,6 +654,8 @@ class ReportCardProcessor:
         # Flow thresholds based on exceedance probabilities
         if self.exceedance is None:
             self.compute_exceedance()
+        if self.config.p_high is None or self.config.p_low is None:
+            self.resolve_thresholds()
 
         p_high = self.config.p_high  # e.g., 0.1
         p_low = self.config.p_low    # e.g., 0.79
@@ -769,6 +830,7 @@ class ReportCardProcessor:
         self.load_data()
         self.align_data()
         self.compute_exceedance()
+        self.resolve_thresholds()
         self.compute_flood_events()
         self.compute_water_year_totals()
         self.compute_residual_mass()

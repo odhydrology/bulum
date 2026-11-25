@@ -456,7 +456,7 @@ class ReportCardPlotter:
 
         # Add footnotes
         footnotes = [
-            f"* Flow exceedance categories: High (0-{self.config.p_high}), Medium ({self.config.p_high}-{self.config.p_low}), Low ({self.config.p_low}-1)",
+            f"* Flow exceedance categories: High (0-{self.config.p_high:.3g}), Medium ({self.config.p_high:.3g}-{self.config.p_low:.3g}), Low ({self.config.p_low:.3g}-1)",
             "+ Zero flow refers to flow < 1ML/d",
             "^ Absolute difference in percentage between observed and modelled",
         ]
@@ -562,8 +562,10 @@ def report_card(
     heading: str = "Report Card",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    p_low: float = 0.79,
-    p_high: float = 0.1,
+    p_low: Optional[float] = None,
+    p_high: Optional[float] = None,
+    q_low: Optional[float] = None,
+    q_high: Optional[float] = None,
     water_year_start_month: int = 7,
     colors: Optional[dict] = None,
     output_file: Optional[str] = None,
@@ -586,8 +588,13 @@ def report_card(
         heading: Title for the report card
         start_date: Analysis start date as 'YYYY-MM-DD' or 'DD/MM/YYYY' (auto if None)
         end_date: Analysis end date as 'YYYY-MM-DD' or 'DD/MM/YYYY' (auto if None)
-        p_low: Low flow exceedance threshold (default 0.79)
-        p_high: High flow exceedance threshold (default 0.1)
+        p_low: Low flow exceedance threshold (fraction). Default: 80% of the
+            observed zero-crossover point (exceedance where obs first <= 0.1 ML/d),
+            rounded to a whole percent
+        p_high: High flow exceedance threshold (fraction). Default: 10% of the
+            observed zero-crossover point, rounded to a whole percent
+        q_low: Low flow threshold in ML/d; overrides p_low if given
+        q_high: High flow threshold in ML/d; overrides p_high if given
         water_year_start_month: Month when water year starts, 1-12 (default 7 = July)
         colors: Custom color palette (dict). Use get_colors() to see keys.
         output_file: Path to save the figure (optional)
@@ -626,6 +633,8 @@ def report_card(
         end_date=end_date,
         p_low=p_low,
         p_high=p_high,
+        q_low=q_low,
+        q_high=q_high,
         water_year_start_month=water_year_start_month,
         colors=colors,
         output_file=output_file,
@@ -677,8 +686,10 @@ def report_card_from_data(
     heading: str = "Report Card",
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
-    p_low: float = 0.79,
-    p_high: float = 0.1,
+    p_low: Optional[float] = None,
+    p_high: Optional[float] = None,
+    q_low: Optional[float] = None,
+    q_high: Optional[float] = None,
     water_year_start_month: int = 7,
     colors: Optional[dict] = None,
     output_file: Optional[str] = None,
@@ -704,8 +715,13 @@ def report_card_from_data(
         heading: Title for the report card
         start_date: Analysis start date as 'YYYY-MM-DD' or 'DD/MM/YYYY' (auto if None)
         end_date: Analysis end date as 'YYYY-MM-DD' or 'DD/MM/YYYY' (auto if None)
-        p_low: Low flow exceedance threshold (default 0.79)
-        p_high: High flow exceedance threshold (default 0.1)
+        p_low: Low flow exceedance threshold (fraction). Default: 80% of the
+            observed zero-crossover point (exceedance where obs first <= 0.1 ML/d),
+            rounded to a whole percent
+        p_high: High flow exceedance threshold (fraction). Default: 10% of the
+            observed zero-crossover point, rounded to a whole percent
+        q_low: Low flow threshold in ML/d; overrides p_low if given
+        q_high: High flow threshold in ML/d; overrides p_high if given
         water_year_start_month: Month when water year starts, 1-12 (default 7 = July)
         colors: Custom color palette (dict). Use get_colors() to see keys.
         output_file: Path to save the figure (optional)
@@ -737,6 +753,8 @@ def report_card_from_data(
         heading=heading,
         p_low=p_low,
         p_high=p_high,
+        q_low=q_low,
+        q_high=q_high,
         water_year_start_month=water_year_start_month,
     )
 
@@ -767,6 +785,7 @@ def report_card_from_data(
     # Skip load_data, go straight to alignment and processing
     processor.align_data()
     processor.compute_exceedance()
+    processor.resolve_thresholds()
     processor.compute_flood_events()
     processor.compute_water_year_totals()
     processor.compute_residual_mass()

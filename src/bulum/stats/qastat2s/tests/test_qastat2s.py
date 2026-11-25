@@ -19,7 +19,8 @@ RAIN_FILE = f"{TESTS_DIR}/058067.infilled.csv"
 
 def _build_processor(obs, mod, rain):
     """Build and fully process a ReportCardProcessor from in-memory data."""
-    config = ReportCardConfig(input_file_path=Path("."), heading="test")
+    config = ReportCardConfig(input_file_path=Path("."), heading="test",
+                              p_high=0.1, p_low=0.79)
     p = ReportCardProcessor(config)
     p.obs_raw = pd.DataFrame({"obs": _coerce_series(obs, "obs")})
     p.mod_raw = pd.DataFrame({"mod": _coerce_series(mod, "mod")})

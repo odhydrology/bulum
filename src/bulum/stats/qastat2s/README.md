@@ -42,8 +42,10 @@ report_card(
     heading="Report Card",        # Title text
     start_date=None,              # Analysis start, e.g. "2000-01-01"
     end_date=None,                # Analysis end, e.g. "2020-12-31"
-    p_low=0.79,                   # Low flow exceedance threshold
-    p_high=0.1,                   # High flow exceedance threshold
+    p_low=None,                   # Low flow exceedance threshold (default: 80% of zero-crossover point)
+    p_high=None,                  # High flow exceedance threshold (default: 10% of zero-crossover point)
+    q_low=None,                   # Low flow threshold in ML/d (overrides p_low)
+    q_high=None,                  # High flow threshold in ML/d (overrides p_high)
     water_year_start_month=7,     # 1-12, default July (Australian)
     colors=None,                  # Custom color palette (dict)
     output_file=None,             # Save path, e.g. "report.png"
