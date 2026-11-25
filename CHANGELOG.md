@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- stats.qastat2s: flow band thresholds can be set in ML/d (`q_high`, `q_low`). Each overrides the matching `p_*`, and a warning is raised if both are given.
+
+### Changed
+- stats.qastat2s: high/low flow thresholds now default to automatic, set at 10% / 80% of the observed zero-crossover point (exceedance where flow first drops to ≤ 0.1 ML/d), rounded to a whole percent, as in legacy QAStat. Previously they defaulted to 0.1 / 0.79. Pass `p_high` / `p_low` to keep the old behaviour.
+- stats.qastat2s: exceedance curves now use Cunnane plotting positions (was Weibull).
+
 ### Fixed
 - plots.pyblo: the chart now renders when the VegaFusion data transformer is enabled. Before, the subtitle raised "Expression parsing error: Integers may not have leading zeros" unless `subtitle=False`.
 
