@@ -398,7 +398,7 @@ class ReportCardProcessor:
         Compute exceedance curve data.
 
         Only includes days where both obs and mod are available.
-        Values are sorted descending, probabilities are Weibull plotting positions.
+        Values are sorted descending, probabilities are Cunnane plotting positions.
         """
         paired = self.get_paired_data()
         n = len(paired)
@@ -407,9 +407,10 @@ class ReportCardProcessor:
         obs_sorted = np.sort(paired['obs'].values)[::-1]
         mod_sorted = np.sort(paired['mod'].values)[::-1]
 
-        # Weibull plotting position: P = rank / (n + 1)
+        # Cunnane plotting position: P = (rank - 0.4) / (n + 0.2)
+        # (same as zero_crossover_point and bulum.trans.get_exceedence_plotting_position)
         ranks = np.arange(1, n + 1)
-        probabilities = ranks / (n + 1)
+        probabilities = (ranks - 0.4) / (n + 0.2)
 
         self.exceedance = ExceedanceData(
             probabilities=probabilities,
